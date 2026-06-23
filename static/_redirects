@@ -1,0 +1,5 @@
+# SPA fallback for Cloudflare Pages. The adapter-static build emits index.html as
+# the app shell; this rewrites any path that isn't a real static asset to it with
+# a 200 so the SPA boots and routes on the client. (Static assets are matched
+# before redirect rules, so they're served directly.)
+/*    /index.html    200
