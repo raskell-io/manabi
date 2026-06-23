@@ -17,7 +17,7 @@
 		{ href: '/', label: 'Home', icon: Home },
 		{ href: '/review', label: 'Review', icon: GraduationCap },
 		{ href: '/read', label: 'Read', icon: BookOpen },
-		{ href: '/tables', label: 'Tables', icon: Table2 },
+		{ href: '/scripts', label: 'Scripts', icon: Table2 },
 		{ href: '/items', label: 'Items', icon: Library },
 		{ href: '/lessons', label: 'Lessons', icon: LayoutGrid },
 		{ href: '/dashboard', label: 'Progress', icon: BarChart3 },
