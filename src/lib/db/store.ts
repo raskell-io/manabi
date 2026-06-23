@@ -25,6 +25,7 @@ import {
 	type ExerciseAttempt,
 	type ExerciseType,
 	type GeneratedItem,
+	type GeneratedPassage,
 	type ItemKind,
 	type Language,
 	type LearningItem,
@@ -32,6 +33,7 @@ import {
 	type ManabiDocument,
 	type ManabiSettings,
 	type Passage,
+	type PassageDraft,
 	type PassageKind,
 	type PassageLine,
 	type PronunciationAttempt,
@@ -96,6 +98,16 @@ export const contentDrafts: Readable<ContentDraft[]> = derived(docStore, ($doc) 
 	});
 });
 
+/** Passage drafts (conversations/texts), pending first. */
+export const passageDrafts: Readable<PassageDraft[]> = derived(docStore, ($doc) => {
+	if (!$doc?.passageDrafts) return [];
+	const order: Record<PassageDraft['status'], number> = { pending: 0, approved: 1, rejected: 2 };
+	return Object.values($doc.passageDrafts).sort((a, b) => {
+		const s = order[a.status] - order[b.status];
+		return s !== 0 ? s : b.createdAt - a.createdAt;
+	});
+});
+
 export const exerciseAttempts: Readable<ExerciseAttempt[]> = derived(docStore, ($doc) => {
 	if (!$doc) return [];
 	return Object.values($doc.exerciseAttempts).sort((a, b) => b.at - a.at);
@@ -138,14 +150,15 @@ export async function initDB(): Promise<void> {
 	}
 }
 
-/** Forward-only migrations. */
+/** Forward-only migrations — idempotently ensure every collection exists. */
 function migrate(d: Automerge.Doc<ManabiDocument>): Automerge.Doc<ManabiDocument> {
 	let next = d;
-	if ((next.schemaVersion ?? 0) < 3) {
+	if ((next.schemaVersion ?? 0) < SCHEMA_VERSION) {
 		next = Automerge.change(next, (doc) => {
 			if (!doc.settings) doc.settings = defaultSettings();
 			if (!doc.seededIds) doc.seededIds = {};
 			if (!doc.passages) doc.passages = {};
+			if (!doc.passageDrafts) doc.passageDrafts = {};
 			doc.schemaVersion = SCHEMA_VERSION;
 		});
 	}
@@ -477,5 +490,65 @@ export function rejectDraft(draftId: string): void {
 export function deleteDraft(draftId: string): void {
 	updateDoc((d) => {
 		delete d.contentDrafts[draftId];
+	});
+}
+
+// --- AI passage drafts (conversations & texts) ------------------------------
+
+export function addPassageDrafts(
+	language: Language,
+	kind: PassageKind,
+	level: string,
+	generated: GeneratedPassage[],
+	sourcePrompt: string
+): number {
+	updateDoc((d) => {
+		for (const passage of generated) {
+			const id = generateId();
+			d.passageDrafts[id] = stripUndefined({
+				id,
+				language,
+				kind,
+				level,
+				passage,
+				sourcePrompt,
+				status: 'pending' as const,
+				createdAt: Date.now()
+			});
+		}
+	});
+	return generated.length;
+}
+
+/** Approve a passage draft: publish it as a Passage and mark the draft approved. */
+export function approvePassageDraft(draftId: string): string | undefined {
+	const draft = doc?.passageDrafts[draftId];
+	if (!draft || draft.status !== 'pending') return undefined;
+	const newId = createPassage({
+		language: draft.language,
+		kind: draft.kind,
+		title: draft.passage.title,
+		level: draft.level,
+		tags: draft.passage.tags,
+		intro: draft.passage.intro,
+		lines: draft.passage.lines
+	});
+	updateDoc((d) => {
+		const dr = d.passageDrafts[draftId];
+		if (dr) dr.status = 'approved';
+	});
+	return newId;
+}
+
+export function rejectPassageDraft(draftId: string): void {
+	updateDoc((d) => {
+		const dr = d.passageDrafts[draftId];
+		if (dr) dr.status = 'rejected';
+	});
+}
+
+export function deletePassageDraft(draftId: string): void {
+	updateDoc((d) => {
+		delete d.passageDrafts[draftId];
 	});
 }

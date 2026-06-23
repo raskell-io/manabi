@@ -11,6 +11,8 @@ import { openaiProvider } from './providers/openai';
 import type {
 	GenerateItemsInput,
 	GenerateItemsResult,
+	GeneratePassagesInput,
+	GeneratePassagesResult,
 	InferenceProvider,
 	InferenceResult,
 	TtsInput,
@@ -43,6 +45,18 @@ export async function generateItems(
 	for (const p of PROVIDERS) {
 		if (!p.generateItems || !p.capabilities(settings).generate) continue;
 		return p.generateItems(input, settings);
+	}
+	return { ok: false, error: 'No generation provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+}
+
+/** Generate reading passages (OpenAI only). */
+export async function generatePassages(
+	input: GeneratePassagesInput,
+	settings: ManabiSettings
+): Promise<InferenceResult<GeneratePassagesResult>> {
+	for (const p of PROVIDERS) {
+		if (!p.generatePassages || !p.capabilities(settings).generate) continue;
+		return p.generatePassages(input, settings);
 	}
 	return { ok: false, error: 'No generation provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
 }

@@ -6,7 +6,14 @@
  * support; the router picks the first capable provider in priority order.
  */
 
-import type { GeneratedItem, ItemKind, Language, ManabiSettings } from '$lib/db/types';
+import type {
+	GeneratedItem,
+	GeneratedPassage,
+	ItemKind,
+	Language,
+	ManabiSettings,
+	PassageKind
+} from '$lib/db/types';
 
 export type ExecutionTarget = 'local' | 'remote';
 
@@ -40,6 +47,17 @@ export interface GenerateItemsResult {
 	items: GeneratedItem[];
 }
 
+export interface GeneratePassagesInput {
+	language: Language;
+	kind: PassageKind; // conversation | text
+	level: string;
+	topic?: string;
+	count: number; // how many passages
+}
+export interface GeneratePassagesResult {
+	passages: GeneratedPassage[];
+}
+
 export interface ProviderCapabilities {
 	tts: boolean;
 	generate: boolean;
@@ -54,4 +72,8 @@ export interface InferenceProvider {
 		input: GenerateItemsInput,
 		settings: ManabiSettings
 	): Promise<InferenceResult<GenerateItemsResult>>;
+	generatePassages?(
+		input: GeneratePassagesInput,
+		settings: ManabiSettings
+	): Promise<InferenceResult<GeneratePassagesResult>>;
 }

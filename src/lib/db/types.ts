@@ -250,6 +250,27 @@ export interface GeneratedItem {
 	[key: string]: unknown;
 }
 
+/** AI-generated reading passage (conversation or text) awaiting review. */
+export interface GeneratedPassage {
+	title: string;
+	intro?: string;
+	tags: string[];
+	lines: PassageLine[];
+	[key: string]: unknown;
+}
+
+export interface PassageDraft {
+	id: string;
+	language: Language;
+	kind: PassageKind;
+	level: string;
+	passage: GeneratedPassage;
+	sourcePrompt: string;
+	status: DraftStatus;
+	createdAt: number;
+	[key: string]: unknown;
+}
+
 // --- Settings ---------------------------------------------------------------
 
 export interface ManabiSettings {
@@ -279,7 +300,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export interface ManabiDocument {
 	schemaVersion: number;
@@ -290,6 +311,7 @@ export interface ManabiDocument {
 	exerciseAttempts: Record<string, ExerciseAttempt>;
 	pronunciationAttempts: Record<string, PronunciationAttempt>;
 	contentDrafts: Record<string, ContentDraft>;
+	passageDrafts: Record<string, PassageDraft>;
 	/** Seed ids already applied, so new seeds upsert without re-adding deleted ones. */
 	seededIds: Record<string, boolean>;
 	settings: ManabiSettings;
@@ -306,6 +328,7 @@ export function createEmptyDocument(): ManabiDocument {
 		exerciseAttempts: {},
 		pronunciationAttempts: {},
 		contentDrafts: {},
+		passageDrafts: {},
 		seededIds: {},
 		settings: defaultSettings()
 	};
