@@ -181,7 +181,41 @@ const ZH: SeedSpec[] = [
 	{ id: 'seed-zh-cheap', target: '便宜', reading: 'piányi', meaning: 'cheap', tags: ['adjective', 'shopping', 'HSK2'], level: 'A2',
 		examples: [{ target: '这家店很便宜。', reading: 'Zhè jiā diàn hěn piányi.', meaning: 'This shop is very cheap.' }] },
 	{ id: 'seed-zh-shop', target: '商店', reading: 'shāngdiàn', meaning: 'shop / store', tags: ['places', 'shopping', 'HSK1'], level: 'A2',
-		examples: [{ target: '商店几点关门？', reading: 'Shāngdiàn jǐ diǎn guānmén?', meaning: 'What time does the shop close?' }] }
+		examples: [{ target: '商店几点关门？', reading: 'Shāngdiàn jǐ diǎn guānmén?', meaning: 'What time does the shop close?' }] },
+
+	// — A2 batch 3: colors, body, hobbies, food, transport —
+	{ id: 'seed-zh-color', target: '颜色', reading: 'yánsè', meaning: 'color', tags: ['noun', 'daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '你喜欢什么颜色？', reading: 'Nǐ xǐhuān shénme yánsè?', meaning: 'What color do you like?' }] },
+	{ id: 'seed-zh-red', target: '红色', reading: 'hóngsè', meaning: 'red', tags: ['color', 'HSK2'], level: 'A2',
+		examples: [{ target: '我买了一件红色的衣服。', reading: 'Wǒ mǎi le yí jiàn hóngsè de yīfu.', meaning: 'I bought a red piece of clothing.' }] },
+	{ id: 'seed-zh-eye', target: '眼睛', reading: 'yǎnjing', meaning: 'eye', tags: ['body', 'noun', 'HSK2'], level: 'A2',
+		examples: [{ target: '她的眼睛很大。', reading: 'Tā de yǎnjing hěn dà.', meaning: 'Her eyes are big.' }] },
+	{ id: 'seed-zh-hand', target: '手', reading: 'shǒu', meaning: 'hand', tags: ['body', 'noun', 'HSK1'], level: 'A2',
+		examples: [{ target: '吃饭前要洗手。', reading: 'Chīfàn qián yào xǐ shǒu.', meaning: 'Wash your hands before eating.' }] },
+	{ id: 'seed-zh-foot', target: '脚', reading: 'jiǎo', meaning: 'foot', tags: ['body', 'noun', 'HSK3'], level: 'A2',
+		examples: [{ target: '我的脚有点疼。', reading: 'Wǒ de jiǎo yǒudiǎn téng.', meaning: 'My foot hurts a little.' }] },
+	{ id: 'seed-zh-sport', target: '运动', reading: 'yùndòng', meaning: 'exercise / sports', tags: ['hobby', 'health', 'HSK2'], level: 'A2',
+		examples: [{ target: '我每天早上运动。', reading: 'Wǒ měitiān zǎoshang yùndòng.', meaning: 'I exercise every morning.' }] },
+	{ id: 'seed-zh-sing', target: '唱歌', reading: 'chànggē', meaning: 'to sing', tags: ['hobby', 'verb', 'HSK2'], level: 'A2',
+		examples: [{ target: '她很喜欢唱歌。', reading: 'Tā hěn xǐhuān chànggē.', meaning: 'She loves to sing.' }] },
+	{ id: 'seed-zh-swim', target: '游泳', reading: 'yóuyǒng', meaning: 'to swim', tags: ['hobby', 'verb', 'HSK2'], level: 'A2',
+		examples: [{ target: '夏天我们常去游泳。', reading: 'Xiàtiān wǒmen cháng qù yóuyǒng.', meaning: 'In summer we often go swimming.' }] },
+	{ id: 'seed-zh-travel', target: '旅游', reading: 'lǚyóu', meaning: 'to travel / tourism', tags: ['hobby', 'travel', 'HSK2'], level: 'A2',
+		examples: [{ target: '我想去日本旅游。', reading: 'Wǒ xiǎng qù Rìběn lǚyóu.', meaning: 'I want to travel to Japan.' }] },
+	{ id: 'seed-zh-bread', target: '面包', reading: 'miànbāo', meaning: 'bread', tags: ['food', 'noun', 'HSK2'], level: 'A2',
+		examples: [{ target: '早上我吃面包。', reading: 'Zǎoshang wǒ chī miànbāo.', meaning: 'I eat bread in the morning.' }] },
+	{ id: 'seed-zh-egg', target: '鸡蛋', reading: 'jīdàn', meaning: 'egg', tags: ['food', 'noun', 'HSK2'], level: 'A2',
+		examples: [{ target: '我要两个鸡蛋。', reading: 'Wǒ yào liǎng gè jīdàn.', meaning: 'I’d like two eggs.' }] },
+	{ id: 'seed-zh-milk', target: '牛奶', reading: 'niúnǎi', meaning: 'milk', tags: ['food', 'noun', 'HSK2'], level: 'A2',
+		examples: [{ target: '孩子每天喝牛奶。', reading: 'Háizi měitiān hē niúnǎi.', meaning: 'The child drinks milk every day.' }] },
+	{ id: 'seed-zh-fruit', target: '水果', reading: 'shuǐguǒ', meaning: 'fruit', tags: ['food', 'noun', 'HSK1'], level: 'A2',
+		examples: [{ target: '多吃水果对身体好。', reading: 'Duō chī shuǐguǒ duì shēntǐ hǎo.', meaning: 'Eating more fruit is good for your health.' }] },
+	{ id: 'seed-zh-bus', target: '公交车', reading: 'gōngjiāochē', meaning: 'bus', tags: ['transport', 'travel', 'HSK2'], level: 'A2',
+		examples: [{ target: '我坐公交车上班。', reading: 'Wǒ zuò gōngjiāochē shàngbān.', meaning: 'I take the bus to work.' }] },
+	{ id: 'seed-zh-taxi', target: '出租车', reading: 'chūzūchē', meaning: 'taxi', tags: ['transport', 'travel', 'HSK2'], level: 'A2',
+		examples: [{ target: '我们打出租车去吧。', reading: 'Wǒmen dǎ chūzūchē qù ba.', meaning: 'Let’s take a taxi there.' }] },
+	{ id: 'seed-zh-bike', target: '自行车', reading: 'zìxíngchē', meaning: 'bicycle', tags: ['transport', 'travel', 'HSK3'], level: 'A2',
+		examples: [{ target: '他每天骑自行车。', reading: 'Tā měitiān qí zìxíngchē.', meaning: 'He rides a bicycle every day.' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -302,7 +336,37 @@ const JA: SeedSpec[] = [
 	{ id: 'seed-ja-g-nitsuite', target: '〜について', reading: '〜について', transliteration: 'ni tsuite', meaning: 'about / regarding', kind: 'grammar', tags: ['grammar', 'N4'], level: 'B1',
 		examples: [{ target: '日本の歴史について調べます。', reading: 'にほんのれきしについてしらべます。', transliteration: 'Nihon no rekishi ni tsuite shirabemasu.', meaning: 'I’ll research about Japanese history.' }] },
 	{ id: 'seed-ja-g-tara', target: '〜たら', reading: '〜たら', transliteration: 'tara', meaning: 'if / when (conditional)', kind: 'grammar', tags: ['grammar', 'N4'], level: 'B1',
-		examples: [{ target: '家に着いたら電話します。', reading: 'いえについたらでんわします。', transliteration: 'Ie ni tsuitara denwa shimasu.', meaning: 'I’ll call when I get home.' }] }
+		examples: [{ target: '家に着いたら電話します。', reading: 'いえについたらでんわします。', transliteration: 'Ie ni tsuitara denwa shimasu.', meaning: 'I’ll call when I get home.' }] },
+
+	// — N3 batch 3: travel, hobbies, verbs, grammar —
+	{ id: 'seed-ja-ryokou', target: '旅行', reading: 'りょこう', transliteration: 'ryokō', meaning: 'trip / travel', tags: ['noun', 'travel', 'N5'], level: 'B1',
+		examples: [{ target: '夏休みに旅行します。', reading: 'なつやすみにりょこうします。', transliteration: 'Natsuyasumi ni ryokō shimasu.', meaning: 'I’ll travel during summer vacation.' }] },
+	{ id: 'seed-ja-shumi', target: '趣味', reading: 'しゅみ', transliteration: 'shumi', meaning: 'hobby', tags: ['noun', 'daily', 'N4'], level: 'B1',
+		examples: [{ target: '趣味は何ですか。', reading: 'しゅみはなんですか。', transliteration: 'Shumi wa nan desu ka.', meaning: 'What’s your hobby?' }] },
+	{ id: 'seed-ja-ongaku', target: '音楽', reading: 'おんがく', transliteration: 'ongaku', meaning: 'music', tags: ['noun', 'hobby', 'N5'], level: 'B1',
+		examples: [{ target: '音楽を聞くのが好きです。', reading: 'おんがくをきくのがすきです。', transliteration: 'Ongaku o kiku no ga suki desu.', meaning: 'I like listening to music.' }] },
+	{ id: 'seed-ja-dokusho', target: '読書', reading: 'どくしょ', transliteration: 'dokusho', meaning: 'reading (books)', tags: ['noun', 'hobby', 'N3'], level: 'B1',
+		examples: [{ target: '私の趣味は読書です。', reading: 'わたしのしゅみはどくしょです。', transliteration: 'Watashi no shumi wa dokusho desu.', meaning: 'My hobby is reading.' }] },
+	{ id: 'seed-ja-shashin', target: '写真', reading: 'しゃしん', transliteration: 'shashin', meaning: 'photo', tags: ['noun', 'hobby', 'N5'], level: 'B1',
+		examples: [{ target: '写真を撮ってもいいですか。', reading: 'しゃしんをとってもいいですか。', transliteration: 'Shashin o totte mo ii desu ka.', meaning: 'May I take a photo?' }] },
+	{ id: 'seed-ja-ryouri', target: '料理', reading: 'りょうり', transliteration: 'ryōri', meaning: 'cooking / dish', tags: ['noun', 'food', 'N5'], level: 'B1',
+		examples: [{ target: '母の料理が一番おいしい。', reading: 'ははのりょうりがいちばんおいしい。', transliteration: 'Haha no ryōri ga ichiban oishii.', meaning: 'My mother’s cooking is the best.' }] },
+	{ id: 'seed-ja-atsumeru', target: '集める', reading: 'あつめる', transliteration: 'atsumeru', meaning: 'to collect / gather', tags: ['verb', 'N4'], level: 'B1',
+		examples: [{ target: '切手を集めています。', reading: 'きってをあつめています。', transliteration: 'Kitte o atsumete imasu.', meaning: 'I collect stamps.' }] },
+	{ id: 'seed-ja-tsutaeru', target: '伝える', reading: 'つたえる', transliteration: 'tsutaeru', meaning: 'to convey / tell', tags: ['verb', 'N4'], level: 'B1',
+		examples: [{ target: '彼に伝えてください。', reading: 'かれにつたえてください。', transliteration: 'Kare ni tsutaete kudasai.', meaning: 'Please tell him.' }] },
+	{ id: 'seed-ja-nareru', target: '慣れる', reading: 'なれる', transliteration: 'nareru', meaning: 'to get used to', tags: ['verb', 'N3'], level: 'B1',
+		examples: [{ target: '新しい仕事に慣れました。', reading: 'あたらしいしごとになれました。', transliteration: 'Atarashii shigoto ni naremashita.', meaning: 'I’ve gotten used to my new job.' }] },
+	{ id: 'seed-ja-benri', target: '便利', reading: 'べんり', transliteration: 'benri', meaning: 'convenient', tags: ['adjective', 'daily', 'N5'], level: 'B1',
+		examples: [{ target: '駅が近くて便利です。', reading: 'えきがちかくてべんりです。', transliteration: 'Eki ga chikakute benri desu.', meaning: 'The station is close, so it’s convenient.' }] },
+	{ id: 'seed-ja-jiyuu', target: '自由', reading: 'じゆう', transliteration: 'jiyū', meaning: 'free / freedom', tags: ['adjective', 'N3'], level: 'B1',
+		examples: [{ target: '自由な時間が欲しい。', reading: 'じゆうなじかんがほしい。', transliteration: 'Jiyū na jikan ga hoshii.', meaning: 'I want some free time.' }] },
+	{ id: 'seed-ja-g-bakari', target: '〜たばかり', reading: '〜たばかり', transliteration: 'ta bakari', meaning: 'just (did something)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: '今、起きたばかりです。', reading: 'いま、おきたばかりです。', transliteration: 'Ima, okita bakari desu.', meaning: 'I just woke up.' }] },
+	{ id: 'seed-ja-g-uchini', target: '〜うちに', reading: '〜うちに', transliteration: 'uchi ni', meaning: 'while / before (it changes)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: '熱いうちに食べてください。', reading: 'あついうちにたべてください。', transliteration: 'Atsui uchi ni tabete kudasai.', meaning: 'Please eat it while it’s hot.' }] },
+	{ id: 'seed-ja-g-toori', target: '〜とおりに', reading: '〜とおりに', transliteration: 'tōri ni', meaning: 'just as / according to', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: '説明のとおりにやってください。', reading: 'せつめいのとおりにやってください。', transliteration: 'Setsumei no tōri ni yatte kudasai.', meaning: 'Please do it as explained.' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -390,7 +454,37 @@ const HE: SeedSpec[] = [
 	{ id: 'seed-he-chatul', target: 'חָתוּל', reading: 'chatul', transliteration: 'chatul', meaning: 'cat', tags: ['animals', 'noun'], level: 'A1',
 		examples: [{ target: 'הֶחָתוּל יָשֵׁן.', reading: 'hechatul yashen.', meaning: 'The cat is sleeping.' }] },
 	{ id: 'seed-he-shavua', target: 'שָׁבוּעַ', reading: 'shavua', transliteration: 'shavua', meaning: 'week', tags: ['time', 'daily'], level: 'A2',
-		examples: [{ target: 'שָׁבוּעַ טוֹב!', reading: 'shavua tov!', meaning: 'Have a good week!' }] }
+		examples: [{ target: 'שָׁבוּעַ טוֹב!', reading: 'shavua tov!', meaning: 'Have a good week!' }] },
+
+	// — A1-A2 batch 3: colors, body, food, more verbs, question words —
+	{ id: 'seed-he-color', target: 'צֶבַע', reading: 'tseva', transliteration: 'tseva', meaning: 'color', tags: ['noun', 'daily'], level: 'A2',
+		examples: [{ target: 'אֵיזֶה צֶבַע אַתָּה אוֹהֵב?', reading: 'eize tseva ata ohev?', meaning: 'Which color do you like?' }] },
+	{ id: 'seed-he-red', target: 'אָדֹם', reading: 'adom', transliteration: 'adom', meaning: 'red (m.)', tags: ['color', 'adjective'], level: 'A2',
+		examples: [{ target: 'הַתַּפּוּחַ אָדֹם.', reading: 'hatapuach adom.', meaning: 'The apple is red.' }] },
+	{ id: 'seed-he-blue', target: 'כָּחֹל', reading: 'kachol', transliteration: 'kachol', meaning: 'blue (m.)', tags: ['color', 'adjective'], level: 'A2',
+		examples: [{ target: 'הַיָּם כָּחֹל.', reading: 'hayam kachol.', meaning: 'The sea is blue.' }] },
+	{ id: 'seed-he-green', target: 'יָרֹק', reading: 'yarok', transliteration: 'yarok', meaning: 'green (m.)', tags: ['color', 'adjective'], level: 'A2',
+		examples: [{ target: 'הָעֵץ יָרֹק.', reading: 'ha’etz yarok.', meaning: 'The tree is green.' }] },
+	{ id: 'seed-he-head', target: 'רֹאשׁ', reading: 'rosh', transliteration: 'rosh', meaning: 'head', tags: ['body', 'noun'], level: 'A1',
+		examples: [{ target: 'כּוֹאֵב לִי הָרֹאשׁ.', reading: 'ko’ev li harosh.', meaning: 'My head hurts.' }] },
+	{ id: 'seed-he-bread', target: 'לֶחֶם', reading: 'lechem', transliteration: 'lechem', meaning: 'bread', tags: ['food', 'noun'], level: 'A1',
+		examples: [{ target: 'אֲנִי קוֹנֶה לֶחֶם.', reading: 'ani koneh lechem.', meaning: 'I buy bread.' }] },
+	{ id: 'seed-he-milk', target: 'חָלָב', reading: 'chalav', transliteration: 'chalav', meaning: 'milk', tags: ['food', 'noun'], level: 'A1',
+		examples: [{ target: 'אֲנִי שׁוֹתֶה חָלָב.', reading: 'ani shoteh chalav.', meaning: 'I drink milk.' }] },
+	{ id: 'seed-he-egg', target: 'בֵּיצָה', reading: 'beitza', transliteration: 'beitza', meaning: 'egg', tags: ['food', 'noun'], level: 'A1',
+		examples: [{ target: 'אֲנִי אוֹכֵל בֵּיצָה.', reading: 'ani ochel beitza.', meaning: 'I eat an egg.' }] },
+	{ id: 'seed-he-drink', target: 'שׁוֹתֶה', reading: 'shoteh', transliteration: 'shoteh', meaning: 'drink (m.)', tags: ['verb', 'food'], level: 'A1',
+		examples: [{ target: 'אֲנִי שׁוֹתֶה קָפֶה.', reading: 'ani shoteh kafeh.', meaning: 'I drink coffee.' }] },
+	{ id: 'seed-he-speak', target: 'מְדַבֵּר', reading: 'medaber', transliteration: 'medaber', meaning: 'speak (m.)', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: 'אֲנִי מְדַבֵּר עִבְרִית.', reading: 'ani medaber ivrit.', meaning: 'I speak Hebrew.' }] },
+	{ id: 'seed-he-read', target: 'קוֹרֵא', reading: 'kore', transliteration: 'kore', meaning: 'read (m.)', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: 'אֲנִי קוֹרֵא עִתּוֹן.', reading: 'ani kore iton.', meaning: 'I read a newspaper.' }] },
+	{ id: 'seed-he-what', target: 'מָה', reading: 'ma', transliteration: 'ma', meaning: 'what', tags: ['question', 'daily'], level: 'A1',
+		examples: [{ target: 'מָה זֶה?', reading: 'ma ze?', meaning: 'What is this?' }] },
+	{ id: 'seed-he-where', target: 'אֵיפֹה', reading: 'eifo', transliteration: 'eifo', meaning: 'where', tags: ['question', 'daily'], level: 'A1',
+		examples: [{ target: 'אֵיפֹה אַתָּה?', reading: 'eifo ata?', meaning: 'Where are you?' }] },
+	{ id: 'seed-he-when', target: 'מָתַי', reading: 'matay', transliteration: 'matay', meaning: 'when', tags: ['question', 'daily'], level: 'A2',
+		examples: [{ target: 'מָתַי אַתָּה בָּא?', reading: 'matay ata ba?', meaning: 'When are you coming?' }] }
 ];
 
 const SEED: Record<Language, SeedSpec[]> = { zh: ZH, ja: JA, he: HE };
@@ -579,6 +673,50 @@ const ZH_PASSAGES: PassageSpec[] = [
 			{ target: '大家一起吃年夜饭，看春晚。', reading: 'Dàjiā yìqǐ chī niányèfàn, kàn Chūnwǎn.', meaning: 'Everyone eats the New Year’s Eve dinner together and watches the gala.' },
 			{ target: '现在，人们也常用手机发红包。', reading: 'Xiànzài, rénmen yě cháng yòng shǒujī fā hóngbāo.', meaning: 'Nowadays, people often send red envelopes with their phones too.' }
 		]
+	},
+	{
+		id: 'pass-zh-supermarket',
+		kind: 'conversation',
+		title: '在超市 — At the supermarket',
+		level: 'A2',
+		tags: ['shopping', 'food', 'daily'],
+		intro: 'A couple goes shopping for groceries.',
+		lines: [
+			{ speaker: 'A', target: '我们需要买什么？', reading: 'Wǒmen xūyào mǎi shénme?', meaning: 'What do we need to buy?' },
+			{ speaker: 'B', target: '牛奶、鸡蛋，还有水果。', reading: 'Niúnǎi, jīdàn, hái yǒu shuǐguǒ.', meaning: 'Milk, eggs, and fruit.' },
+			{ speaker: 'A', target: '面包要不要？', reading: 'Miànbāo yào bu yào?', meaning: 'Do we want bread?' },
+			{ speaker: 'B', target: '要，买一个。', reading: 'Yào, mǎi yí gè.', meaning: 'Yes, get one.' },
+			{ speaker: 'A', target: '好，去那边付钱吧。', reading: 'Hǎo, qù nàbiān fù qián ba.', meaning: 'Okay, let’s pay over there.' }
+		]
+	},
+	{
+		id: 'pass-zh-taxi',
+		kind: 'conversation',
+		title: '打车 — Taking a taxi',
+		level: 'A2',
+		tags: ['transport', 'travel'],
+		intro: 'Catching a cab to the station.',
+		lines: [
+			{ speaker: '乘客', target: '师傅，去火车站。', reading: 'Shīfu, qù huǒchēzhàn.', meaning: 'Driver, to the train station.' },
+			{ speaker: '司机', target: '好的，走高速吗？', reading: 'Hǎo de, zǒu gāosù ma?', meaning: 'Sure, take the highway?' },
+			{ speaker: '乘客', target: '走高速，我赶时间。', reading: 'Zǒu gāosù, wǒ gǎn shíjiān.', meaning: 'Take the highway, I’m in a hurry.' },
+			{ speaker: '司机', target: '大概二十分钟到。', reading: 'Dàgài èrshí fēnzhōng dào.', meaning: 'It’ll take about twenty minutes.' },
+			{ speaker: '乘客', target: '可以扫码付款吗？', reading: 'Kěyǐ sǎomǎ fùkuǎn ma?', meaning: 'Can I pay by QR code?' }
+		]
+	},
+	{
+		id: 'pass-zh-delivery',
+		kind: 'text',
+		title: '点外卖 — Ordering food delivery',
+		level: 'A2',
+		tags: ['society', 'food', 'tech'],
+		intro: 'A short piece on China’s food-delivery culture.',
+		lines: [
+			{ target: '在中国，点外卖非常方便。', reading: 'Zài Zhōngguó, diǎn wàimài fēicháng fāngbiàn.', meaning: 'In China, ordering food delivery is very convenient.' },
+			{ target: '用手机几分钟就能下单。', reading: 'Yòng shǒujī jǐ fēnzhōng jiù néng xiàdān.', meaning: 'With a phone you can place an order in minutes.' },
+			{ target: '很多人午饭和晚饭都点外卖。', reading: 'Hěn duō rén wǔfàn hé wǎnfàn dōu diǎn wàimài.', meaning: 'Many people order delivery for both lunch and dinner.' },
+			{ target: '不过，自己做饭更健康也更便宜。', reading: 'Búguò, zìjǐ zuòfàn gèng jiànkāng yě gèng piányi.', meaning: 'However, cooking yourself is healthier and cheaper.' }
+		]
 	}
 ];
 
@@ -736,6 +874,49 @@ const JA_PASSAGES: PassageSpec[] = [
 			{ target: '夏は暑く、秋には紅葉が美しい。', reading: 'なつはあつく、あきにはこうようがうつくしい。', transliteration: 'Natsu wa atsuku, aki ni wa kōyō ga utsukushii.', meaning: 'Summer is hot, and in autumn the fall leaves are beautiful.' },
 			{ target: '冬は雪が降る地域も多い。', reading: 'ふゆはゆきがふるちいきもおおい。', transliteration: 'Fuyu wa yuki ga furu chiiki mo ōi.', meaning: 'In winter, many regions get snow.' }
 		]
+	},
+	{
+		id: 'pass-ja-hotel',
+		kind: 'conversation',
+		title: 'ホテルのチェックイン — Hotel check-in',
+		level: 'N3',
+		tags: ['travel', 'polite'],
+		intro: 'Checking in at the front desk.',
+		lines: [
+			{ speaker: '客', target: 'チェックインをお願いします。', reading: 'チェックインをおねがいします。', transliteration: 'Chekkuin o onegai shimasu.', meaning: 'I’d like to check in, please.' },
+			{ speaker: 'フロント', target: 'お名前をお願いします。', reading: 'おなまえをおねがいします。', transliteration: 'O-namae o onegai shimasu.', meaning: 'Your name, please.' },
+			{ speaker: '客', target: '田中です。二泊します。', reading: 'たなかです。にはくします。', transliteration: 'Tanaka desu. Nihaku shimasu.', meaning: 'It’s Tanaka. I’m staying two nights.' },
+			{ speaker: 'フロント', target: 'お部屋は5階です。こちらが鍵です。', reading: 'おへやはごかいです。こちらがかぎです。', transliteration: 'O-heya wa go-kai desu. Kochira ga kagi desu.', meaning: 'Your room is on the 5th floor. Here is your key.' },
+			{ speaker: '客', target: 'ありがとうございます。', reading: 'ありがとうございます。', transliteration: 'Arigatō gozaimasu.', meaning: 'Thank you.' }
+		]
+	},
+	{
+		id: 'pass-ja-hobby',
+		kind: 'conversation',
+		title: '趣味の話 — Talking about hobbies',
+		level: 'N3',
+		tags: ['daily', 'hobby'],
+		intro: 'Two people chat about what they like to do.',
+		lines: [
+			{ speaker: 'A', target: '趣味は何ですか。', reading: 'しゅみはなんですか。', transliteration: 'Shumi wa nan desu ka.', meaning: 'What’s your hobby?' },
+			{ speaker: 'B', target: '写真を撮ることです。', reading: 'しゃしんをとることです。', transliteration: 'Shashin o toru koto desu.', meaning: 'Taking photos.' },
+			{ speaker: 'A', target: 'いいですね。どんな写真ですか。', reading: 'いいですね。どんなしゃしんですか。', transliteration: 'Ii desu ne. Donna shashin desu ka.', meaning: 'Nice. What kind of photos?' },
+			{ speaker: 'B', target: '自然の写真が多いです。', reading: 'しぜんのしゃしんがおおいです。', transliteration: 'Shizen no shashin ga ōi desu.', meaning: 'Mostly nature photos.' }
+		]
+	},
+	{
+		id: 'pass-ja-food',
+		kind: 'text',
+		title: '日本の食べ物 — Japanese food',
+		level: 'N3',
+		tags: ['culture', 'food'],
+		intro: 'A short non-fiction passage on Japanese cuisine.',
+		lines: [
+			{ target: '日本の食べ物は世界中で人気がある。', reading: 'にほんのたべものはせかいじゅうでにんきがある。', transliteration: 'Nihon no tabemono wa sekaijū de ninki ga aru.', meaning: 'Japanese food is popular all over the world.' },
+			{ target: '寿司やラーメンは特に有名だ。', reading: 'すしやラーメンはとくにゆうめいだ。', transliteration: 'Sushi ya rāmen wa toku ni yūmei da.', meaning: 'Sushi and ramen are especially famous.' },
+			{ target: '最近は、健康にいいと言われている。', reading: 'さいきんは、けんこうにいいといわれている。', transliteration: 'Saikin wa, kenkō ni ii to iwarete iru.', meaning: 'Recently, it’s said to be good for your health.' },
+			{ target: '家で作る人も、店で食べる人も多い。', reading: 'いえでつくるひとも、みせでたべるひともおおい。', transliteration: 'Ie de tsukuru hito mo, mise de taberu hito mo ōi.', meaning: 'Many people both cook at home and eat out.' }
+		]
 	}
 ];
 
@@ -882,6 +1063,49 @@ const HE_PASSAGES: PassageSpec[] = [
 			{ target: 'רֹב הָאֲנָשִׁים עוֹבְדִים עַד יוֹם חֲמִישִׁי.', reading: 'rov ha’anashim ovdim ad yom chamishi.', meaning: 'Most people work until Thursday.' },
 			{ target: 'יוֹם שִׁשִּׁי וְשַׁבָּת הֵם יְמֵי מְנוּחָה.', reading: 'yom shishi ve’shabbat hem yemei menucha.', meaning: 'Friday and Saturday are rest days.' },
 			{ target: 'בְּשַׁבָּת, מִשְׁפָּחוֹת רַבּוֹת אוֹכְלוֹת יַחַד.', reading: 'be’shabbat, mishpachot rabot ochlot yachad.', meaning: 'On Shabbat, many families eat together.' }
+		]
+	},
+	{
+		id: 'pass-he-grocery',
+		kind: 'conversation',
+		title: 'בַּמַּכֹּלֶת — At the grocery store',
+		level: 'A2',
+		tags: ['shopping', 'food', 'daily'],
+		intro: 'Buying a few basics at the corner shop.',
+		lines: [
+			{ speaker: 'קוֹנֶה', target: 'יֵשׁ לָכֶם חָלָב?', reading: 'yesh lachem chalav?', meaning: 'Do you have milk?' },
+			{ speaker: 'מוֹכֵר', target: 'כֵּן, בַּמְּקָרֵר.', reading: 'ken, bamkarer.', meaning: 'Yes, in the fridge.' },
+			{ speaker: 'קוֹנֶה', target: 'וְגַם לֶחֶם, בְּבַקָּשָׁה.', reading: 've’gam lechem, bevakasha.', meaning: 'And bread too, please.' },
+			{ speaker: 'מוֹכֵר', target: 'בְּבַקָּשָׁה. עוֹד מַשֶּׁהוּ?', reading: 'bevakasha. od mashehu?', meaning: 'Here you go. Anything else?' },
+			{ speaker: 'קוֹנֶה', target: 'לֹא, כַּמָּה זֶה עוֹלֶה?', reading: 'lo, kama ze oleh?', meaning: 'No, how much is it?' }
+		]
+	},
+	{
+		id: 'pass-he-time',
+		kind: 'conversation',
+		title: 'מָה הַשָּׁעָה? — What time is it?',
+		level: 'A2',
+		tags: ['daily', 'time'],
+		intro: 'Asking a stranger for the time.',
+		lines: [
+			{ speaker: 'א', target: 'סְלִיחָה, מָה הַשָּׁעָה?', reading: 'slicha, ma hasha’a?', meaning: 'Excuse me, what time is it?' },
+			{ speaker: 'ב', target: 'עַכְשָׁו שָׁלוֹשׁ.', reading: 'achshav shalosh.', meaning: 'It’s three now.' },
+			{ speaker: 'א', target: 'תּוֹדָה! אֲנִי מְאַחֵר.', reading: 'todah! ani me’acher.', meaning: 'Thanks! I’m late.' },
+			{ speaker: 'ב', target: 'בְּבַקָּשָׁה, יוֹם טוֹב.', reading: 'bevakasha, yom tov.', meaning: 'You’re welcome, have a good day.' }
+		]
+	},
+	{
+		id: 'pass-he-aboutme',
+		kind: 'text',
+		title: 'קְצָת עָלַי — A little about me',
+		level: 'A2',
+		tags: ['daily', 'people'],
+		intro: 'A simple first-person self-introduction.',
+		lines: [
+			{ target: 'שָׁלוֹם, קוֹרְאִים לִי מַיָּה.', reading: 'shalom, kor’im li Maya.', meaning: 'Hi, my name is Maya.' },
+			{ target: 'אֲנִי גָּרָה בְּתֵל אָבִיב עִם הַמִּשְׁפָּחָה שֶׁלִּי.', reading: 'ani gara be-Tel Aviv im hamishpacha sheli.', meaning: 'I live in Tel Aviv with my family.' },
+			{ target: 'אֲנִי לוֹמֶדֶת בָּאוּנִיבֶרְסִיטָה.', reading: 'ani lomedet ba’universita.', meaning: 'I study at the university.' },
+			{ target: 'בַּזְּמַן הַפָּנוּי אֲנִי אוֹהֶבֶת לִקְרֹא.', reading: 'bazman hapanui ani ohevet likro.', meaning: 'In my free time I like to read.' }
 		]
 	}
 ];
