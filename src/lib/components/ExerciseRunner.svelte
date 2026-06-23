@@ -3,6 +3,7 @@
 	import AudioButton from './AudioButton.svelte';
 	import Recorder from './Recorder.svelte';
 	import ScriptText from './ScriptText.svelte';
+	import { settings } from '$lib/db/store';
 	import type { Exercise, Choice } from '$lib/exercises/templates';
 	import type { LearningItem, SelfRating } from '$lib/db/types';
 
@@ -54,7 +55,11 @@
 		}
 		const advance = e.key === 'Enter' || e.key === ' ';
 		if (selected?.correct) {
-			if (e.key === '1') finish(3);
+			// With grade buttons off, a correct answer always advances as "Good".
+			if (!$settings.gradeButtons) {
+				if (advance || e.key === '1') finish(4);
+				else return;
+			} else if (e.key === '1') finish(3);
 			else if (e.key === '3') finish(5);
 			else if (e.key === '2' || advance) finish(4);
 			else return;
@@ -133,11 +138,17 @@
 			<div class="grade">
 				{#if selected?.correct}
 					<p class="feedback ok">Correct</p>
-					<div class="grade-row">
-						<button class="g hard" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
-						<button class="g good" onclick={() => finish(4)}>Good <kbd>2</kbd></button>
-						<button class="g easy" onclick={() => finish(5)}>Easy <kbd>3</kbd></button>
-					</div>
+					{#if $settings.gradeButtons}
+						<div class="grade-row">
+							<button class="g hard" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
+							<button class="g good" onclick={() => finish(4)}>Good <kbd>2</kbd></button>
+							<button class="g easy" onclick={() => finish(5)}>Easy <kbd>3</kbd></button>
+						</div>
+					{:else}
+						<div class="grade-row">
+							<button class="g good" onclick={() => finish(4)}>Next <kbd>↵</kbd></button>
+						</div>
+					{/if}
 				{:else}
 					<p class="feedback no">
 						Answer: <ScriptText text={exercise.answer} language={exercise.language} size="sm" />

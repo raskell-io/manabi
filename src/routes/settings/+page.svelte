@@ -42,6 +42,14 @@
 </section>
 
 <section class="group">
+	<h2>Review</h2>
+	<label class="check">
+		<input type="checkbox" checked={s.gradeButtons} onchange={(e) => updateSettings({ gradeButtons: e.currentTarget.checked })} />
+		<span>Self-rate difficulty after a correct answer (Hard / Good / Easy). When off, a correct answer just advances (graded “Good”) for a faster review.</span>
+	</label>
+</section>
+
+<section class="group">
 	<h2>Audio</h2>
 	<label class="check">
 		<input type="checkbox" checked={s.localTtsEnabled} onchange={(e) => updateSettings({ localTtsEnabled: e.currentTarget.checked })} />

@@ -281,6 +281,7 @@ export interface ManabiSettings {
 	openaiModel: string; // chat model for content generation
 	localTtsEnabled: boolean; // synthesize pronunciation on-device
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
+	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
 	theme: 'system' | 'light' | 'dark';
 	[key: string]: unknown;
 }
@@ -294,6 +295,7 @@ export function defaultSettings(): ManabiSettings {
 		openaiModel: 'gpt-4o',
 		localTtsEnabled: true,
 		hideHebrewVowels: false,
+		gradeButtons: true,
 		theme: 'system'
 	};
 }
