@@ -13,12 +13,15 @@ authenticates itself.
 Because the unified "Workers & Pages" flow deploys via `wrangler` (Workers Static
 Assets), the repo needs a `wrangler.toml`:
 
-- **`wrangler.toml`** — `name = "manabi"` + `[assets] directory = "./build"`.
-  No Worker script; Cloudflare serves the `build/` output as static assets.
+- **`wrangler.toml`** — `name = "manabi"` + `[assets] directory = "./build"` with
+  `not_found_handling = "single-page-application"`. No Worker script; Cloudflare
+  serves the `build/` output and returns `index.html` (200) for any client route.
   *(Without this, `npx wrangler deploy` fails with no entry-point — that was the
   original "Deploying" failure.)*
-- **`static/_redirects`** — `/* /404.html 200`, the SPA fallback (the build emits
-  `404.html`, not `index.html`); the assets server honors it.
+- The build emits **`index.html`** as the SPA shell (`svelte.config`
+  `fallback: 'index.html'`). **Do not use a `_redirects` `/* … 200` rewrite** here
+  — Workers Static Assets turns it into a 307 redirect loop (that's a classic-Pages
+  feature, not a Workers one).
 - **`.nvmrc`** — pins Node 22 for the Cloudflare build.
 - **`.github/workflows/ci.yml`** — `npm run check` (0/0) + `npm test` + build on
   every push/PR (quality gate; independent of deploy).

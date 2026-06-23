@@ -3,13 +3,14 @@
 # deploy`). There is no Worker script: `assets.directory` points at the
 # adapter-static output and Cloudflare serves it directly.
 #
-# SPA routing is handled by `static/_redirects` (`/* /404.html 200`), which the
-# assets server honors; `not_found_handling` is the belt-and-suspenders fallback
-# (the build emits 404.html, not index.html).
+# SPA routing: the build emits `index.html` as the shell (svelte.config
+# `fallback: 'index.html'`); `single-page-application` serves it with a 200 for
+# any path that isn't a real asset. (NB: classic-Pages `_redirects` 200-rewrites
+# are NOT honored here — they turn into a 307 redirect loop.)
 
 name = "manabi"
 compatibility_date = "2025-06-01"
 
 [assets]
 directory = "./build"
-not_found_handling = "404-page"
+not_found_handling = "single-page-application"

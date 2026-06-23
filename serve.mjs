@@ -2,10 +2,9 @@
 /**
  * Tiny dependency-free static server for the adapter-static build.
  *
- * The build is a pure SPA: it emits `404.html` (the SvelteKit fallback) but no
- * `index.html`, so every path that isn't a real file — including `/` and client
- * routes like `/review` — is served `404.html` with a 200 so the SPA can boot
- * and route on the client.
+ * The build is a pure SPA: it emits `index.html` as the fallback shell, so every
+ * path that isn't a real file — including client routes like `/review` — is
+ * served `index.html` with a 200 so the SPA can boot and route on the client.
  *
  * Usage: PORT=4317 HOST=127.0.0.1 node serve.mjs
  */
@@ -17,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(fileURLToPath(new URL('./build', import.meta.url)));
 const PORT = Number(process.env.PORT) || 4317;
 const HOST = process.env.HOST || '127.0.0.1';
-const FALLBACK = join(ROOT, '404.html');
+const FALLBACK = join(ROOT, 'index.html');
 
 const TYPES = {
 	'.html': 'text/html; charset=utf-8',
@@ -59,7 +58,7 @@ const server = createServer(async (req, res) => {
 			return send(res, 200, await readFile(filePath), type);
 		}
 
-		// SPA fallback — serve 404.html with a 200 so the client app boots.
+		// SPA fallback — serve index.html with a 200 so the client app boots.
 		return send(res, 200, await readFile(FALLBACK), TYPES['.html']);
 	} catch (err) {
 		return send(res, 500, `Server error: ${err?.message ?? err}`, 'text/plain');

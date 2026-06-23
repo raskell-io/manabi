@@ -9,7 +9,7 @@ const config = {
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
-			fallback: '404.html', // SPA fallback for dynamic routes (/items/[id])
+			fallback: 'index.html', // SPA shell; CF Workers serves it via not_found_handling=single-page-application
 			precompress: false,
 			strict: true
 		}),

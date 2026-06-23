@@ -1,5 +1,0 @@
-# SPA fallback for Cloudflare Pages. The adapter-static build emits 404.html
-# (no index.html), so any path that isn't a real static asset is rewritten to
-# the app shell with a 200 and routed on the client. Static assets are matched
-# before this rule, so they're served directly.
-/*    /404.html    200
