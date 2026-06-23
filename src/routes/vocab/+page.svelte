@@ -81,7 +81,8 @@
 <header class="head">
 	<h1>Vocabulary</h1>
 	<p class="muted">
-		{lang === 'zh' ? 'Full HSK 3.0' : 'JLPT N5–N1'} {langName} word lists. Tap a word to add it to your reviews, or add a whole level.
+		{lang === 'zh' ? 'Full HSK 3.0' : 'JLPT N5–N1'} {langName} word lists. Use
+		<strong>＋ Add</strong> to drop a word into your spaced-repetition reviews — or add a whole level at once.
 	</p>
 </header>
 
@@ -113,13 +114,13 @@
 		<ul class="list">
 			{#each shown as w (w.t)}
 				<li>
-					<div class="lead">
-						<ScriptText text={w.t} language={lang} size="sm" />
+					<span class="word"><ScriptText text={w.t} language={lang} size="lg" /></span>
+					<div class="info">
 						<span class="reading">{w.r}</span>
+						<span class="meaning">{w.m}</span>
 					</div>
-					<span class="meaning">{w.m}</span>
-					<button class="study" class:done={added.has(w.t)} onclick={() => add(w)} title="Add to reviews" aria-label="Add to reviews">
-						{#if added.has(w.t)}<Check size={15} />{:else}<Plus size={15} />{/if}
+					<button class="study" class:done={added.has(w.t)} onclick={() => add(w)} title="Add this word to your spaced-repetition reviews">
+						{#if added.has(w.t)}<Check size={15} /> Added{:else}<Plus size={15} /> Add{/if}
 					</button>
 				</li>
 			{/each}
@@ -239,40 +240,49 @@
 	}
 	.list li {
 		display: grid;
-		grid-template-columns: 12rem 1fr auto;
-		gap: 1rem;
+		grid-template-columns: minmax(3rem, max-content) 1fr auto;
+		gap: 1.25rem;
 		align-items: center;
-		padding: 0.5rem 0.85rem;
+		padding: 0.6rem 1rem;
 		border: 1px solid var(--color-border);
 		border-radius: 0.55rem;
 		background: var(--color-bg-secondary);
 	}
-	.lead {
+	.word {
+		min-width: 0;
+	}
+	.info {
 		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
+		flex-direction: column;
+		gap: 0.1rem;
 		min-width: 0;
 	}
 	.reading {
 		color: var(--color-text-muted);
-		font-size: 0.82rem;
+		font-size: 0.85rem;
 	}
 	.meaning {
 		color: var(--color-text);
-		font-size: 0.9rem;
+		font-size: 0.95rem;
 		min-width: 0;
 	}
 	.study {
-		width: 2.1rem;
-		height: 2.1rem;
+		justify-self: end;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: 0.5rem;
 		border: 1px solid var(--color-border);
 		background: var(--color-bg);
 		color: var(--color-accent);
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
+		font-size: 0.82rem;
+		font-weight: 600;
+		white-space: nowrap;
 		flex-shrink: 0;
+	}
+	.study:hover {
+		border-color: var(--color-accent);
 	}
 	.study.done {
 		color: var(--color-success);
@@ -285,11 +295,14 @@
 	}
 	@media (max-width: 560px) {
 		.list li {
-			grid-template-columns: 1fr auto;
+			gap: 0.75rem;
+			padding: 0.6rem 0.75rem;
 		}
 		.meaning {
-			grid-column: 1 / -1;
-			font-size: 0.85rem;
+			font-size: 0.88rem;
+		}
+		.study {
+			padding: 0.4rem 0.6rem;
 		}
 	}
 </style>
