@@ -444,6 +444,71 @@ export function studyScriptChar(
 	});
 }
 
+// --- Vocabulary browser → SRS -----------------------------------------------
+
+export interface VocabWord {
+	t: string; // target
+	r: string; // reading
+	m: string; // meaning
+}
+
+/** Add one vocab word as a `word` item (dedupes on exact target). */
+export function studyVocabWord(language: Language, w: VocabWord, level: string): string {
+	const existing = Object.values(doc?.learningItems ?? {}).find(
+		(it) => it.language === language && it.target === w.t
+	);
+	if (existing) return existing.id;
+	return createItem({
+		language,
+		kind: 'word',
+		target: w.t,
+		reading: w.r,
+		meaning: w.m,
+		tags: ['vocab', level],
+		level,
+		examples: [],
+		status: 'published'
+	});
+}
+
+/**
+ * Bulk-add a whole level's vocab in a SINGLE document change (one save), so
+ * adding hundreds/thousands of words doesn't fire a save per word. Skips words
+ * already present. Returns how many were newly added.
+ */
+export function addVocabWords(language: Language, words: VocabWord[], level: string): number {
+	let added = 0;
+	updateDoc((d) => {
+		const present = new Set(
+			Object.values(d.learningItems)
+				.filter((it) => it.language === language)
+				.map((it) => it.target)
+		);
+		const now = Date.now();
+		for (const w of words) {
+			if (present.has(w.t)) continue;
+			const id = generateId();
+			d.learningItems[id] = stripUndefined({
+				id,
+				language,
+				kind: 'word' as const,
+				target: w.t,
+				reading: w.r,
+				meaning: w.m,
+				tags: ['vocab', level],
+				level,
+				examples: [],
+				status: 'published' as const,
+				createdAt: now,
+				updatedAt: now
+			});
+			present.add(w.t);
+			added++;
+		}
+	});
+	return added;
+}
+
 /**
  * Mine a passage line into a standalone sentence `LearningItem` so it enters
  * the SRS — the "personal sentence miner" from the pitch. Returns the new id,

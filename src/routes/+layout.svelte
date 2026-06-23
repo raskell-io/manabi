@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import {
-		Home, GraduationCap, BookOpen, Table2, Library, LayoutGrid, BarChart3,
+		Home, GraduationCap, BookOpen, Table2, BookA, Library, LayoutGrid, BarChart3,
 		Sparkles, Settings as SettingsIcon, Menu, X, Sun, Moon
 	} from 'lucide-svelte';
 	import { initDB, settings, setActiveLanguage, updateSettings } from '$lib/db/store';
@@ -18,6 +18,7 @@
 		{ href: '/review', label: 'Review', icon: GraduationCap },
 		{ href: '/read', label: 'Read', icon: BookOpen },
 		{ href: '/scripts', label: 'Scripts', icon: Table2 },
+		{ href: '/vocab', label: 'Vocab', icon: BookA },
 		{ href: '/items', label: 'Items', icon: Library },
 		{ href: '/lessons', label: 'Lessons', icon: LayoutGrid },
 		{ href: '/dashboard', label: 'Progress', icon: BarChart3 },
