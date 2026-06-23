@@ -147,7 +147,41 @@ const ZH: SeedSpec[] = [
 	{ id: 'seed-zh-so', target: '所以', reading: 'suǒyǐ', meaning: 'so / therefore', kind: 'grammar', tags: ['grammar', 'connective', 'HSK2'], level: 'A2',
 		examples: [{ target: '我很累，所以早点睡了。', reading: 'Wǒ hěn lèi, suǒyǐ zǎo diǎn shuì le.', meaning: 'I was tired, so I went to bed early.' }] },
 	{ id: 'seed-zh-butptn', target: '虽然', reading: 'suīrán', meaning: 'although', kind: 'grammar', tags: ['grammar', 'connective', 'HSK3'], level: 'A2',
-		examples: [{ target: '虽然很贵，但是很好吃。', reading: 'Suīrán hěn guì, dànshì hěn hǎochī.', meaning: 'Although it’s expensive, it’s delicious.' }] }
+		examples: [{ target: '虽然很贵，但是很好吃。', reading: 'Suīrán hěn guì, dànshì hěn hǎochī.', meaning: 'Although it’s expensive, it’s delicious.' }] },
+
+	// — A2 batch 2: family, health, weather, more verbs & adjectives, places —
+	{ id: 'seed-zh-mom', target: '妈妈', reading: 'māma', meaning: 'mom', tags: ['family', 'people', 'HSK1'], level: 'A2',
+		examples: [{ target: '我妈妈是老师。', reading: 'Wǒ māma shì lǎoshī.', meaning: 'My mom is a teacher.' }] },
+	{ id: 'seed-zh-dad', target: '爸爸', reading: 'bàba', meaning: 'dad', tags: ['family', 'people', 'HSK1'], level: 'A2',
+		examples: [{ target: '爸爸在家工作。', reading: 'Bàba zài jiā gōngzuò.', meaning: 'Dad works at home.' }] },
+	{ id: 'seed-zh-family', target: '家人', reading: 'jiārén', meaning: 'family (members)', tags: ['family', 'people', 'HSK2'], level: 'A2',
+		examples: [{ target: '我爱我的家人。', reading: 'Wǒ ài wǒ de jiārén.', meaning: 'I love my family.' }] },
+	{ id: 'seed-zh-weather', target: '天气', reading: 'tiānqì', meaning: 'weather', tags: ['nature', 'daily', 'HSK1'], level: 'A2',
+		examples: [{ target: '今天天气怎么样？', reading: 'Jīntiān tiānqì zěnmeyàng?', meaning: 'How is the weather today?' }] },
+	{ id: 'seed-zh-hot', target: '热', reading: 'rè', meaning: 'hot', tags: ['adjective', 'nature', 'HSK1'], level: 'A2',
+		examples: [{ target: '夏天很热。', reading: 'Xiàtiān hěn rè.', meaning: 'Summer is very hot.' }] },
+	{ id: 'seed-zh-cold', target: '冷', reading: 'lěng', meaning: 'cold', tags: ['adjective', 'nature', 'HSK1'], level: 'A2',
+		examples: [{ target: '北京冬天很冷。', reading: 'Běijīng dōngtiān hěn lěng.', meaning: 'Winters in Beijing are cold.' }] },
+	{ id: 'seed-zh-doctor', target: '医生', reading: 'yīshēng', meaning: 'doctor', tags: ['health', 'people', 'HSK1'], level: 'A2',
+		examples: [{ target: '我要去看医生。', reading: 'Wǒ yào qù kàn yīshēng.', meaning: 'I need to see a doctor.' }] },
+	{ id: 'seed-zh-medicine', target: '药', reading: 'yào', meaning: 'medicine', tags: ['health', 'noun', 'HSK2'], level: 'A2',
+		examples: [{ target: '记得吃药。', reading: 'Jìde chī yào.', meaning: 'Remember to take your medicine.' }] },
+	{ id: 'seed-zh-tired', target: '累', reading: 'lèi', meaning: 'tired', tags: ['adjective', 'health', 'HSK2'], level: 'A2',
+		examples: [{ target: '我今天很累。', reading: 'Wǒ jīntiān hěn lèi.', meaning: 'I am very tired today.' }] },
+	{ id: 'seed-zh-study', target: '学习', reading: 'xuéxí', meaning: 'to study', tags: ['verb', 'daily', 'HSK1'], level: 'A2',
+		examples: [{ target: '我在学习中文。', reading: 'Wǒ zài xuéxí Zhōngwén.', meaning: 'I am studying Chinese.' }] },
+	{ id: 'seed-zh-sleep', target: '睡觉', reading: 'shuìjiào', meaning: 'to sleep', tags: ['verb', 'daily', 'HSK1'], level: 'A2',
+		examples: [{ target: '我十一点睡觉。', reading: 'Wǒ shíyī diǎn shuìjiào.', meaning: 'I go to sleep at eleven.' }] },
+	{ id: 'seed-zh-help', target: '帮助', reading: 'bāngzhù', meaning: 'to help / help', tags: ['verb', 'daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '谢谢你的帮助。', reading: 'Xièxie nǐ de bāngzhù.', meaning: 'Thank you for your help.' }] },
+	{ id: 'seed-zh-happy', target: '高兴', reading: 'gāoxìng', meaning: 'happy / glad', tags: ['adjective', 'daily', 'HSK1'], level: 'A2',
+		examples: [{ target: '认识你很高兴。', reading: 'Rènshi nǐ hěn gāoxìng.', meaning: 'Nice to meet you.' }] },
+	{ id: 'seed-zh-expensive', target: '贵', reading: 'guì', meaning: 'expensive', tags: ['adjective', 'shopping', 'HSK2'], level: 'A2',
+		examples: [{ target: '这件衣服太贵了。', reading: 'Zhè jiàn yīfu tài guì le.', meaning: 'This piece of clothing is too expensive.' }] },
+	{ id: 'seed-zh-cheap', target: '便宜', reading: 'piányi', meaning: 'cheap', tags: ['adjective', 'shopping', 'HSK2'], level: 'A2',
+		examples: [{ target: '这家店很便宜。', reading: 'Zhè jiā diàn hěn piányi.', meaning: 'This shop is very cheap.' }] },
+	{ id: 'seed-zh-shop', target: '商店', reading: 'shāngdiàn', meaning: 'shop / store', tags: ['places', 'shopping', 'HSK1'], level: 'A2',
+		examples: [{ target: '商店几点关门？', reading: 'Shāngdiàn jǐ diǎn guānmén?', meaning: 'What time does the shop close?' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -236,7 +270,39 @@ const JA: SeedSpec[] = [
 	{ id: 'seed-ja-g-hazu', target: '〜はずだ', reading: '〜はずだ', transliteration: 'hazu da', meaning: 'should / is expected to (be)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
 		examples: [{ target: '彼はもう着いたはずです。', reading: 'かれはもうついたはずです。', transliteration: 'Kare wa mō tsuita hazu desu.', meaning: 'He should have already arrived.' }] },
 	{ id: 'seed-ja-g-okagede', target: '〜おかげで', reading: '〜おかげで', transliteration: 'okage de', meaning: 'thanks to (positive cause)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
-		examples: [{ target: 'あなたのおかげで助かりました。', reading: 'あなたのおかげでたすかりました。', transliteration: 'Anata no okage de tasukarimashita.', meaning: 'Thanks to you, I was saved.' }] }
+		examples: [{ target: 'あなたのおかげで助かりました。', reading: 'あなたのおかげでたすかりました。', transliteration: 'Anata no okage de tasukarimashita.', meaning: 'Thanks to you, I was saved.' }] },
+
+	// — N3 batch 2: abstract nouns, feelings, adjectives, verbs, grammar —
+	{ id: 'seed-ja-bunka', target: '文化', reading: 'ぶんか', transliteration: 'bunka', meaning: 'culture', tags: ['noun', 'society', 'N4'], level: 'B1',
+		examples: [{ target: '日本の文化が好きです。', reading: 'にほんのぶんかがすきです。', transliteration: 'Nihon no bunka ga suki desu.', meaning: 'I like Japanese culture.' }] },
+	{ id: 'seed-ja-shakai', target: '社会', reading: 'しゃかい', transliteration: 'shakai', meaning: 'society', tags: ['noun', 'society', 'N3'], level: 'B1',
+		examples: [{ target: '社会の問題について考える。', reading: 'しゃかいのもんだいについてかんがえる。', transliteration: 'Shakai no mondai ni tsuite kangaeru.', meaning: 'To think about society’s problems.' }] },
+	{ id: 'seed-ja-mondai', target: '問題', reading: 'もんだい', transliteration: 'mondai', meaning: 'problem / question', tags: ['noun', 'N4'], level: 'B1',
+		examples: [{ target: 'それは大きな問題です。', reading: 'それはおおきなもんだいです。', transliteration: 'Sore wa ōkina mondai desu.', meaning: 'That is a big problem.' }] },
+	{ id: 'seed-ja-riyuu', target: '理由', reading: 'りゆう', transliteration: 'riyū', meaning: 'reason', tags: ['noun', 'N4'], level: 'B1',
+		examples: [{ target: '理由を教えてください。', reading: 'りゆうをおしえてください。', transliteration: 'Riyū o oshiete kudasai.', meaning: 'Please tell me the reason.' }] },
+	{ id: 'seed-ja-kimochi', target: '気持ち', reading: 'きもち', transliteration: 'kimochi', meaning: 'feeling / mood', tags: ['noun', 'N4'], level: 'B1',
+		examples: [{ target: '気持ちが分かります。', reading: 'きもちがわかります。', transliteration: 'Kimochi ga wakarimasu.', meaning: 'I understand how you feel.' }] },
+	{ id: 'seed-ja-ureshii', target: '嬉しい', reading: 'うれしい', transliteration: 'ureshii', meaning: 'happy / glad', tags: ['adjective', 'N4'], level: 'B1',
+		examples: [{ target: '会えて嬉しいです。', reading: 'あえてうれしいです。', transliteration: 'Aete ureshii desu.', meaning: 'I’m glad to meet you.' }] },
+	{ id: 'seed-ja-kanashii', target: '悲しい', reading: 'かなしい', transliteration: 'kanashii', meaning: 'sad', tags: ['adjective', 'N4'], level: 'B1',
+		examples: [{ target: 'その話は悲しいです。', reading: 'そのはなしはかなしいです。', transliteration: 'Sono hanashi wa kanashii desu.', meaning: 'That story is sad.' }] },
+	{ id: 'seed-ja-muzukashii', target: '難しい', reading: 'むずかしい', transliteration: 'muzukashii', meaning: 'difficult', tags: ['adjective', 'N5'], level: 'B1',
+		examples: [{ target: '漢字は難しいです。', reading: 'かんじはむずかしいです。', transliteration: 'Kanji wa muzukashii desu.', meaning: 'Kanji is difficult.' }] },
+	{ id: 'seed-ja-kantan', target: '簡単', reading: 'かんたん', transliteration: 'kantan', meaning: 'easy / simple', tags: ['adjective', 'N4'], level: 'B1',
+		examples: [{ target: 'このゲームは簡単です。', reading: 'このゲームはかんたんです。', transliteration: 'Kono gēmu wa kantan desu.', meaning: 'This game is easy.' }] },
+	{ id: 'seed-ja-taisetsu', target: '大切', reading: 'たいせつ', transliteration: 'taisetsu', meaning: 'important / precious', tags: ['adjective', 'N4'], level: 'B1',
+		examples: [{ target: '家族は大切です。', reading: 'かぞくはたいせつです。', transliteration: 'Kazoku wa taisetsu desu.', meaning: 'Family is important.' }] },
+	{ id: 'seed-ja-kimeru', target: '決める', reading: 'きめる', transliteration: 'kimeru', meaning: 'to decide', tags: ['verb', 'N4'], level: 'B1',
+		examples: [{ target: '自分で決めます。', reading: 'じぶんできめます。', transliteration: 'Jibun de kimemasu.', meaning: 'I’ll decide myself.' }] },
+	{ id: 'seed-ja-tsuzukeru', target: '続ける', reading: 'つづける', transliteration: 'tsuzukeru', meaning: 'to continue', tags: ['verb', 'N4'], level: 'B1',
+		examples: [{ target: '毎日勉強を続けます。', reading: 'まいにちべんきょうをつづけます。', transliteration: 'Mainichi benkyō o tsuzukemasu.', meaning: 'I keep studying every day.' }] },
+	{ id: 'seed-ja-g-niyoruto', target: '〜によると', reading: '〜によると', transliteration: 'ni yoru to', meaning: 'according to', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: '天気予報によると、明日は雨です。', reading: 'てんきよほうによると、あしたはあめです。', transliteration: 'Tenki yohō ni yoru to, ashita wa ame desu.', meaning: 'According to the forecast, it’ll rain tomorrow.' }] },
+	{ id: 'seed-ja-g-nitsuite', target: '〜について', reading: '〜について', transliteration: 'ni tsuite', meaning: 'about / regarding', kind: 'grammar', tags: ['grammar', 'N4'], level: 'B1',
+		examples: [{ target: '日本の歴史について調べます。', reading: 'にほんのれきしについてしらべます。', transliteration: 'Nihon no rekishi ni tsuite shirabemasu.', meaning: 'I’ll research about Japanese history.' }] },
+	{ id: 'seed-ja-g-tara', target: '〜たら', reading: '〜たら', transliteration: 'tara', meaning: 'if / when (conditional)', kind: 'grammar', tags: ['grammar', 'N4'], level: 'B1',
+		examples: [{ target: '家に着いたら電話します。', reading: 'いえについたらでんわします。', transliteration: 'Ie ni tsuitara denwa shimasu.', meaning: 'I’ll call when I get home.' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -294,7 +360,37 @@ const HE: SeedSpec[] = [
 	{ id: 'seed-he-gadol', target: 'גָּדוֹל', reading: 'gadol', transliteration: 'gadol', meaning: 'big (m)', tags: ['adjective', 'daily'], level: 'A1',
 		examples: [{ target: 'הַבַּיִת גָּדוֹל.', reading: 'habayit gadol.', meaning: 'The house is big.' }] },
 	{ id: 'seed-he-katan', target: 'קָטָן', reading: 'katan', transliteration: 'katan', meaning: 'small (m)', tags: ['adjective', 'daily'], level: 'A1',
-		examples: [{ target: 'הַסֵּפֶר קָטָן.', reading: 'hasefer katan.', meaning: 'The book is small.' }] }
+		examples: [{ target: 'הַסֵּפֶר קָטָן.', reading: 'hasefer katan.', meaning: 'The book is small.' }] },
+
+	// — A1-A2 batch 2: family, common verbs, adjectives, animals, time —
+	{ id: 'seed-he-ima', target: 'אִמָּא', reading: 'ima', transliteration: 'ima', meaning: 'mom', tags: ['family', 'people'], level: 'A1',
+		examples: [{ target: 'אִמָּא שֶׁלִּי עוֹבֶדֶת.', reading: 'ima sheli ovedet.', meaning: 'My mom works.' }] },
+	{ id: 'seed-he-aba', target: 'אַבָּא', reading: 'aba', transliteration: 'aba', meaning: 'dad', tags: ['family', 'people'], level: 'A1',
+		examples: [{ target: 'אַבָּא בַּבַּיִת.', reading: 'aba babayit.', meaning: 'Dad is at home.' }] },
+	{ id: 'seed-he-mishpacha', target: 'מִשְׁפָּחָה', reading: 'mishpacha', transliteration: 'mishpacha', meaning: 'family', tags: ['family', 'people'], level: 'A2',
+		examples: [{ target: 'יֵשׁ לִי מִשְׁפָּחָה גְּדוֹלָה.', reading: 'yesh li mishpacha gdola.', meaning: 'I have a big family.' }] },
+	{ id: 'seed-he-yeled', target: 'יֶלֶד', reading: 'yeled', transliteration: 'yeled', meaning: 'boy / child', tags: ['family', 'people'], level: 'A1',
+		examples: [{ target: 'הַיֶּלֶד קָטָן.', reading: 'hayeled katan.', meaning: 'The boy is small.' }] },
+	{ id: 'seed-he-rotzeh', target: 'רוֹצֶה', reading: 'rotzeh', transliteration: 'rotzeh', meaning: 'want (m.)', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: 'אֲנִי רוֹצֶה מַיִם.', reading: 'ani rotzeh mayim.', meaning: 'I want water.' }] },
+	{ id: 'seed-he-holech', target: 'הוֹלֵךְ', reading: 'holech', transliteration: 'holech', meaning: 'go / walk (m.)', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: 'אֲנִי הוֹלֵךְ הַבַּיְתָה.', reading: 'ani holech habayta.', meaning: 'I’m going home.' }] },
+	{ id: 'seed-he-ochel-v', target: 'אוֹכֵל', reading: 'ochel', transliteration: 'ochel', meaning: 'eat (m.)', tags: ['verb', 'food'], level: 'A1',
+		examples: [{ target: 'אֲנִי אוֹכֵל פִּיתָה.', reading: 'ani ochel pita.', meaning: 'I eat pita.' }] },
+	{ id: 'seed-he-lomed', target: 'לוֹמֵד', reading: 'lomed', transliteration: 'lomed', meaning: 'study / learn (m.)', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: 'אֲנִי לוֹמֵד עִבְרִית.', reading: 'ani lomed ivrit.', meaning: 'I’m learning Hebrew.' }] },
+	{ id: 'seed-he-oved', target: 'עוֹבֵד', reading: 'oved', transliteration: 'oved', meaning: 'work (m.)', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: 'הוּא עוֹבֵד בְּמִשְׂרָד.', reading: 'hu oved bemisrad.', meaning: 'He works in an office.' }] },
+	{ id: 'seed-he-yafe', target: 'יָפֶה', reading: 'yafe', transliteration: 'yafe', meaning: 'beautiful (m.)', tags: ['adjective', 'daily'], level: 'A1',
+		examples: [{ target: 'הַיּוֹם יוֹם יָפֶה.', reading: 'hayom yom yafe.', meaning: 'Today is a beautiful day.' }] },
+	{ id: 'seed-he-chadash', target: 'חָדָשׁ', reading: 'chadash', transliteration: 'chadash', meaning: 'new (m.)', tags: ['adjective', 'daily'], level: 'A1',
+		examples: [{ target: 'יֵשׁ לִי טֵלֵפוֹן חָדָשׁ.', reading: 'yesh li telefon chadash.', meaning: 'I have a new phone.' }] },
+	{ id: 'seed-he-kelev', target: 'כֶּלֶב', reading: 'kelev', transliteration: 'kelev', meaning: 'dog', tags: ['animals', 'noun'], level: 'A1',
+		examples: [{ target: 'יֵשׁ לִי כֶּלֶב.', reading: 'yesh li kelev.', meaning: 'I have a dog.' }] },
+	{ id: 'seed-he-chatul', target: 'חָתוּל', reading: 'chatul', transliteration: 'chatul', meaning: 'cat', tags: ['animals', 'noun'], level: 'A1',
+		examples: [{ target: 'הֶחָתוּל יָשֵׁן.', reading: 'hechatul yashen.', meaning: 'The cat is sleeping.' }] },
+	{ id: 'seed-he-shavua', target: 'שָׁבוּעַ', reading: 'shavua', transliteration: 'shavua', meaning: 'week', tags: ['time', 'daily'], level: 'A2',
+		examples: [{ target: 'שָׁבוּעַ טוֹב!', reading: 'shavua tov!', meaning: 'Have a good week!' }] }
 ];
 
 const SEED: Record<Language, SeedSpec[]> = { zh: ZH, ja: JA, he: HE };
@@ -439,6 +535,50 @@ const ZH_PASSAGES: PassageSpec[] = [
 			{ target: '很多人坐高铁去外地工作或者旅游。', reading: 'Hěn duō rén zuò gāotiě qù wàidì gōngzuò huòzhě lǚyóu.', meaning: 'Many people take the high-speed rail to work or travel in other cities.' },
 			{ target: '车上又安静又舒服。', reading: 'Chē shàng yòu ānjìng yòu shūfu.', meaning: 'On board it’s quiet and comfortable.' }
 		]
+	},
+	{
+		id: 'pass-zh-doctor',
+		kind: 'conversation',
+		title: '看医生 — Seeing the doctor',
+		level: 'A2',
+		tags: ['health', 'daily'],
+		intro: 'Describing symptoms at a clinic.',
+		lines: [
+			{ speaker: '医生', target: '你哪里不舒服？', reading: 'Nǐ nǎlǐ bù shūfu?', meaning: 'What’s bothering you?' },
+			{ speaker: '病人', target: '我头疼，还有点发烧。', reading: 'Wǒ tóu téng, hái yǒudiǎn fāshāo.', meaning: 'I have a headache, and a slight fever.' },
+			{ speaker: '医生', target: '这样几天了？', reading: 'Zhèyàng jǐ tiān le?', meaning: 'How many days has it been like this?' },
+			{ speaker: '病人', target: '两天了。', reading: 'Liǎng tiān le.', meaning: 'Two days.' },
+			{ speaker: '医生', target: '多喝水，吃点药，好好休息。', reading: 'Duō hē shuǐ, chī diǎn yào, hǎohǎo xiūxi.', meaning: 'Drink lots of water, take some medicine, and rest well.' }
+		]
+	},
+	{
+		id: 'pass-zh-clothes',
+		kind: 'conversation',
+		title: '买衣服 — Shopping for clothes',
+		level: 'A2',
+		tags: ['shopping', 'daily'],
+		intro: 'Trying on a shirt at a store.',
+		lines: [
+			{ speaker: '顾客', target: '这件衬衫有大号的吗？', reading: 'Zhè jiàn chènshān yǒu dà hào de ma?', meaning: 'Do you have this shirt in a large?' },
+			{ speaker: '店员', target: '有，您要什么颜色？', reading: 'Yǒu, nín yào shénme yánsè?', meaning: 'Yes — what color would you like?' },
+			{ speaker: '顾客', target: '蓝色的。可以试穿吗？', reading: 'Lánsè de. Kěyǐ shìchuān ma?', meaning: 'Blue. Can I try it on?' },
+			{ speaker: '店员', target: '当然，试衣间在那边。', reading: 'Dāngrán, shìyījiān zài nàbiān.', meaning: 'Of course, the fitting room is over there.' },
+			{ speaker: '顾客', target: '正好，我买了。', reading: 'Zhènghǎo, wǒ mǎi le.', meaning: 'It fits perfectly — I’ll take it.' }
+		]
+	},
+	{
+		id: 'pass-zh-spring',
+		kind: 'text',
+		title: '春节 — Spring Festival',
+		level: 'A2',
+		tags: ['culture', 'festival'],
+		intro: 'A short non-fiction piece on China’s biggest holiday.',
+		lines: [
+			{ target: '春节是中国最重要的节日。', reading: 'Chūnjié shì Zhōngguó zuì zhòngyào de jiérì.', meaning: 'Spring Festival is China’s most important holiday.' },
+			{ target: '每年很多人回家和家人团聚。', reading: 'Měi nián hěn duō rén huí jiā hé jiārén tuánjù.', meaning: 'Every year many people go home to reunite with family.' },
+			{ target: '大家一起吃年夜饭，看春晚。', reading: 'Dàjiā yìqǐ chī niányèfàn, kàn Chūnwǎn.', meaning: 'Everyone eats the New Year’s Eve dinner together and watches the gala.' },
+			{ target: '现在，人们也常用手机发红包。', reading: 'Xiànzài, rénmen yě cháng yòng shǒujī fā hóngbāo.', meaning: 'Nowadays, people often send red envelopes with their phones too.' }
+		]
 	}
 ];
 
@@ -553,6 +693,49 @@ const JA_PASSAGES: PassageSpec[] = [
 			{ target: 'そのため、働く人が足りなくなると言われている。', reading: 'そのため、はたらくひとがたりなくなるといわれている。', transliteration: 'Sono tame, hataraku hito ga tarinaku naru to iwarete iru.', meaning: 'For that reason, it’s said there will be a shortage of workers.' },
 			{ target: '政府はいろいろな対策を考えている。', reading: 'せいふはいろいろなたいさくをかんがえている。', transliteration: 'Seifu wa iroiro na taisaku o kangaete iru.', meaning: 'The government is considering various measures.' }
 		]
+	},
+	{
+		id: 'pass-ja-reservation',
+		kind: 'conversation',
+		title: 'レストランの予約 — A restaurant reservation',
+		level: 'N3',
+		tags: ['daily', 'food', 'polite'],
+		intro: 'Booking a table by phone.',
+		lines: [
+			{ speaker: '店', target: 'はい、レストランさくらです。', reading: 'はい、レストランさくらです。', transliteration: 'Hai, resutoran Sakura desu.', meaning: 'Hello, this is Restaurant Sakura.' },
+			{ speaker: '客', target: '今夜、二名で予約したいのですが。', reading: 'こんや、にめいでよやくしたいのですが。', transliteration: 'Kon’ya, nimei de yoyaku shitai no desu ga.', meaning: 'I’d like to make a reservation for two tonight.' },
+			{ speaker: '店', target: '何時がよろしいですか。', reading: 'なんじがよろしいですか。', transliteration: 'Nanji ga yoroshii desu ka.', meaning: 'What time would be good?' },
+			{ speaker: '客', target: '七時でお願いします。', reading: 'しちじでおねがいします。', transliteration: 'Shichi-ji de onegai shimasu.', meaning: 'Seven o’clock, please.' },
+			{ speaker: '店', target: 'かしこまりました。お待ちしております。', reading: 'かしこまりました。おまちしております。', transliteration: 'Kashikomarimashita. O-machi shite orimasu.', meaning: 'Certainly. We look forward to seeing you.' }
+		]
+	},
+	{
+		id: 'pass-ja-lost',
+		kind: 'conversation',
+		title: '忘れ物 — A lost item',
+		level: 'N3',
+		tags: ['travel', 'daily'],
+		intro: 'Reporting something left on the train.',
+		lines: [
+			{ speaker: '客', target: 'すみません、電車に傘を忘れてしまいました。', reading: 'すみません、でんしゃにかさをわすれてしまいました。', transliteration: 'Sumimasen, densha ni kasa o wasurete shimaimashita.', meaning: 'Excuse me, I left my umbrella on the train.' },
+			{ speaker: '駅員', target: '何色の傘ですか。', reading: 'なにいろのかさですか。', transliteration: 'Nani-iro no kasa desu ka.', meaning: 'What color is the umbrella?' },
+			{ speaker: '客', target: '青い傘です。', reading: 'あおいかさです。', transliteration: 'Aoi kasa desu.', meaning: 'It’s a blue umbrella.' },
+			{ speaker: '駅員', target: '少々お待ちください。確認します。', reading: 'しょうしょうおまちください。かくにんします。', transliteration: 'Shōshō o-machi kudasai. Kakunin shimasu.', meaning: 'One moment please. I’ll check.' }
+		]
+	},
+	{
+		id: 'pass-ja-seasons',
+		kind: 'text',
+		title: '日本の四季 — The four seasons of Japan',
+		level: 'N3',
+		tags: ['culture', 'nature'],
+		intro: 'A short non-fiction passage on the seasons.',
+		lines: [
+			{ target: '日本にははっきりとした四季がある。', reading: 'にほんにははっきりとしたしきがある。', transliteration: 'Nihon ni wa hakkiri to shita shiki ga aru.', meaning: 'Japan has clearly distinct four seasons.' },
+			{ target: '春には桜が咲き、多くの人が花見をする。', reading: 'はるにはさくらがさき、おおくのひとがはなみをする。', transliteration: 'Haru ni wa sakura ga saki, ōku no hito ga hanami o suru.', meaning: 'In spring the cherry blossoms bloom, and many people go flower-viewing.' },
+			{ target: '夏は暑く、秋には紅葉が美しい。', reading: 'なつはあつく、あきにはこうようがうつくしい。', transliteration: 'Natsu wa atsuku, aki ni wa kōyō ga utsukushii.', meaning: 'Summer is hot, and in autumn the fall leaves are beautiful.' },
+			{ target: '冬は雪が降る地域も多い。', reading: 'ふゆはゆきがふるちいきもおおい。', transliteration: 'Fuyu wa yuki ga furu chiiki mo ōi.', meaning: 'In winter, many regions get snow.' }
+		]
 	}
 ];
 
@@ -655,6 +838,50 @@ const HE_PASSAGES: PassageSpec[] = [
 			{ target: 'אֶפְשָׁר לִמְצֹא אוֹתוֹ כִּמְעַט בְּכָל מָקוֹם.', reading: 'efshar limtzo oto kim’at bechol makom.', meaning: 'You can find it almost everywhere.' },
 			{ target: 'הַרְבֵּה אֲנָשִׁים אוֹכְלִים אוֹתוֹ עִם פִּיתָה.', reading: 'harbeh anashim ochlim oto im pita.', meaning: 'Many people eat it with pita.' },
 			{ target: 'זֶה טָעִים, זוֹל וּבָרִיא.', reading: 'ze ta’im, zol uvari.', meaning: 'It’s tasty, cheap, and healthy.' }
+		]
+	},
+	{
+		id: 'pass-he-intro',
+		kind: 'conversation',
+		title: 'נָעִים מְאֹד — Introductions',
+		level: 'A1',
+		tags: ['greeting', 'daily'],
+		intro: 'Two people meet for the first time.',
+		lines: [
+			{ speaker: 'א', target: 'שָׁלוֹם, אֲנִי דָּוִד.', reading: 'shalom, ani David.', meaning: 'Hi, I’m David.' },
+			{ speaker: 'ב', target: 'נָעִים מְאֹד, אֲנִי שָׂרָה.', reading: 'na’im me’od, ani Sarah.', meaning: 'Nice to meet you, I’m Sarah.' },
+			{ speaker: 'א', target: 'מֵאַיִן אַתְּ?', reading: 'me’ayin at?', meaning: 'Where are you from?' },
+			{ speaker: 'ב', target: 'אֲנִי מִתֵּל אָבִיב. וְאַתָּה?', reading: 'ani mi-Tel Aviv. ve’ata?', meaning: 'I’m from Tel Aviv. And you?' },
+			{ speaker: 'א', target: 'אֲנִי מִירוּשָׁלַיִם.', reading: 'ani mi-Yerushalayim.', meaning: 'I’m from Jerusalem.' }
+		]
+	},
+	{
+		id: 'pass-he-restaurant',
+		kind: 'conversation',
+		title: 'בְּמִסְעָדָה — At a restaurant',
+		level: 'A2',
+		tags: ['food', 'daily'],
+		intro: 'Ordering a meal.',
+		lines: [
+			{ speaker: 'מֶלְצַר', target: 'שָׁלוֹם, מָה תִּרְצוּ לֶאֱכֹל?', reading: 'shalom, ma tirtzu le’echol?', meaning: 'Hello, what would you like to eat?' },
+			{ speaker: 'לָקוֹחַ', target: 'אֲנִי רוֹצֶה סָלָט, בְּבַקָּשָׁה.', reading: 'ani rotzeh salat, bevakasha.', meaning: 'I’d like a salad, please.' },
+			{ speaker: 'מֶלְצַר', target: 'וְלִשְׁתּוֹת?', reading: 've’lishtot?', meaning: 'And to drink?' },
+			{ speaker: 'לָקוֹחַ', target: 'מַיִם, תּוֹדָה.', reading: 'mayim, todah.', meaning: 'Water, thanks.' },
+			{ speaker: 'מֶלְצַר', target: 'בְּבַקָּשָׁה, רֶגַע אֶחָד.', reading: 'bevakasha, rega echad.', meaning: 'Sure, one moment.' }
+		]
+	},
+	{
+		id: 'pass-he-week',
+		kind: 'text',
+		title: 'יְמֵי הַשָּׁבוּעַ — Days of the week',
+		level: 'A2',
+		tags: ['culture', 'time'],
+		intro: 'A short text on how the week works in Israel.',
+		lines: [
+			{ target: 'בְּעִבְרִית, הַשָּׁבוּעַ מַתְחִיל בְּיוֹם רִאשׁוֹן.', reading: 'be’ivrit, hashavua matchil beyom rishon.', meaning: 'In Hebrew, the week starts on Sunday.' },
+			{ target: 'רֹב הָאֲנָשִׁים עוֹבְדִים עַד יוֹם חֲמִישִׁי.', reading: 'rov ha’anashim ovdim ad yom chamishi.', meaning: 'Most people work until Thursday.' },
+			{ target: 'יוֹם שִׁשִּׁי וְשַׁבָּת הֵם יְמֵי מְנוּחָה.', reading: 'yom shishi ve’shabbat hem yemei menucha.', meaning: 'Friday and Saturday are rest days.' },
+			{ target: 'בְּשַׁבָּת, מִשְׁפָּחוֹת רַבּוֹת אוֹכְלוֹת יַחַד.', reading: 'be’shabbat, mishpachot rabot ochlot yachad.', meaning: 'On Shabbat, many families eat together.' }
 		]
 	}
 ];
