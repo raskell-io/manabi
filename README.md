@@ -90,11 +90,11 @@ Logs go to `~/Library/Logs/manabi.{out,err}.log`. To reach it from other devices
 
 ## Deploy
 
-Manabi deploys as a static SPA to **Cloudflare Pages**. CI/CD is wired up
-(`.github/workflows/`): every push to `main` runs `svelte-check` + tests + build,
-then deploys `build/` to Pages. See [DEPLOY.md](DEPLOY.md) for the one-time setup
-(create the `manabi` Pages project, add `CLOUDFLARE_API_TOKEN` /
-`CLOUDFLARE_ACCOUNT_ID` repo secrets, optional `manabi.raskell.io` custom domain).
+Manabi deploys as a static SPA to **Cloudflare Pages** via Git integration:
+connect the (public) repo once in the Cloudflare dashboard and it rebuilds on
+every push to `main` — no secrets, no deploy workflow. `.github/workflows/ci.yml`
+runs `svelte-check` + tests + build as a quality gate. See [DEPLOY.md](DEPLOY.md)
+for the one-time dashboard setup and the optional `manabi.raskell.io` domain.
 
 ## AI content workbench
 
