@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { Check, X } from 'lucide-svelte';
+	import { Check, X, BookOpen, Mic } from 'lucide-svelte';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
 		gradeItem,
 		getItem,
 		recordPronunciationAttempt,
-		settings,
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
@@ -16,6 +15,10 @@
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 
+	type Mode = 'reading' | 'speaking' | 'both';
+
+	let mode = $state<Mode | null>(null); // null → show the picker
+	let allTasks = $state<QueueTask[]>([]);
 	let tasks = $state<QueueTask[]>([]);
 	let index = $state(0);
 	let pool: LearningItem[] = [];
@@ -23,18 +26,40 @@
 	let wrong = $state(0);
 	let done = $state(false);
 
+	const started = $derived(mode !== null);
+	// "Speaking" only drills the pronunciation dimension (record-and-compare).
+	// "Reading" reviews everything as text. Audio playback / listening are off
+	// for now, so reading mode needs no audio.
+	const readingCount = $derived(allTasks.length);
+	const speakingCount = $derived(allTasks.filter((t) => t.dimension === 'pronunciation').length);
+
 	let current = $derived(tasks[index]);
 	let item = $derived<LearningItem | undefined>(current ? getItem(current.itemId) : undefined);
+	// Only pronunciation, in a speaking-enabled mode, uses the mic (record-compare);
+	// everything else is text-only.
+	const taskAudio = $derived(mode !== 'reading' && current?.dimension === 'pronunciation');
 	let exercise = $derived<Exercise | null>(
-		current && item
-			? buildExercise(item, current.dimension, pool, { audio: $settings.localTtsEnabled })
-			: null
+		current && item ? buildExercise(item, current.dimension, pool, { audio: taskAudio }) : null
 	);
+
+	function start(m: Mode) {
+		mode = m;
+		index = 0;
+		correct = 0;
+		wrong = 0;
+		tasks = m === 'speaking' ? allTasks.filter((t) => t.dimension === 'pronunciation') : allTasks;
+		done = tasks.length === 0;
+	}
+
+	function backToModes() {
+		mode = null;
+		done = false;
+		allTasks = snapshotQueue().tasks;
+	}
 
 	onMount(() => {
 		pool = get(activeItems);
-		tasks = snapshotQueue().tasks;
-		if (tasks.length === 0) done = true;
+		allTasks = snapshotQueue().tasks;
 	});
 
 	function advance() {
@@ -60,7 +85,38 @@
 	}
 </script>
 
-{#if done}
+{#if !started}
+	<div class="picker">
+		<h1>Review</h1>
+		{#if allTasks.length === 0}
+			<p class="muted">Nothing's due right now. Add items in <a href="/items">Items</a>, browse
+				<a href="/vocab">Vocab</a>, or generate a batch in the <a href="/workbench">Workbench</a>.</p>
+		{:else}
+			<p class="muted">What do you want to practice? Audio playback isn't available right now —
+				<strong>Reading</strong> needs no microphone or audio.</p>
+			<div class="modes">
+				<button class="mode-card" onclick={() => start('reading')}>
+					<BookOpen size={22} />
+					<span class="m-title">Reading</span>
+					<span class="m-desc">Recognition, recall &amp; context — text only.</span>
+					<span class="m-count">{readingCount} {readingCount === 1 ? 'card' : 'cards'}</span>
+				</button>
+				<button class="mode-card" onclick={() => start('speaking')} disabled={speakingCount === 0}>
+					<Mic size={22} />
+					<span class="m-title">Speaking</span>
+					<span class="m-desc">Record &amp; compare your pronunciation.</span>
+					<span class="m-count">{speakingCount} {speakingCount === 1 ? 'card' : 'cards'}</span>
+				</button>
+				<button class="mode-card" onclick={() => start('both')}>
+					<span class="m-icons"><BookOpen size={20} /><Mic size={20} /></span>
+					<span class="m-title">Reading + Speaking</span>
+					<span class="m-desc">Everything that's due.</span>
+					<span class="m-count">{readingCount} {readingCount === 1 ? 'card' : 'cards'}</span>
+				</button>
+			</div>
+		{/if}
+	</div>
+{:else if done}
 	<div class="summary">
 		<h1>Session complete</h1>
 		<div class="tally">
@@ -68,11 +124,11 @@
 			<span class="no"><X size={20} /> {wrong}</span>
 		</div>
 		{#if tasks.length === 0}
-			<p class="muted">Nothing was due. Add items or generate a batch in the Workbench.</p>
+			<p class="muted">Nothing was due for this mode.</p>
 		{/if}
 		<div class="actions">
 			<a class="btn" href="/">Home</a>
-			<a class="btn primary" href="/review" onclick={() => location.reload()}>Again</a>
+			<button class="btn primary" onclick={backToModes}>Choose mode</button>
 		</div>
 	</div>
 {:else if current && item && exercise}
@@ -168,5 +224,63 @@
 		background: var(--color-accent);
 		color: #fff;
 		border-color: var(--color-accent);
+		font: inherit;
+		cursor: pointer;
+	}
+
+	/* Mode picker */
+	.picker {
+		max-width: 44rem;
+	}
+	.picker h1 {
+		margin: 0 0 0.25rem;
+	}
+	.picker .muted a {
+		color: var(--color-accent);
+	}
+	.modes {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+		gap: 1rem;
+		margin-top: 1.5rem;
+	}
+	.mode-card {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.4rem;
+		padding: 1.25rem;
+		border: 1px solid var(--color-border);
+		border-radius: 0.75rem;
+		background: var(--color-bg-secondary);
+		color: var(--color-text);
+		text-align: left;
+	}
+	.mode-card:hover:not(:disabled) {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+	}
+	.mode-card:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+	.m-icons {
+		display: inline-flex;
+		gap: 0.2rem;
+	}
+	.m-title {
+		font-weight: 700;
+		font-size: 1.05rem;
+		margin-top: 0.25rem;
+	}
+	.m-desc {
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
+	}
+	.m-count {
+		margin-top: 0.4rem;
+		font-size: 0.8rem;
+		color: var(--color-accent);
+		font-weight: 600;
 	}
 </style>
