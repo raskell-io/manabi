@@ -2,12 +2,16 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { Home, GraduationCap, BookOpen, Table2, Library, LayoutGrid, BarChart3, Sparkles, Settings as SettingsIcon } from 'lucide-svelte';
-	import { initDB, settings, setActiveLanguage } from '$lib/db/store';
+	import {
+		Home, GraduationCap, BookOpen, Table2, Library, LayoutGrid, BarChart3,
+		Sparkles, Settings as SettingsIcon, Menu, X, Sun, Moon
+	} from 'lucide-svelte';
+	import { initDB, settings, setActiveLanguage, updateSettings } from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
 
 	let { children } = $props();
 	let ready = $state(false);
+	let drawerOpen = $state(false);
 
 	const NAV = [
 		{ href: '/', label: 'Home', icon: Home },
@@ -26,15 +30,28 @@
 		root.classList.remove('light', 'dark');
 		if (theme === 'light' || theme === 'dark') root.classList.add(theme);
 	}
-
 	$effect(() => {
 		if (ready) applyTheme($settings.theme);
 	});
+
+	function prefersDark(): boolean {
+		return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+	}
+	const isDark = $derived($settings.theme === 'dark' || ($settings.theme === 'system' && prefersDark()));
+	function toggleTheme() {
+		updateSettings({ theme: isDark ? 'light' : 'dark' });
+	}
 
 	const activePath = $derived($page.url.pathname);
 	function isActive(href: string): boolean {
 		return href === '/' ? activePath === '/' : activePath.startsWith(href);
 	}
+
+	// Close the mobile drawer whenever the route changes.
+	$effect(() => {
+		activePath;
+		drawerOpen = false;
+	});
 
 	onMount(async () => {
 		await initDB();
@@ -45,8 +62,24 @@
 {#if !ready}
 	<div class="boot">Loading Manabi…</div>
 {:else}
+	<!-- Mobile top bar -->
+	<header class="topbar">
+		<button class="icon-btn" onclick={() => (drawerOpen = !drawerOpen)} aria-label="Menu" aria-expanded={drawerOpen}>
+			{#if drawerOpen}<X size={20} />{:else}<Menu size={20} />{/if}
+		</button>
+		<a href="/" class="tb-brand"><span class="logo">学</span><span class="name">Manabi</span></a>
+		<div class="tb-lang">
+			{#each LANGUAGES as l (l.code)}
+				<button class="lang" class:active={$settings.activeLanguage === l.code} onclick={() => setActiveLanguage(l.code as Language)} title={l.name}>{l.native}</button>
+			{/each}
+		</div>
+		<button class="icon-btn" onclick={toggleTheme} aria-label="Toggle light/dark theme">
+			{#if isDark}<Sun size={18} />{:else}<Moon size={18} />{/if}
+		</button>
+	</header>
+
 	<div class="shell">
-		<aside class="sidebar">
+		<aside class="sidebar" class:open={drawerOpen}>
 			<div class="brand">
 				<span class="logo">学</span>
 				<span class="name">Manabi</span>
@@ -54,14 +87,7 @@
 
 			<div class="lang-switch">
 				{#each LANGUAGES as l (l.code)}
-					<button
-						class="lang"
-						class:active={$settings.activeLanguage === l.code}
-						onclick={() => setActiveLanguage(l.code as Language)}
-						title={l.name}
-					>
-						{l.native}
-					</button>
+					<button class="lang" class:active={$settings.activeLanguage === l.code} onclick={() => setActiveLanguage(l.code as Language)} title={l.name}>{l.native}</button>
 				{/each}
 			</div>
 
@@ -73,7 +99,15 @@
 					</a>
 				{/each}
 			</nav>
+
+			<button class="theme-row" onclick={toggleTheme}>
+				{#if isDark}<Sun size={16} /> Light mode{:else}<Moon size={16} /> Dark mode{/if}
+			</button>
 		</aside>
+
+		{#if drawerOpen}
+			<button class="backdrop" onclick={() => (drawerOpen = false)} aria-label="Close menu"></button>
+		{/if}
 
 		<main class="content">
 			{@render children?.()}
@@ -105,11 +139,13 @@
 		top: 0;
 		height: 100vh;
 	}
-	.brand {
+	.brand,
+	.tb-brand {
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
 		padding: 0 0.5rem;
+		color: var(--color-text);
 	}
 	.logo {
 		font-family: var(--font-script);
@@ -121,7 +157,8 @@
 		font-weight: 700;
 		font-size: 1.15rem;
 	}
-	.lang-switch {
+	.lang-switch,
+	.tb-lang {
 		display: flex;
 		gap: 0.4rem;
 	}
@@ -163,19 +200,116 @@
 		color: var(--color-accent);
 		font-weight: 600;
 	}
+	.theme-row {
+		margin-top: auto;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.6rem 0.75rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+	.theme-row:hover {
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+	}
 	.content {
 		padding: 2rem 2.5rem;
 		max-width: 64rem;
 		width: 100%;
 	}
-	@media (max-width: 720px) {
+
+	/* Top bar + icon buttons — hidden on desktop. */
+	.topbar {
+		display: none;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border-bottom: 1px solid var(--color-border);
+		background: var(--color-bg-secondary);
+		position: sticky;
+		top: 0;
+		z-index: 30;
+	}
+	.icon-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.4rem;
+		height: 2.4rem;
+		border-radius: 0.5rem;
+		border: 1px solid transparent;
+		background: transparent;
+		color: var(--color-text);
+		flex-shrink: 0;
+	}
+	.icon-btn:hover {
+		background: var(--color-bg-elevated);
+	}
+	.backdrop {
+		display: none;
+	}
+
+	@media (max-width: 820px) {
+		.topbar {
+			display: flex;
+		}
+		.tb-brand {
+			flex: 1;
+			padding-left: 0.25rem;
+		}
+		.tb-brand .name {
+			font-size: 1.05rem;
+		}
+		.tb-lang .lang {
+			min-width: 2.2rem;
+			flex: none;
+			padding: 0.3rem 0.4rem;
+			font-size: 0.85rem;
+		}
+
 		.shell {
-			grid-template-columns: 1fr;
+			display: block;
+			min-height: auto;
 		}
 		.sidebar {
-			position: static;
-			height: auto;
-			flex-direction: column;
+			position: fixed;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			width: 15rem;
+			height: 100dvh;
+			z-index: 40;
+			transform: translateX(-100%);
+			transition: transform 0.2s ease;
+			box-shadow: 0 0 2rem rgba(0, 0, 0, 0.3);
+		}
+		.sidebar.open {
+			transform: none;
+		}
+		/* In the mobile drawer the brand/lang/theme live in the top bar instead. */
+		.sidebar .brand,
+		.sidebar .lang-switch,
+		.sidebar .theme-row {
+			display: none;
+		}
+		.sidebar nav {
+			margin-top: 0.5rem;
+		}
+		.backdrop {
+			display: block;
+			position: fixed;
+			inset: 0;
+			z-index: 35;
+			border: none;
+			background: rgba(0, 0, 0, 0.4);
+		}
+		.content {
+			padding: 1.25rem 1rem;
+			max-width: 100%;
 		}
 	}
 </style>

@@ -193,4 +193,22 @@
 		color: var(--color-success);
 		opacity: 1;
 	}
+
+	/* Let the 5-column kana grid shrink to fit narrow phones. */
+	@media (max-width: 480px) {
+		.kana-grid {
+			gap: 0.3rem;
+		}
+		.cell {
+			min-width: 0;
+			min-height: 3.4rem;
+			padding: 0.4rem 0.2rem;
+		}
+		.glyph {
+			font-size: 1.5rem;
+		}
+		.gloss {
+			display: none;
+		}
+	}
 </style>
