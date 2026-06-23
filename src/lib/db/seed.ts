@@ -367,6 +367,78 @@ const ZH_PASSAGES: PassageSpec[] = [
 			{ target: '这样不但节省时间，也对环境有好处。', reading: 'Zhèyàng búdàn jiéshěng shíjiān, yě duì huánjìng yǒu hǎochù.', meaning: 'This not only saves time but is also good for the environment.' },
 			{ target: '不过，有些人觉得在家很难集中注意力。', reading: 'Búguò, yǒuxiē rén juéde zài jiā hěn nán jízhōng zhùyìlì.', meaning: 'However, some people find it hard to concentrate at home.' }
 		]
+	},
+	{
+		id: 'pass-zh-restaurant',
+		kind: 'conversation',
+		title: '在饭馆点菜 — Ordering at a restaurant',
+		level: 'A2',
+		tags: ['daily', 'food'],
+		intro: 'A waiter takes an order at a casual restaurant.',
+		lines: [
+			{ speaker: '服务员', target: '您好，几位？', reading: 'Nín hǎo, jǐ wèi?', meaning: 'Hello, how many people?' },
+			{ speaker: '顾客', target: '两位。有什么推荐的菜吗？', reading: 'Liǎng wèi. Yǒu shénme tuījiàn de cài ma?', meaning: 'Two. Any recommended dishes?' },
+			{ speaker: '服务员', target: '我们的牛肉面很有名。', reading: 'Wǒmen de niúròumiàn hěn yǒumíng.', meaning: 'Our beef noodles are famous.' },
+			{ speaker: '顾客', target: '好，那来两碗，再要两杯茶。', reading: 'Hǎo, nà lái liǎng wǎn, zài yào liǎng bēi chá.', meaning: 'Great, two bowls then, and two teas as well.' },
+			{ speaker: '服务员', target: '好的，请稍等。', reading: 'Hǎo de, qǐng shāo děng.', meaning: 'Sure, please wait a moment.' }
+		]
+	},
+	{
+		id: 'pass-zh-directions',
+		kind: 'conversation',
+		title: '问路 — Asking for directions',
+		level: 'A2',
+		tags: ['daily', 'travel'],
+		intro: 'Finding the subway station on the street.',
+		lines: [
+			{ speaker: 'A', target: '请问，地铁站在哪里？', reading: 'Qǐngwèn, dìtiězhàn zài nǎlǐ?', meaning: 'Excuse me, where is the subway station?' },
+			{ speaker: 'B', target: '一直往前走，到红绿灯左转。', reading: 'Yìzhí wǎng qián zǒu, dào hónglǜdēng zuǒ zhuǎn.', meaning: 'Go straight ahead, turn left at the traffic light.' },
+			{ speaker: 'A', target: '远吗？', reading: 'Yuǎn ma?', meaning: 'Is it far?' },
+			{ speaker: 'B', target: '不远，走五分钟就到了。', reading: 'Bù yuǎn, zǒu wǔ fēnzhōng jiù dào le.', meaning: 'Not far, five minutes on foot.' },
+			{ speaker: 'A', target: '谢谢！我用手机地图看看。', reading: 'Xièxie! Wǒ yòng shǒujī dìtú kànkan.', meaning: 'Thanks! I’ll check on my phone map.' }
+		]
+	},
+	{
+		id: 'pass-zh-reschedule',
+		kind: 'conversation',
+		title: '改时间 — Rescheduling',
+		level: 'A2',
+		tags: ['daily', 'plans'],
+		intro: 'Moving a meeting to another day by message.',
+		lines: [
+			{ speaker: 'A', target: '不好意思，我今天有事，能改到明天吗？', reading: 'Bù hǎoyìsi, wǒ jīntiān yǒu shì, néng gǎi dào míngtiān ma?', meaning: 'Sorry, something came up today — can we move it to tomorrow?' },
+			{ speaker: 'B', target: '没问题，明天几点？', reading: 'Méi wèntí, míngtiān jǐ diǎn?', meaning: 'No problem, what time tomorrow?' },
+			{ speaker: 'A', target: '下午两点怎么样？', reading: 'Xiàwǔ liǎng diǎn zěnmeyàng?', meaning: 'How about 2 p.m.?' },
+			{ speaker: 'B', target: '可以，到时候发消息给我。', reading: 'Kěyǐ, dào shíhou fā xiāoxi gěi wǒ.', meaning: 'Sure, message me when it’s time.' }
+		]
+	},
+	{
+		id: 'pass-zh-mobilepay',
+		kind: 'text',
+		title: '手机支付 — Paying with your phone',
+		level: 'A2',
+		tags: ['society', 'tech', 'money'],
+		intro: 'A short piece on mobile-payment culture.',
+		lines: [
+			{ target: '在中国，很多人出门不带钱包。', reading: 'Zài Zhōngguó, hěn duō rén chūmén bú dài qiánbāo.', meaning: 'In China, many people leave home without a wallet.' },
+			{ target: '无论买菜还是坐车，都可以用手机扫码支付。', reading: 'Wúlùn mǎi cài háishì zuò chē, dōu kěyǐ yòng shǒujī sǎomǎ zhīfù.', meaning: 'Whether buying groceries or taking transit, you can pay by scanning a code with your phone.' },
+			{ target: '这种方式又快又方便。', reading: 'Zhè zhǒng fāngshì yòu kuài yòu fāngbiàn.', meaning: 'This way is both fast and convenient.' },
+			{ target: '不过，有些老人觉得不太习惯。', reading: 'Búguò, yǒuxiē lǎorén juéde bú tài xíguàn.', meaning: 'However, some older people find it hard to get used to.' }
+		]
+	},
+	{
+		id: 'pass-zh-hsr',
+		kind: 'text',
+		title: '高铁 — High-speed rail',
+		level: 'A2',
+		tags: ['society', 'travel', 'tech'],
+		intro: 'A short newspaper-style piece on high-speed trains.',
+		lines: [
+			{ target: '中国的高铁发展得非常快。', reading: 'Zhōngguó de gāotiě fāzhǎn de fēicháng kuài.', meaning: 'China’s high-speed rail has developed very fast.' },
+			{ target: '从北京到上海只要四个多小时。', reading: 'Cóng Běijīng dào Shànghǎi zhǐ yào sì gè duō xiǎoshí.', meaning: 'From Beijing to Shanghai takes only a little over four hours.' },
+			{ target: '很多人坐高铁去外地工作或者旅游。', reading: 'Hěn duō rén zuò gāotiě qù wàidì gōngzuò huòzhě lǚyóu.', meaning: 'Many people take the high-speed rail to work or travel in other cities.' },
+			{ target: '车上又安静又舒服。', reading: 'Chē shàng yòu ānjìng yòu shūfu.', meaning: 'On board it’s quiet and comfortable.' }
+		]
 	}
 ];
 
@@ -410,6 +482,76 @@ const JA_PASSAGES: PassageSpec[] = [
 			{ target: '最近、寝る前にスマホを使う人が増えている。', reading: 'さいきん、ねるまえにスマホをつかうひとがふえている。', transliteration: 'Saikin, neru mae ni sumaho o tsukau hito ga fuete iru.', meaning: 'Recently, more people use their smartphones before bed.' },
 			{ target: '画面の光は脳を刺激し、眠りにくくすると言われている。', reading: 'がめんのひかりはのうをしげきし、ねむりにくくするといわれている。', transliteration: 'Gamen no hikari wa nō o shigeki shi, nemurinikuku suru to iwarete iru.', meaning: 'The screen’s light stimulates the brain and is said to make sleep harder.' },
 			{ target: '専門家は、寝る一時間前にはスマホをやめるよう勧めている。', reading: 'せんもんかは、ねるいちじかんまえにはスマホをやめるようすすめている。', transliteration: 'Senmonka wa, neru ichi-jikan mae ni wa sumaho o yameru yō susumete iru.', meaning: 'Experts recommend stopping smartphone use an hour before sleeping.' }
+		]
+	},
+	{
+		id: 'pass-ja-konbini-talk',
+		kind: 'conversation',
+		title: 'コンビニで — At the convenience store',
+		level: 'N3',
+		tags: ['daily', 'food'],
+		intro: 'Checking out at a convenience store.',
+		lines: [
+			{ speaker: '店員', target: 'いらっしゃいませ。', reading: 'いらっしゃいませ。', transliteration: 'Irasshaimase.', meaning: 'Welcome.' },
+			{ speaker: '客', target: 'これ、温めてもらえますか。', reading: 'これ、あたためてもらえますか。', transliteration: 'Kore, atatamete moraemasu ka.', meaning: 'Could you heat this up?' },
+			{ speaker: '店員', target: 'はい。お箸はおつけしますか。', reading: 'はい。おはしはおつけしますか。', transliteration: 'Hai. O-hashi wa o-tsuke shimasu ka.', meaning: 'Yes. Shall I add chopsticks?' },
+			{ speaker: '客', target: 'お願いします。あと、これも。', reading: 'おねがいします。あと、これも。', transliteration: 'Onegai shimasu. Ato, kore mo.', meaning: 'Please. And this too.' },
+			{ speaker: '店員', target: '合わせて650円です。', reading: 'あわせてろっぴゃくごじゅうえんです。', transliteration: 'Awasete roppyaku-gojū en desu.', meaning: 'That’s 650 yen altogether.' }
+		]
+	},
+	{
+		id: 'pass-ja-lunch',
+		kind: 'conversation',
+		title: 'ランチに誘う — Inviting a coworker to lunch',
+		level: 'N3',
+		tags: ['work', 'food'],
+		intro: 'Casual workplace small talk over lunch plans.',
+		lines: [
+			{ speaker: 'A', target: 'お昼、一緒にどうですか。', reading: 'おひる、いっしょにどうですか。', transliteration: 'O-hiru, issho ni dō desu ka.', meaning: 'How about lunch together?' },
+			{ speaker: 'B', target: 'いいですね。何が食べたいですか。', reading: 'いいですね。なにがたべたいですか。', transliteration: 'Ii desu ne. Nani ga tabetai desu ka.', meaning: 'Sounds good. What do you feel like eating?' },
+			{ speaker: 'A', target: '駅前に新しいラーメン屋ができたんです。', reading: 'えきまえにあたらしいラーメンやができたんです。', transliteration: 'Ekimae ni atarashii rāmen-ya ga dekita n desu.', meaning: 'A new ramen shop opened in front of the station.' },
+			{ speaker: 'B', target: '行きましょう。混む前に出ましょうか。', reading: 'いきましょう。こむまえにでましょうか。', transliteration: 'Ikimashō. Komu mae ni demashō ka.', meaning: 'Let’s go. Shall we leave before it gets crowded?' }
+		]
+	},
+	{
+		id: 'pass-ja-traindelay',
+		kind: 'conversation',
+		title: '電車の遅れ — A train delay',
+		level: 'N3',
+		tags: ['travel', 'daily'],
+		intro: 'Asking station staff about a delay.',
+		lines: [
+			{ speaker: 'A', target: 'すみません、電車、遅れていますか。', reading: 'すみません、でんしゃ、おくれていますか。', transliteration: 'Sumimasen, densha, okurete imasu ka.', meaning: 'Excuse me, is the train delayed?' },
+			{ speaker: 'B', target: 'ええ、事故で10分ほど遅れているそうです。', reading: 'ええ、じこでじゅっぷんほどおくれているそうです。', transliteration: 'Ee, jiko de juppun hodo okurete iru sō desu.', meaning: 'Yes, it seems to be delayed about ten minutes due to an accident.' },
+			{ speaker: 'A', target: 'そうですか。じゃあ、会社に連絡します。', reading: 'そうですか。じゃあ、かいしゃにれんらくします。', transliteration: 'Sō desu ka. Jā, kaisha ni renraku shimasu.', meaning: 'I see. Then I’ll contact the office.' }
+		]
+	},
+	{
+		id: 'pass-ja-konbini-text',
+		kind: 'text',
+		title: '日本のコンビニ — Convenience stores in Japan',
+		level: 'N3',
+		tags: ['society', 'daily'],
+		intro: 'A non-fiction passage on what konbini do.',
+		lines: [
+			{ target: '日本のコンビニは、ただ買い物をする場所ではない。', reading: 'にほんのコンビニは、ただかいものをするばしょではない。', transliteration: 'Nihon no konbini wa, tada kaimono o suru basho de wa nai.', meaning: 'Convenience stores in Japan are not just places to shop.' },
+			{ target: '料金の支払いや、荷物の受け取りもできる。', reading: 'りょうきんのしはらいや、にもつのうけとりもできる。', transliteration: 'Ryōkin no shiharai ya, nimotsu no uketori mo dekiru.', meaning: 'You can also pay bills and pick up packages.' },
+			{ target: '24時間開いているので、とても便利だ。', reading: 'にじゅうよじかんあいているので、とてもべんりだ。', transliteration: 'Nijūyo-jikan aite iru node, totemo benri da.', meaning: 'Since they’re open 24 hours, they’re very convenient.' },
+			{ target: '最近は、外国人の店員も増えている。', reading: 'さいきんは、がいこくじんのてんいんもふえている。', transliteration: 'Saikin wa, gaikokujin no ten’in mo fuete iru.', meaning: 'Recently, the number of foreign clerks is increasing too.' }
+		]
+	},
+	{
+		id: 'pass-ja-aging',
+		kind: 'text',
+		title: '高齢化社会 — An aging society',
+		level: 'N3',
+		tags: ['society', 'news'],
+		intro: 'A short non-fiction passage on demographics.',
+		lines: [
+			{ target: '日本では、お年寄りの数が増えている。', reading: 'にほんでは、おとしよりのかずがふえている。', transliteration: 'Nihon de wa, o-toshiyori no kazu ga fuete iru.', meaning: 'In Japan, the number of elderly people is increasing.' },
+			{ target: '一方で、子どもの数は減っている。', reading: 'いっぽうで、こどものかずはへっている。', transliteration: 'Ippō de, kodomo no kazu wa hette iru.', meaning: 'On the other hand, the number of children is decreasing.' },
+			{ target: 'そのため、働く人が足りなくなると言われている。', reading: 'そのため、はたらくひとがたりなくなるといわれている。', transliteration: 'Sono tame, hataraku hito ga tarinaku naru to iwarete iru.', meaning: 'For that reason, it’s said there will be a shortage of workers.' },
+			{ target: '政府はいろいろな対策を考えている。', reading: 'せいふはいろいろなたいさくをかんがえている。', transliteration: 'Seifu wa iroiro na taisaku o kangaete iru.', meaning: 'The government is considering various measures.' }
 		]
 	}
 ];
@@ -455,6 +597,64 @@ const HE_PASSAGES: PassageSpec[] = [
 			{ target: 'תֵּל אָבִיב הִיא עִיר גְּדוֹלָה בְּיִשְׂרָאֵל.', reading: 'tel aviv hi ir gdola be’Yisrael.', meaning: 'Tel Aviv is a big city in Israel.' },
 			{ target: 'הַרְבֵּה אֲנָשִׁים גָּרִים וְעוֹבְדִים שָׁם.', reading: 'harbeh anashim garim ve’ovdim sham.', meaning: 'Many people live and work there.' },
 			{ target: 'בָּעִיר יֵשׁ חוֹף יָם יָפֶה וְהַרְבֵּה בָּתֵּי קָפֶה.', reading: 'ba’ir yesh chof yam yafeh ve’harbeh batei kafeh.', meaning: 'In the city there is a beautiful beach and many cafés.' }
+		]
+	},
+	{
+		id: 'pass-he-directions',
+		kind: 'conversation',
+		title: 'אֵיךְ מַגִּיעִים? — Asking for directions',
+		level: 'A2',
+		tags: ['daily', 'travel'],
+		intro: 'Asking a passer-by how to reach the station.',
+		lines: [
+			{ speaker: 'א', target: 'סְלִיחָה, אֵיפֹה הַתַּחֲנָה?', reading: 'slicha, eifo hatachana?', meaning: 'Excuse me, where is the station?' },
+			{ speaker: 'ב', target: 'יָשָׁר וְאָז יְמִינָה.', reading: 'yashar ve’az yemina.', meaning: 'Straight, and then right.' },
+			{ speaker: 'א', target: 'זֶה רָחוֹק?', reading: 'ze rachok?', meaning: 'Is it far?' },
+			{ speaker: 'ב', target: 'לֹא, חָמֵשׁ דַּקּוֹת בְּרֶגֶל.', reading: 'lo, chamesh dakot beregel.', meaning: 'No, five minutes on foot.' },
+			{ speaker: 'א', target: 'תּוֹדָה רַבָּה!', reading: 'todah rabah!', meaning: 'Thank you very much!' }
+		]
+	},
+	{
+		id: 'pass-he-phone',
+		kind: 'conversation',
+		title: 'שִׂיחַת טֶלֶפוֹן — A phone call',
+		level: 'A2',
+		tags: ['daily', 'plans'],
+		intro: 'Friends make plans to meet up.',
+		lines: [
+			{ speaker: 'א', target: 'הַלּוֹ, מָה נִשְׁמָע?', reading: 'halo, ma nishma?', meaning: 'Hello, how are you?' },
+			{ speaker: 'ב', target: 'בְּסֵדֶר, תּוֹדָה. אַתָּה פָּנוּי מָחָר?', reading: 'beseder, todah. ata panui machar?', meaning: 'Fine, thanks. Are you free tomorrow?' },
+			{ speaker: 'א', target: 'כֵּן, בָּעֶרֶב.', reading: 'ken, ba’erev.', meaning: 'Yes, in the evening.' },
+			{ speaker: 'ב', target: 'יוֹפִי, נִפָּגֵשׁ בְּשֶׁבַע.', reading: 'yofi, nipagesh besheva.', meaning: 'Great, let’s meet at seven.' },
+			{ speaker: 'א', target: 'טוֹב, לְהִתְרָאוֹת!', reading: 'tov, lehitra’ot!', meaning: 'Okay, see you!' }
+		]
+	},
+	{
+		id: 'pass-he-weather',
+		kind: 'text',
+		title: 'מֶזֶג הָאֲוִיר — The weather',
+		level: 'A2',
+		tags: ['nature', 'daily'],
+		intro: 'A simple text about the seasons in Israel.',
+		lines: [
+			{ target: 'בְּיִשְׂרָאֵל יֵשׁ קַיִץ חַם וְאָרֹךְ.', reading: 'be’Yisrael yesh kayitz cham ve’aroch.', meaning: 'In Israel there is a hot, long summer.' },
+			{ target: 'בַּחֹרֶף יוֹרֵד גֶּשֶׁם, אֲבָל לֹא הַרְבֵּה.', reading: 'bachoref yored geshem, aval lo harbeh.', meaning: 'In winter it rains, but not a lot.' },
+			{ target: 'הָאָבִיב נָעִים וְיָרֹק.', reading: 'ha’aviv na’im veyarok.', meaning: 'Spring is pleasant and green.' },
+			{ target: 'הַרְבֵּה אֲנָשִׁים אוֹהֲבִים אֶת הַיָּם בַּקַּיִץ.', reading: 'harbeh anashim ohavim et hayam bakayitz.', meaning: 'Many people love the sea in summer.' }
+		]
+	},
+	{
+		id: 'pass-he-food',
+		kind: 'text',
+		title: 'הָאֹכֶל בְּיִשְׂרָאֵל — Food in Israel',
+		level: 'A2',
+		tags: ['food', 'culture'],
+		intro: 'A short text about a beloved local food.',
+		lines: [
+			{ target: 'בְּיִשְׂרָאֵל אוֹהֲבִים לֶאֱכֹל חוּמוּס.', reading: 'be’Yisrael ohavim le’echol chumus.', meaning: 'In Israel people love to eat hummus.' },
+			{ target: 'אֶפְשָׁר לִמְצֹא אוֹתוֹ כִּמְעַט בְּכָל מָקוֹם.', reading: 'efshar limtzo oto kim’at bechol makom.', meaning: 'You can find it almost everywhere.' },
+			{ target: 'הַרְבֵּה אֲנָשִׁים אוֹכְלִים אוֹתוֹ עִם פִּיתָה.', reading: 'harbeh anashim ochlim oto im pita.', meaning: 'Many people eat it with pita.' },
+			{ target: 'זֶה טָעִים, זוֹל וּבָרִיא.', reading: 'ze ta’im, zol uvari.', meaning: 'It’s tasty, cheap, and healthy.' }
 		]
 	}
 ];
