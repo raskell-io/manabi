@@ -8,7 +8,15 @@
  * append new entries with new ids. The workbench (/workbench) generates more.
  */
 
-import type { GeneratedItem, ItemKind, Language, LearningItem } from './types';
+import type {
+	GeneratedItem,
+	ItemKind,
+	Language,
+	LearningItem,
+	Passage,
+	PassageKind,
+	PassageLine
+} from './types';
 
 interface SeedSpec extends GeneratedItem {
 	id: string;
@@ -109,7 +117,37 @@ const ZH: SeedSpec[] = [
 	{ id: 'seed-zh-howmuch', target: '多少钱', reading: 'duōshao qián', meaning: 'how much (money)?', kind: 'phrase', tags: ['phrase', 'shopping', 'HSK1'], level: 'A1',
 		examples: [{ target: '这个多少钱？', reading: 'Zhège duōshao qián?', meaning: 'How much is this?' }] },
 	{ id: 'seed-zh-where', target: '在哪里', reading: 'zài nǎlǐ', meaning: 'where is …?', kind: 'phrase', tags: ['phrase', 'travel', 'HSK1'], level: 'A1',
-		examples: [{ target: '厕所在哪里？', reading: 'Cèsuǒ zài nǎlǐ?', meaning: 'Where is the toilet?' }] }
+		examples: [{ target: '厕所在哪里？', reading: 'Cèsuǒ zài nǎlǐ?', meaning: 'Where is the toilet?' }] },
+
+	// — A2 batch (HSK2-3): modern daily life & connectives —
+	{ id: 'seed-zh-weekend', target: '周末', reading: 'zhōumò', meaning: 'weekend', tags: ['time', 'daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '这个周末你有空吗？', reading: 'Zhège zhōumò nǐ yǒu kòng ma?', meaning: 'Are you free this weekend?' }] },
+	{ id: 'seed-zh-movie', target: '电影', reading: 'diànyǐng', meaning: 'movie', tags: ['daily', 'noun', 'HSK1'], level: 'A2',
+		examples: [{ target: '我们一起去看电影吧。', reading: 'Wǒmen yìqǐ qù kàn diànyǐng ba.', meaning: 'Let’s go watch a movie together.' }] },
+	{ id: 'seed-zh-phone', target: '手机', reading: 'shǒujī', meaning: 'mobile phone', tags: ['tech', 'daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '我用手机买票。', reading: 'Wǒ yòng shǒujī mǎi piào.', meaning: 'I buy tickets with my phone.' }] },
+	{ id: 'seed-zh-internet', target: '网络', reading: 'wǎngluò', meaning: 'internet / network', tags: ['tech', 'HSK3'], level: 'A2',
+		examples: [{ target: '这里的网络很快。', reading: 'Zhèlǐ de wǎngluò hěn kuài.', meaning: 'The internet here is fast.' }] },
+	{ id: 'seed-zh-pay', target: '支付', reading: 'zhīfù', meaning: 'to pay (esp. digitally)', tags: ['tech', 'shopping', 'HSK3'], level: 'A2',
+		examples: [{ target: '可以用手机支付吗？', reading: 'Kěyǐ yòng shǒujī zhīfù ma?', meaning: 'Can I pay by phone?' }] },
+	{ id: 'seed-zh-together', target: '一起', reading: 'yìqǐ', meaning: 'together', tags: ['daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '我们一起吃饭吧。', reading: 'Wǒmen yìqǐ chīfàn ba.', meaning: 'Let’s eat together.' }] },
+	{ id: 'seed-zh-feel', target: '觉得', reading: 'juéde', meaning: 'to feel / think', tags: ['daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '我觉得这个电影很好。', reading: 'Wǒ juéde zhège diànyǐng hěn hǎo.', meaning: 'I think this movie is great.' }] },
+	{ id: 'seed-zh-already', target: '已经', reading: 'yǐjīng', meaning: 'already', tags: ['daily', 'HSK2'], level: 'A2',
+		examples: [{ target: '我已经买票了。', reading: 'Wǒ yǐjīng mǎi piào le.', meaning: 'I have already bought the tickets.' }] },
+	{ id: 'seed-zh-should', target: '应该', reading: 'yīnggāi', meaning: 'should / ought to', tags: ['daily', 'HSK3'], level: 'A2',
+		examples: [{ target: '你应该早点睡。', reading: 'Nǐ yīnggāi zǎo diǎn shuì.', meaning: 'You should sleep earlier.' }] },
+	{ id: 'seed-zh-maybe', target: '可能', reading: 'kěnéng', meaning: 'maybe / possible', tags: ['daily', 'HSK3'], level: 'A2',
+		examples: [{ target: '明天可能下雨。', reading: 'Míngtiān kěnéng xià yǔ.', meaning: 'It might rain tomorrow.' }] },
+	{ id: 'seed-zh-habit', target: '习惯', reading: 'xíguàn', meaning: 'habit / to be used to', tags: ['daily', 'HSK3'], level: 'A2',
+		examples: [{ target: '我习惯早上喝咖啡。', reading: 'Wǒ xíguàn zǎoshang hē kāfēi.', meaning: 'I’m used to drinking coffee in the morning.' }] },
+	{ id: 'seed-zh-because', target: '因为', reading: 'yīnwèi', meaning: 'because', kind: 'grammar', tags: ['grammar', 'connective', 'HSK2'], level: 'A2',
+		examples: [{ target: '因为下雨，我没去。', reading: 'Yīnwèi xià yǔ, wǒ méi qù.', meaning: 'Because it rained, I didn’t go.' }] },
+	{ id: 'seed-zh-so', target: '所以', reading: 'suǒyǐ', meaning: 'so / therefore', kind: 'grammar', tags: ['grammar', 'connective', 'HSK2'], level: 'A2',
+		examples: [{ target: '我很累，所以早点睡了。', reading: 'Wǒ hěn lèi, suǒyǐ zǎo diǎn shuì le.', meaning: 'I was tired, so I went to bed early.' }] },
+	{ id: 'seed-zh-butptn', target: '虽然', reading: 'suīrán', meaning: 'although', kind: 'grammar', tags: ['grammar', 'connective', 'HSK3'], level: 'A2',
+		examples: [{ target: '虽然很贵，但是很好吃。', reading: 'Suīrán hěn guì, dànshì hěn hǎochī.', meaning: 'Although it’s expensive, it’s delicious.' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -170,7 +208,35 @@ const JA: SeedSpec[] = [
 	{ id: 'seed-ja-g-teshimau', target: '〜てしまう', reading: '〜てしまう', transliteration: 'te shimau', meaning: 'do completely / unintentionally (regret)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
 		examples: [{ target: '宿題を忘れてしまいました。', reading: 'しゅくだいをわすれてしまいました。', transliteration: 'Shukudai o wasurete shimaimashita.', meaning: 'I (carelessly) forgot my homework.' }] },
 	{ id: 'seed-ja-g-youtoomou', target: '〜ようと思う', reading: '〜ようとおもう', transliteration: 'yō to omou', meaning: 'intend to / be thinking of doing', kind: 'grammar', tags: ['grammar', 'N4'], level: 'B1',
-		examples: [{ target: '来年日本へ行こうと思います。', reading: 'らいねんにほんへいこうとおもいます。', transliteration: 'Rainen Nihon e ikō to omoimasu.', meaning: 'I’m thinking of going to Japan next year.' }] }
+		examples: [{ target: '来年日本へ行こうと思います。', reading: 'らいねんにほんへいこうとおもいます。', transliteration: 'Rainen Nihon e ikō to omoimasu.', meaning: 'I’m thinking of going to Japan next year.' }] },
+
+	// — N3 batch: vocabulary & grammar —
+	{ id: 'seed-ja-yakusoku', target: '約束', reading: 'やくそく', transliteration: 'yakusoku', meaning: 'promise / appointment', tags: ['noun', 'N4'], level: 'B1',
+		examples: [{ target: '友達と約束があります。', reading: 'ともだちとやくそくがあります。', transliteration: 'Tomodachi to yakusoku ga arimasu.', meaning: 'I have plans with a friend.' }] },
+	{ id: 'seed-ja-keiken', target: '経験', reading: 'けいけん', transliteration: 'keiken', meaning: 'experience', tags: ['noun', 'N3'], level: 'B1',
+		examples: [{ target: 'いい経験になりました。', reading: 'いいけいけんになりました。', transliteration: 'Ii keiken ni narimashita.', meaning: 'It was a good experience.' }] },
+	{ id: 'seed-ja-setsumei', target: '説明', reading: 'せつめい', transliteration: 'setsumei', meaning: 'explanation (する: to explain)', tags: ['noun', 'verb', 'N4'], level: 'B1',
+		examples: [{ target: 'もう一度説明してください。', reading: 'もういちどせつめいしてください。', transliteration: 'Mō ichido setsumei shite kudasai.', meaning: 'Please explain once more.' }] },
+	{ id: 'seed-ja-hitsuyou', target: '必要', reading: 'ひつよう', transliteration: 'hitsuyō', meaning: 'necessary / need', tags: ['adjective', 'N4'], level: 'B1',
+		examples: [{ target: 'パスポートが必要です。', reading: 'パスポートがひつようです。', transliteration: 'Pasupōto ga hitsuyō desu.', meaning: 'A passport is necessary.' }] },
+	{ id: 'seed-ja-renraku', target: '連絡', reading: 'れんらく', transliteration: 'renraku', meaning: 'contact (する: to get in touch)', tags: ['noun', 'verb', 'N4'], level: 'B1',
+		examples: [{ target: '後で連絡します。', reading: 'あとでれんらくします。', transliteration: 'Ato de renraku shimasu.', meaning: 'I’ll contact you later.' }] },
+	{ id: 'seed-ja-junbi', target: '準備', reading: 'じゅんび', transliteration: 'junbi', meaning: 'preparation (する: to prepare)', tags: ['noun', 'verb', 'N4'], level: 'B1',
+		examples: [{ target: '旅行の準備をします。', reading: 'りょこうのじゅんびをします。', transliteration: 'Ryokō no junbi o shimasu.', meaning: 'I prepare for the trip.' }] },
+	{ id: 'seed-ja-zannen', target: '残念', reading: 'ざんねん', transliteration: 'zannen', meaning: 'unfortunate / too bad', tags: ['adjective', 'N4'], level: 'B1',
+		examples: [{ target: '行けなくて残念です。', reading: 'いけなくてざんねんです。', transliteration: 'Ikenakute zannen desu.', meaning: 'It’s a shame I can’t go.' }] },
+	{ id: 'seed-ja-kyoumi', target: '興味', reading: 'きょうみ', transliteration: 'kyōmi', meaning: 'interest', tags: ['noun', 'N3'], level: 'B1',
+		examples: [{ target: '日本の文化に興味があります。', reading: 'にほんのぶんかにきょうみがあります。', transliteration: 'Nihon no bunka ni kyōmi ga arimasu.', meaning: 'I’m interested in Japanese culture.' }] },
+	{ id: 'seed-ja-saikin', target: '最近', reading: 'さいきん', transliteration: 'saikin', meaning: 'recently / lately', tags: ['time', 'N4'], level: 'B1',
+		examples: [{ target: '最近、運動を始めました。', reading: 'さいきん、うんどうをはじめました。', transliteration: 'Saikin, undō o hajimemashita.', meaning: 'I recently started exercising.' }] },
+	{ id: 'seed-ja-fueru', target: '増える', reading: 'ふえる', transliteration: 'fueru', meaning: 'to increase', tags: ['verb', 'N4'], level: 'B1',
+		examples: [{ target: '在宅勤務が増えています。', reading: 'ざいたくきんむがふえています。', transliteration: 'Zaitaku kinmu ga fuete imasu.', meaning: 'Working from home is increasing.' }] },
+	{ id: 'seed-ja-g-youni', target: '〜ように', reading: '〜ように', transliteration: 'yō ni', meaning: 'so that / in order to', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: '忘れないようにメモします。', reading: 'わすれないようにメモします。', transliteration: 'Wasurenai yō ni memo shimasu.', meaning: 'I take notes so I won’t forget.' }] },
+	{ id: 'seed-ja-g-hazu', target: '〜はずだ', reading: '〜はずだ', transliteration: 'hazu da', meaning: 'should / is expected to (be)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: '彼はもう着いたはずです。', reading: 'かれはもうついたはずです。', transliteration: 'Kare wa mō tsuita hazu desu.', meaning: 'He should have already arrived.' }] },
+	{ id: 'seed-ja-g-okagede', target: '〜おかげで', reading: '〜おかげで', transliteration: 'okage de', meaning: 'thanks to (positive cause)', kind: 'grammar', tags: ['grammar', 'N3'], level: 'B1',
+		examples: [{ target: 'あなたのおかげで助かりました。', reading: 'あなたのおかげでたすかりました。', transliteration: 'Anata no okage de tasukarimashita.', meaning: 'Thanks to you, I was saved.' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -240,6 +306,187 @@ const SEED: Record<Language, SeedSpec[]> = { zh: ZH, ja: JA, he: HE };
 export function seedsToApply(seededIds: Record<string, boolean> | undefined): LearningItem[] {
 	const seeded = seededIds ?? {};
 	return seedItems().filter((it) => !seeded[it.id]);
+}
+
+// ===========================================================================
+// Reading material — natural conversations & newspaper/non-fiction texts.
+// ===========================================================================
+
+interface PassageSpec {
+	id: string;
+	kind: PassageKind;
+	title: string;
+	level: string;
+	tags: string[];
+	intro?: string;
+	lines: PassageLine[];
+}
+
+const ZH_PASSAGES: PassageSpec[] = [
+	{
+		id: 'pass-zh-weekend',
+		kind: 'conversation',
+		title: '周末看电影 — Making weekend plans',
+		level: 'A2',
+		tags: ['daily', 'plans', 'HSK2'],
+		intro: 'Two friends text about going to a movie this weekend.',
+		lines: [
+			{ speaker: 'A', target: '这个周末你有空吗？', reading: 'Zhège zhōumò nǐ yǒu kòng ma?', meaning: 'Are you free this weekend?' },
+			{ speaker: 'B', target: '有啊，怎么了？', reading: 'Yǒu a, zěnme le?', meaning: 'Yeah, what’s up?' },
+			{ speaker: 'A', target: '我们一起去看电影吧。', reading: 'Wǒmen yìqǐ qù kàn diànyǐng ba.', meaning: 'Let’s go watch a movie together.' },
+			{ speaker: 'B', target: '好主意！几点的？', reading: 'Hǎo zhǔyi! Jǐ diǎn de?', meaning: 'Good idea! What time?' },
+			{ speaker: 'A', target: '下午三点，我用手机买票。', reading: 'Xiàwǔ sān diǎn, wǒ yòng shǒujī mǎi piào.', meaning: 'Three p.m. — I’ll buy the tickets on my phone.' },
+			{ speaker: 'B', target: '太好了，到时候见！', reading: 'Tài hǎo le, dào shíhou jiàn!', meaning: 'Great, see you then!' }
+		]
+	},
+	{
+		id: 'pass-zh-cafe',
+		kind: 'conversation',
+		title: '在咖啡店 — Ordering at a café',
+		level: 'A2',
+		tags: ['daily', 'food', 'shopping'],
+		intro: 'A customer orders a coffee and pays with their phone.',
+		lines: [
+			{ speaker: '店员', target: '您好，要点什么？', reading: 'Nín hǎo, yào diǎn shénme?', meaning: 'Hi, what would you like?' },
+			{ speaker: '顾客', target: '一杯拿铁，谢谢。', reading: 'Yì bēi nátiě, xièxie.', meaning: 'A latte, thanks.' },
+			{ speaker: '店员', target: '要大杯还是中杯？', reading: 'Yào dà bēi háishì zhōng bēi?', meaning: 'Large or medium?' },
+			{ speaker: '顾客', target: '中杯就好。可以用手机支付吗？', reading: 'Zhōng bēi jiù hǎo. Kěyǐ yòng shǒujī zhīfù ma?', meaning: 'Medium is fine. Can I pay by phone?' },
+			{ speaker: '店员', target: '当然可以，扫这个二维码。', reading: 'Dāngrán kěyǐ, sǎo zhège èrwéimǎ.', meaning: 'Of course, scan this QR code.' }
+		]
+	},
+	{
+		id: 'pass-zh-wfh',
+		kind: 'text',
+		title: '在家工作越来越普遍 — Working from home',
+		level: 'A2',
+		tags: ['society', 'work', 'tech'],
+		intro: 'A short newspaper-style piece on remote work.',
+		lines: [
+			{ target: '近年来，越来越多的人选择在家工作。', reading: 'Jìnnián lái, yuèláiyuè duō de rén xuǎnzé zài jiā gōngzuò.', meaning: 'In recent years, more and more people choose to work from home.' },
+			{ target: '有了网络和智能手机，人们可以随时开会。', reading: 'Yǒule wǎngluò hé zhìnéng shǒujī, rénmen kěyǐ suíshí kāihuì.', meaning: 'With the internet and smartphones, people can hold meetings anytime.' },
+			{ target: '这样不但节省时间，也对环境有好处。', reading: 'Zhèyàng búdàn jiéshěng shíjiān, yě duì huánjìng yǒu hǎochù.', meaning: 'This not only saves time but is also good for the environment.' },
+			{ target: '不过，有些人觉得在家很难集中注意力。', reading: 'Búguò, yǒuxiē rén juéde zài jiā hěn nán jízhōng zhùyìlì.', meaning: 'However, some people find it hard to concentrate at home.' }
+		]
+	}
+];
+
+const JA_PASSAGES: PassageSpec[] = [
+	{
+		id: 'pass-ja-plans',
+		kind: 'conversation',
+		title: '週末の予定 — Weekend plans',
+		level: 'N3',
+		tags: ['daily', 'plans'],
+		intro: 'Two friends message about checking out a new café.',
+		lines: [
+			{ speaker: 'A', target: '今週末、暇？', reading: 'こんしゅうまつ、ひま？', transliteration: 'Konshūmatsu, hima?', meaning: 'Are you free this weekend?' },
+			{ speaker: 'B', target: 'うん、特に予定はないよ。', reading: 'うん、とくによていはないよ。', transliteration: 'Un, toku ni yotei wa nai yo.', meaning: 'Yeah, no special plans.' },
+			{ speaker: 'A', target: 'じゃあ、新しいカフェに行かない？', reading: 'じゃあ、あたらしいカフェにいかない？', transliteration: 'Jā, atarashii kafe ni ikanai?', meaning: 'Then shall we go to the new café?' },
+			{ speaker: 'B', target: 'いいね。インスタで見て、行きたかったんだ。', reading: 'いいね。インスタでみて、いきたかったんだ。', transliteration: 'Ii ne. Insuta de mite, ikitakatta n da.', meaning: 'Nice. I saw it on Instagram and wanted to go.' },
+			{ speaker: 'A', target: 'じゃあ、11時に駅で待ち合わせしよう。', reading: 'じゃあ、じゅういちじにえきでまちあわせしよう。', transliteration: 'Jā, jūichi-ji ni eki de machiawase shiyō.', meaning: 'Then let’s meet at the station at eleven.' }
+		]
+	},
+	{
+		id: 'pass-ja-work',
+		kind: 'conversation',
+		title: '仕事のお願い — A favor at work',
+		level: 'N3',
+		tags: ['work', 'polite'],
+		intro: 'Asking a colleague to check a document — polite workplace Japanese.',
+		lines: [
+			{ speaker: 'A', target: 'すみません、この資料、確認してもらえますか。', reading: 'すみません、このしりょう、かくにんしてもらえますか。', transliteration: 'Sumimasen, kono shiryō, kakunin shite moraemasu ka.', meaning: 'Excuse me, could you check this document?' },
+			{ speaker: 'B', target: 'いいですよ。午後でもいいですか。', reading: 'いいですよ。ごごでもいいですか。', transliteration: 'Ii desu yo. Gogo demo ii desu ka.', meaning: 'Sure. Is the afternoon okay?' },
+			{ speaker: 'A', target: 'もちろんです。よろしくお願いします。', reading: 'もちろんです。よろしくおねがいします。', transliteration: 'Mochiron desu. Yoroshiku onegai shimasu.', meaning: 'Of course. Thank you very much.' }
+		]
+	},
+	{
+		id: 'pass-ja-sleep',
+		kind: 'text',
+		title: 'スマホと睡眠 — Smartphones and sleep',
+		level: 'N3',
+		tags: ['society', 'health', 'tech'],
+		intro: 'A short non-fiction passage on screens and sleep.',
+		lines: [
+			{ target: '最近、寝る前にスマホを使う人が増えている。', reading: 'さいきん、ねるまえにスマホをつかうひとがふえている。', transliteration: 'Saikin, neru mae ni sumaho o tsukau hito ga fuete iru.', meaning: 'Recently, more people use their smartphones before bed.' },
+			{ target: '画面の光は脳を刺激し、眠りにくくすると言われている。', reading: 'がめんのひかりはのうをしげきし、ねむりにくくするといわれている。', transliteration: 'Gamen no hikari wa nō o shigeki shi, nemurinikuku suru to iwarete iru.', meaning: 'The screen’s light stimulates the brain and is said to make sleep harder.' },
+			{ target: '専門家は、寝る一時間前にはスマホをやめるよう勧めている。', reading: 'せんもんかは、ねるいちじかんまえにはスマホをやめるようすすめている。', transliteration: 'Senmonka wa, neru ichi-jikan mae ni wa sumaho o yameru yō susumete iru.', meaning: 'Experts recommend stopping smartphone use an hour before sleeping.' }
+		]
+	}
+];
+
+const HE_PASSAGES: PassageSpec[] = [
+	{
+		id: 'pass-he-cafe',
+		kind: 'conversation',
+		title: 'בְּבֵית קָפֶה — At a café',
+		level: 'A2',
+		tags: ['daily', 'food', 'shopping'],
+		intro: 'Ordering a coffee — everyday spoken Hebrew.',
+		lines: [
+			{ speaker: 'לָקוֹחַ', target: 'שָׁלוֹם, אֲנִי רוֹצֶה קָפֶה, בְּבַקָּשָׁה.', reading: 'shalom, ani rotzeh kafeh, bevakasha.', meaning: 'Hello, I’d like a coffee, please.' },
+			{ speaker: 'מוֹכֵר', target: 'גָּדוֹל אוֹ קָטָן?', reading: 'gadol o katan?', meaning: 'Large or small?' },
+			{ speaker: 'לָקוֹחַ', target: 'גָּדוֹל, תּוֹדָה.', reading: 'gadol, todah.', meaning: 'Large, thanks.' },
+			{ speaker: 'מוֹכֵר', target: 'עוֹד מַשֶּׁהוּ?', reading: 'od mashehu?', meaning: 'Anything else?' },
+			{ speaker: 'לָקוֹחַ', target: 'לֹא, זֶה הַכֹּל.', reading: 'lo, ze hakol.', meaning: 'No, that’s all.' }
+		]
+	},
+	{
+		id: 'pass-he-meet',
+		kind: 'conversation',
+		title: 'פְּגִישָׁה עִם חָבֵר — Meeting a friend',
+		level: 'A1',
+		tags: ['daily', 'greeting'],
+		intro: 'A casual greeting between friends.',
+		lines: [
+			{ speaker: 'א', target: 'הֵיי, מָה נִשְׁמָע?', reading: 'hey, ma nishma?', meaning: 'Hey, how’s it going?' },
+			{ speaker: 'ב', target: 'הַכֹּל טוֹב, תּוֹדָה. וְאַתָּה?', reading: 'hakol tov, todah. ve’ata?', meaning: 'All good, thanks. And you?' },
+			{ speaker: 'א', target: 'גַּם טוֹב. בָּא לְךָ לֶאֱכֹל מַשֶּׁהוּ?', reading: 'gam tov. ba lecha le’echol mashehu?', meaning: 'Good too. Feel like grabbing something to eat?' },
+			{ speaker: 'ב', target: 'בְּטַח, אֲנִי רָעֵב.', reading: 'betach, ani ra’ev.', meaning: 'Sure, I’m hungry.' }
+		]
+	},
+	{
+		id: 'pass-he-telaviv',
+		kind: 'text',
+		title: 'הָעִיר תֵּל אָבִיב — The city of Tel Aviv',
+		level: 'A2',
+		tags: ['places', 'society'],
+		intro: 'A short, simple descriptive text.',
+		lines: [
+			{ target: 'תֵּל אָבִיב הִיא עִיר גְּדוֹלָה בְּיִשְׂרָאֵל.', reading: 'tel aviv hi ir gdola be’Yisrael.', meaning: 'Tel Aviv is a big city in Israel.' },
+			{ target: 'הַרְבֵּה אֲנָשִׁים גָּרִים וְעוֹבְדִים שָׁם.', reading: 'harbeh anashim garim ve’ovdim sham.', meaning: 'Many people live and work there.' },
+			{ target: 'בָּעִיר יֵשׁ חוֹף יָם יָפֶה וְהַרְבֵּה בָּתֵּי קָפֶה.', reading: 'ba’ir yesh chof yam yafeh ve’harbeh batei kafeh.', meaning: 'In the city there is a beautiful beach and many cafés.' }
+		]
+	}
+];
+
+const PASSAGE_SEED: Record<Language, PassageSpec[]> = { zh: ZH_PASSAGES, ja: JA_PASSAGES, he: HE_PASSAGES };
+
+/** All seed passages as fully-formed `Passage`s with stable ids. */
+export function seedPassages(now: number = Date.now()): Passage[] {
+	const out: Passage[] = [];
+	for (const [lang, specs] of Object.entries(PASSAGE_SEED) as [Language, PassageSpec[]][]) {
+		for (const spec of specs) {
+			out.push({
+				id: spec.id,
+				language: lang,
+				kind: spec.kind,
+				title: spec.title,
+				level: spec.level,
+				tags: spec.tags,
+				intro: spec.intro,
+				lines: spec.lines,
+				createdAt: now,
+				updatedAt: now
+			});
+		}
+	}
+	return out;
+}
+
+/** Seed passages not yet applied to a document (mirrors `seedsToApply`). */
+export function passagesToApply(seededIds: Record<string, boolean> | undefined): Passage[] {
+	const seeded = seededIds ?? {};
+	return seedPassages().filter((p) => !seeded[p.id]);
 }
 
 /** All seed items as fully-formed `LearningItem`s with stable ids. */

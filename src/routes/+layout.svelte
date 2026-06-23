@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { Home, GraduationCap, Library, LayoutGrid, BarChart3, Sparkles, Settings as SettingsIcon } from 'lucide-svelte';
+	import { Home, GraduationCap, BookOpen, Library, LayoutGrid, BarChart3, Sparkles, Settings as SettingsIcon } from 'lucide-svelte';
 	import { initDB, settings, setActiveLanguage } from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
 
@@ -12,6 +12,7 @@
 	const NAV = [
 		{ href: '/', label: 'Home', icon: Home },
 		{ href: '/review', label: 'Review', icon: GraduationCap },
+		{ href: '/read', label: 'Read', icon: BookOpen },
 		{ href: '/items', label: 'Items', icon: Library },
 		{ href: '/lessons', label: 'Lessons', icon: LayoutGrid },
 		{ href: '/dashboard', label: 'Progress', icon: BarChart3 },

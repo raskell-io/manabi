@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { seedItems, seedsToApply } from './seed';
+import { seedItems, seedsToApply, seedPassages, passagesToApply } from './seed';
 
 const items = seedItems();
+const passages = seedPassages();
 const NIQQUD = /[֑-ׇ]/;
 
 describe('seed content', () => {
@@ -77,5 +78,55 @@ describe('seedsToApply (existing-user upgrade path)', () => {
 		expect(pending.length).toBe(items.length - originals.length);
 		// None of the returned items are originals (no churn / no resurrection).
 		expect(pending.some((p) => originals.includes(p.id))).toBe(false);
+	});
+});
+
+describe('seed passages (conversations & texts)', () => {
+	it('ships conversations and texts in every language', () => {
+		for (const lang of ['zh', 'ja', 'he'] as const) {
+			const ps = passages.filter((p) => p.language === lang);
+			expect(ps.some((p) => p.kind === 'conversation'), lang).toBe(true);
+			expect(ps.some((p) => p.kind === 'text'), lang).toBe(true);
+		}
+	});
+
+	it('uses unique pass- ids and fills required fields', () => {
+		const ids = passages.map((p) => p.id);
+		expect(new Set(ids).size).toBe(ids.length);
+		for (const p of passages) {
+			expect(p.id.startsWith('pass-'), p.id).toBe(true);
+			expect(p.title.trim(), p.id).not.toBe('');
+			expect(p.level.trim(), p.id).not.toBe('');
+			expect(p.lines.length, p.id).toBeGreaterThan(0);
+			for (const line of p.lines) {
+				expect(line.target.trim(), p.id).not.toBe('');
+				expect(line.reading.trim(), p.id).not.toBe('');
+				expect(line.meaning.trim(), p.id).not.toBe('');
+			}
+		}
+	});
+
+	it('gives conversation lines speakers and keeps text lines speaker-free', () => {
+		for (const p of passages) {
+			if (p.kind === 'conversation') {
+				expect(p.lines.every((l) => !!l.speaker), p.id).toBe(true);
+			} else {
+				expect(p.lines.every((l) => !l.speaker), p.id).toBe(true);
+			}
+		}
+	});
+
+	it('vowels every Hebrew passage line', () => {
+		for (const p of passages.filter((p) => p.language === 'he')) {
+			for (const line of p.lines) {
+				expect(NIQQUD.test(line.target), `${p.id}: ${line.target}`).toBe(true);
+			}
+		}
+	});
+
+	it('passagesToApply gates on seededIds like items', () => {
+		expect(passagesToApply({}).length).toBe(passages.length);
+		const all = Object.fromEntries(passages.map((p) => [p.id, true]));
+		expect(passagesToApply(all)).toHaveLength(0);
 	});
 });

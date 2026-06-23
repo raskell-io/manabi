@@ -11,7 +11,7 @@ import * as Automerge from '@automerge/automerge';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 import { derived, writable, type Readable } from 'svelte/store';
 import { deleteBlob } from './blob-store';
-import { seedsToApply } from './seed';
+import { passagesToApply, seedsToApply } from './seed';
 import { gradeDimension, isPass } from '$lib/srs/schedule';
 import { buildQueue, type QueueSummary } from '$lib/srs/queue';
 import {
@@ -31,6 +31,9 @@ import {
 	type Lesson,
 	type ManabiDocument,
 	type ManabiSettings,
+	type Passage,
+	type PassageKind,
+	type PassageLine,
 	type PronunciationAttempt,
 	type SelfRating,
 	type SkillMemory
@@ -73,6 +76,14 @@ export const activeItems: Readable<LearningItem[]> = derived(
 export const lessons: Readable<Lesson[]> = derived(docStore, ($doc) => {
 	if (!$doc) return [];
 	return Object.values($doc.lessons).sort((a, b) => b.createdAt - a.createdAt);
+});
+
+/** Reading passages in the active language, newest first. */
+export const passages: Readable<Passage[]> = derived([docStore, activeLanguage], ([$doc, $lang]) => {
+	if (!$doc?.passages) return [];
+	return Object.values($doc.passages)
+		.filter((p) => p.language === $lang)
+		.sort((a, b) => b.createdAt - a.createdAt);
 });
 
 /** Pending drafts first, then decided ones (audit trail), newest first. */
@@ -130,10 +141,11 @@ export async function initDB(): Promise<void> {
 /** Forward-only migrations. */
 function migrate(d: Automerge.Doc<ManabiDocument>): Automerge.Doc<ManabiDocument> {
 	let next = d;
-	if ((next.schemaVersion ?? 0) < 2) {
+	if ((next.schemaVersion ?? 0) < 3) {
 		next = Automerge.change(next, (doc) => {
 			if (!doc.settings) doc.settings = defaultSettings();
 			if (!doc.seededIds) doc.seededIds = {};
+			if (!doc.passages) doc.passages = {};
 			doc.schemaVersion = SCHEMA_VERSION;
 		});
 	}
@@ -141,18 +153,24 @@ function migrate(d: Automerge.Doc<ManabiDocument>): Automerge.Doc<ManabiDocument
 }
 
 /**
- * Idempotently add any built-in seed items not yet applied to this document.
- * Tracked via `seededIds` so new releases' content reaches existing users
- * without re-adding items they've since deleted.
+ * Idempotently add any built-in seed content (items + passages) not yet applied
+ * to this document. Tracked via `seededIds` so new releases' content reaches
+ * existing users without re-adding content they've since deleted.
  */
 function applyNewSeeds(): void {
-	const missing = seedsToApply(doc.seededIds);
-	if (missing.length === 0) return;
+	const missingItems = seedsToApply(doc.seededIds);
+	const missingPassages = passagesToApply(doc.seededIds);
+	if (missingItems.length === 0 && missingPassages.length === 0) return;
 	doc = Automerge.change(doc, (d) => {
 		if (!d.seededIds) d.seededIds = {};
-		for (const it of missing) {
+		if (!d.passages) d.passages = {};
+		for (const it of missingItems) {
 			if (!d.learningItems[it.id]) d.learningItems[it.id] = stripUndefined(it);
 			d.seededIds[it.id] = true;
+		}
+		for (const p of missingPassages) {
+			if (!d.passages[p.id]) d.passages[p.id] = stripUndefined(p);
+			d.seededIds[p.id] = true;
 		}
 	});
 }
@@ -343,6 +361,72 @@ export function createLesson(title: string, language: Language, itemIds: string[
 export function deleteLesson(id: string): void {
 	updateDoc((d) => {
 		delete d.lessons[id];
+	});
+}
+
+// --- Passages (reading material) --------------------------------------------
+
+export function getPassage(id: string): Passage | undefined {
+	return doc?.passages?.[id];
+}
+
+export interface NewPassageInput {
+	language: Language;
+	kind: PassageKind;
+	title: string;
+	level: string;
+	tags?: string[];
+	intro?: string;
+	lines: PassageLine[];
+}
+
+export function createPassage(input: NewPassageInput): string {
+	const id = generateId();
+	const now = Date.now();
+	updateDoc((d) => {
+		d.passages[id] = stripUndefined({
+			id,
+			language: input.language,
+			kind: input.kind,
+			title: input.title,
+			level: input.level,
+			tags: input.tags ?? [],
+			intro: input.intro,
+			lines: input.lines,
+			createdAt: now,
+			updatedAt: now
+		});
+	});
+	return id;
+}
+
+export function deletePassage(id: string): void {
+	updateDoc((d) => {
+		delete d.passages[id];
+	});
+}
+
+/**
+ * Mine a passage line into a standalone sentence `LearningItem` so it enters
+ * the SRS — the "personal sentence miner" from the pitch. Returns the new id,
+ * or the existing item's id if this exact sentence is already saved.
+ */
+export function studyPassageLine(language: Language, line: PassageLine): string {
+	const existing = Object.values(doc?.learningItems ?? {}).find(
+		(it) => it.language === language && it.target === line.target
+	);
+	if (existing) return existing.id;
+	return createItem({
+		language,
+		kind: 'sentence',
+		target: line.target,
+		reading: line.reading,
+		transliteration: line.transliteration,
+		meaning: line.meaning,
+		tags: ['mined', 'reading'],
+		level: 'A2',
+		examples: [],
+		status: 'published'
 	});
 }
 

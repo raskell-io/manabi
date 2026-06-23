@@ -114,6 +114,44 @@ export interface Lesson {
 	[key: string]: unknown;
 }
 
+// --- Reading material: conversations & texts --------------------------------
+
+export type PassageKind = 'conversation' | 'text';
+
+export const PASSAGE_KIND_LABELS: Record<PassageKind, string> = {
+	conversation: 'Conversation',
+	text: 'Text'
+};
+
+/** One turn of a dialogue, or one sentence of a prose passage. */
+export interface PassageLine {
+	speaker?: string; // dialogue speaker label; absent for prose
+	target: string; // line in the target script
+	reading: string; // pinyin / kana / transliteration
+	transliteration?: string;
+	meaning: string; // English
+	audioRef?: string;
+	[key: string]: unknown;
+}
+
+/**
+ * A reading passage — a natural conversation or a newspaper/non-fiction style
+ * text. Read in `/read`; individual lines can be mined into SRS items.
+ */
+export interface Passage {
+	id: string;
+	language: Language;
+	kind: PassageKind;
+	title: string;
+	level: string;
+	tags: string[];
+	intro?: string; // English context blurb
+	lines: PassageLine[];
+	createdAt: number;
+	updatedAt: number;
+	[key: string]: unknown;
+}
+
 // --- SRS state (multi-dimensional SM-2) -------------------------------------
 
 export interface DimState {
@@ -241,17 +279,18 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export interface ManabiDocument {
 	schemaVersion: number;
 	learningItems: Record<string, LearningItem>;
 	lessons: Record<string, Lesson>;
+	passages: Record<string, Passage>;
 	srsStates: Record<string, SkillMemory>; // keyed by itemId
 	exerciseAttempts: Record<string, ExerciseAttempt>;
 	pronunciationAttempts: Record<string, PronunciationAttempt>;
 	contentDrafts: Record<string, ContentDraft>;
-	/** Seed item ids already applied, so new seeds upsert without re-adding deleted ones. */
+	/** Seed ids already applied, so new seeds upsert without re-adding deleted ones. */
 	seededIds: Record<string, boolean>;
 	settings: ManabiSettings;
 	[key: string]: unknown;
@@ -262,6 +301,7 @@ export function createEmptyDocument(): ManabiDocument {
 		schemaVersion: SCHEMA_VERSION,
 		learningItems: {},
 		lessons: {},
+		passages: {},
 		srsStates: {},
 		exerciseAttempts: {},
 		pronunciationAttempts: {},
