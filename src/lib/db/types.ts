@@ -49,7 +49,7 @@ export function stripNiqqud(text: string): string {
 	return text.replace(/[֑-ׇ]/g, '');
 }
 
-export type ItemKind = 'word' | 'phrase' | 'sentence' | 'grammar';
+export type ItemKind = 'word' | 'phrase' | 'sentence' | 'grammar' | 'character';
 
 /**
  * The five skills tracked independently per item (pitch §5). A learner may

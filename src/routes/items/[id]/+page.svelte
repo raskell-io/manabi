@@ -57,7 +57,7 @@
 		form.examples = form.examples.filter((_, idx) => idx !== i);
 	}
 
-	const KINDS: ItemKind[] = ['word', 'phrase', 'sentence', 'grammar'];
+	const KINDS: ItemKind[] = ['word', 'phrase', 'sentence', 'grammar', 'character'];
 	const STATUSES: ItemStatus[] = ['published', 'draft'];
 	function langName(code: string): string {
 		return LANGUAGES.find((l) => l.code === code)?.name ?? code;

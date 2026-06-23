@@ -420,6 +420,31 @@ export function deletePassage(id: string): void {
 }
 
 /**
+ * Add a script glyph (kana / character / letter) to the SRS as a `character`
+ * item. Dedupes on the exact glyph, returning the existing id if present.
+ */
+export function studyScriptChar(
+	language: Language,
+	glyph: { char: string; roman: string; gloss?: string }
+): string {
+	const existing = Object.values(doc?.learningItems ?? {}).find(
+		(it) => it.language === language && it.target === glyph.char
+	);
+	if (existing) return existing.id;
+	return createItem({
+		language,
+		kind: 'character',
+		target: glyph.char,
+		reading: glyph.roman,
+		meaning: glyph.gloss ?? glyph.roman,
+		tags: ['script'],
+		level: 'A1',
+		examples: [],
+		status: 'published'
+	});
+}
+
+/**
  * Mine a passage line into a standalone sentence `LearningItem` so it enters
  * the SRS — the "personal sentence miner" from the pitch. Returns the new id,
  * or the existing item's id if this exact sentence is already saved.

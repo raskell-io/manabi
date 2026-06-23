@@ -147,6 +147,7 @@
 					<option value="phrase">phrase</option>
 					<option value="sentence">sentence</option>
 					<option value="grammar">grammar</option>
+					<option value="character">character</option>
 				</select>
 			</label>
 			<label><span>Level</span><input bind:value={level} placeholder="A1 / HSK1 / N5" /></label>
