@@ -5,31 +5,39 @@ database, and no secrets to host — OpenAI calls are made browser-direct with t
 user's own key, and all data lives in each visitor's IndexedDB. Deploying just
 means publishing `build/` to an HTTPS static host with a SPA fallback.
 
-The repo is **public**, so the simplest setup is **Cloudflare Pages Git
-integration**: connect the repo once in the Cloudflare dashboard and CF rebuilds
-and deploys on every push to `main`. No API token, no GitHub secrets, no deploy
-workflow.
+The repo is **public** and connected to Cloudflare's **Workers & Pages** Git
+build: Cloudflare runs `npm run build` then `npx wrangler deploy` on every push to
+`main`. No API token and no GitHub secrets — the Cloudflare build environment
+authenticates itself.
 
-What's in the repo for this:
+Because the unified "Workers & Pages" flow deploys via `wrangler` (Workers Static
+Assets), the repo needs a `wrangler.toml`:
 
-- **`static/_redirects`** — `/* /404.html 200`, the SPA fallback Cloudflare needs
-  (the build emits `404.html`, not `index.html`).
+- **`wrangler.toml`** — `name = "manabi"` + `[assets] directory = "./build"`.
+  No Worker script; Cloudflare serves the `build/` output as static assets.
+  *(Without this, `npx wrangler deploy` fails with no entry-point — that was the
+  original "Deploying" failure.)*
+- **`static/_redirects`** — `/* /404.html 200`, the SPA fallback (the build emits
+  `404.html`, not `index.html`); the assets server honors it.
 - **`.nvmrc`** — pins Node 22 for the Cloudflare build.
 - **`.github/workflows/ci.yml`** — `npm run check` (0/0) + `npm test` + build on
   every push/PR (quality gate; independent of deploy).
 
 ## One-time setup (Cloudflare dashboard)
 
-1. **Workers & Pages → Create → Pages → Connect to Git.**
-2. Pick `raskell-io/manabi`, production branch **`main`**.
-3. Build settings:
-   - **Framework preset:** SvelteKit (or "None")
-   - **Build command:** `npm run build`
-   - **Build output directory:** `build`
-   - Node version is read from `.nvmrc` (22); if needed, set env var
-     `NODE_VERSION=22`.
-4. **Save and Deploy.** Live at `https://manabi.pages.dev`; every push to `main`
-   redeploys automatically.
+Already done if your project's build shows **Build command** `npm run build` and
+**Deploy command** `npx wrangler deploy`. To set it up fresh:
+
+1. **Workers & Pages → Create → Connect to Git**, pick `raskell-io/manabi`,
+   branch **`main`**.
+2. Build settings: **Build command** `npm run build`, **Deploy command**
+   `npx wrangler deploy` (the default for a `wrangler.toml` project). Node version
+   comes from `.nvmrc` (22).
+3. **Save and Deploy** → live at `https://manabi.<subdomain>.workers.dev`; every
+   push to `main` redeploys automatically.
+
+If a build already failed at the Deploy step, just **Retry deployment** after
+`wrangler.toml` is in `main`.
 
 ### Custom domain (optional)
 

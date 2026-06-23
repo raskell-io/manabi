@@ -1,0 +1,15 @@
+# Cloudflare deploy config — Manabi is a static SPA served via Workers Static
+# Assets (the "Workers & Pages" build runs `npm run build` then `npx wrangler
+# deploy`). There is no Worker script: `assets.directory` points at the
+# adapter-static output and Cloudflare serves it directly.
+#
+# SPA routing is handled by `static/_redirects` (`/* /404.html 200`), which the
+# assets server honors; `not_found_handling` is the belt-and-suspenders fallback
+# (the build emits 404.html, not index.html).
+
+name = "manabi"
+compatibility_date = "2025-06-01"
+
+[assets]
+directory = "./build"
+not_found_handling = "404-page"
