@@ -23,20 +23,22 @@ describe('script sections', () => {
 		}
 	});
 
-	it('kanji is leveled by JLPT (N5/N4/N3)', () => {
+	it('kanji has the full JLPT N5/N4/N3 sets', () => {
 		const s = section('ja', 'kanji')!;
 		expect(s.kind).toBe('leveled');
 		expect(s.levels!.map((l) => l.label)).toEqual(['JLPT N5', 'JLPT N4', 'JLPT N3']);
-		expect(s.levels![0].glyphs.length).toBeGreaterThanOrEqual(45); // N5
-		expect(s.levels![1].glyphs.length).toBeGreaterThanOrEqual(20); // N4
+		expect(s.levels![0].glyphs.length).toBeGreaterThanOrEqual(75); // N5 ≈ 79
+		expect(s.levels![1].glyphs.length).toBeGreaterThanOrEqual(160); // N4 ≈ 166
+		expect(s.levels![2].glyphs.length).toBeGreaterThanOrEqual(350); // N3 ≈ 367
 	});
 
-	it('hanzi is leveled by HSK (1/2/3)', () => {
+	it('hanzi has the full HSK 1/2/3 character sets', () => {
 		const s = section('zh', 'hanzi')!;
 		expect(s.kind).toBe('leveled');
 		expect(s.levels!.map((l) => l.label)).toEqual(['HSK 1', 'HSK 2', 'HSK 3']);
-		expect(s.levels![0].glyphs.length).toBeGreaterThanOrEqual(40); // HSK 1
-		expect(s.levels![1].glyphs.length).toBeGreaterThanOrEqual(20); // HSK 2
+		expect(s.levels![0].glyphs.length).toBeGreaterThanOrEqual(170); // HSK 1 ≈ 178
+		expect(s.levels![1].glyphs.length).toBeGreaterThanOrEqual(150); // HSK 2 ≈ 168
+		expect(s.levels![2].glyphs.length).toBeGreaterThanOrEqual(250); // HSK 3 ≈ 272
 	});
 
 	it('has the full Hebrew alef-bet (22) plus 5 final forms', () => {

@@ -88,6 +88,16 @@ The service has `KeepAlive` (auto-restarts) and `RunAtLoad` (starts on login).
 Logs go to `~/Library/Logs/manabi.{out,err}.log`. To reach it from other devices
 (e.g. install the PWA on a phone), set `HOST=0.0.0.0` and use your machine's LAN IP.
 
+## Data & attribution
+
+The **Scripts** page's full kanji/hanzi sets are generated from open data via
+`tools/gen-scripts-data.mjs` (regenerate with `node tools/gen-scripts-data.mjs`):
+
+- Kanji readings & meanings — **KANJIDIC2** © EDRDG (CC BY-SA 4.0), with Tanos
+  JLPT levels, via [`davidluzgouveia/kanji-data`](https://github.com/davidluzgouveia/kanji-data).
+- HSK 2.0 word lists — [`drkameleon/complete-hsk-vocabulary`](https://github.com/drkameleon/complete-hsk-vocabulary).
+- Hanzi pinyin & definitions — [`skishore/makemeahanzi`](https://github.com/skishore/makemeahanzi) (Unihan-derived).
+
 ## Deploy
 
 Manabi deploys as a static SPA to **Cloudflare Pages** via Git integration:

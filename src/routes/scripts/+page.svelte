@@ -111,6 +111,13 @@
 			{#each active.glyphs ?? [] as glyph (glyph.char)}{@render cell(glyph)}{/each}
 		</div>
 	{/if}
+
+	{#if active.kind === 'leveled'}
+		<p class="credits">
+			Kanji data from KANJIDIC2 (© EDRDG, CC BY-SA) with Tanos JLPT levels; hanzi from
+			HSK word lists and makemeahanzi.
+		</p>
+	{/if}
 {/if}
 
 <style>
@@ -223,6 +230,12 @@
 	}
 	.block-label:first-of-type {
 		margin-top: 0;
+	}
+	.credits {
+		margin-top: 2rem;
+		font-size: 0.72rem;
+		color: var(--color-text-muted);
+		max-width: 40rem;
 	}
 	.kana-grid {
 		display: grid;
