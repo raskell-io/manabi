@@ -88,6 +88,14 @@ The service has `KeepAlive` (auto-restarts) and `RunAtLoad` (starts on login).
 Logs go to `~/Library/Logs/manabi.{out,err}.log`. To reach it from other devices
 (e.g. install the PWA on a phone), set `HOST=0.0.0.0` and use your machine's LAN IP.
 
+## Deploy
+
+Manabi deploys as a static SPA to **Cloudflare Pages**. CI/CD is wired up
+(`.github/workflows/`): every push to `main` runs `svelte-check` + tests + build,
+then deploys `build/` to Pages. See [DEPLOY.md](DEPLOY.md) for the one-time setup
+(create the `manabi` Pages project, add `CLOUDFLARE_API_TOKEN` /
+`CLOUDFLARE_ACCOUNT_ID` repo secrets, optional `manabi.raskell.io` custom domain).
+
 ## AI content workbench
 
 Set an OpenAI API key in **Settings**, then open **Workbench** to generate batches of
