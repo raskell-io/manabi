@@ -65,6 +65,29 @@ npx svelte-check   # type + a11y + css — must be 0/0
 
 **Invariant:** `npx svelte-check` returns `0 errors and 0 warnings`.
 
+## Self-host locally
+
+The app is a static SPA (`adapter-static`), so any static host works. `serve.mjs`
+is a tiny dependency-free server that serves `build/` with the SPA fallback:
+
+```bash
+npm run build
+PORT=4317 node serve.mjs      # → http://127.0.0.1:4317
+```
+
+On macOS, run it as a persistent login service with launchd:
+
+```bash
+# create ~/Library/LaunchAgents/io.raskell.manabi.plist pointing node at serve.mjs
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.raskell.manabi.plist
+launchctl print  gui/$(id -u)/io.raskell.manabi   # status
+launchctl bootout gui/$(id -u)/io.raskell.manabi   # stop & remove
+```
+
+The service has `KeepAlive` (auto-restarts) and `RunAtLoad` (starts on login).
+Logs go to `~/Library/Logs/manabi.{out,err}.log`. To reach it from other devices
+(e.g. install the PWA on a phone), set `HOST=0.0.0.0` and use your machine's LAN IP.
+
 ## AI content workbench
 
 Set an OpenAI API key in **Settings**, then open **Workbench** to generate batches of
