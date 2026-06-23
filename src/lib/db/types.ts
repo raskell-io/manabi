@@ -241,7 +241,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface ManabiDocument {
 	schemaVersion: number;
@@ -251,6 +251,8 @@ export interface ManabiDocument {
 	exerciseAttempts: Record<string, ExerciseAttempt>;
 	pronunciationAttempts: Record<string, PronunciationAttempt>;
 	contentDrafts: Record<string, ContentDraft>;
+	/** Seed item ids already applied, so new seeds upsert without re-adding deleted ones. */
+	seededIds: Record<string, boolean>;
 	settings: ManabiSettings;
 	[key: string]: unknown;
 }
@@ -264,6 +266,7 @@ export function createEmptyDocument(): ManabiDocument {
 		exerciseAttempts: {},
 		pronunciationAttempts: {},
 		contentDrafts: {},
+		seededIds: {},
 		settings: defaultSettings()
 	};
 }

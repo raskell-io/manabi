@@ -11,7 +11,7 @@ import * as Automerge from '@automerge/automerge';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 import { derived, writable, type Readable } from 'svelte/store';
 import { deleteBlob } from './blob-store';
-import { seedItems } from './seed';
+import { seedsToApply } from './seed';
 import { gradeDimension, isPass } from '$lib/srs/schedule';
 import { buildQueue, type QueueSummary } from '$lib/srs/queue';
 import {
@@ -112,36 +112,49 @@ export function snapshotQueue(): QueueSummary {
 export async function initDB(): Promise<void> {
 	try {
 		const saved = await idbGet<Uint8Array>(STORAGE_KEY);
-		if (saved) {
-			doc = Automerge.load<ManabiDocument>(saved);
-			doc = migrate(doc);
-		} else {
-			doc = Automerge.from<ManabiDocument>(createEmptyDocument());
-			doc = Automerge.change(doc, (d) => {
-				for (const item of seedItems()) d.learningItems[item.id] = stripUndefined(item);
-			});
-			await saveDoc();
-		}
+		doc = saved
+			? migrate(Automerge.load<ManabiDocument>(saved))
+			: Automerge.from<ManabiDocument>(createEmptyDocument());
+		applyNewSeeds();
 		docStore.set(doc);
+		await saveDoc();
 	} catch (err) {
 		console.error('Failed to initialize Manabi database:', err);
 		doc = Automerge.from<ManabiDocument>(createEmptyDocument());
+		applyNewSeeds();
 		docStore.set(doc);
 		await saveDoc();
 	}
 }
 
-/** Forward-only migrations. v1 is the initial schema. */
+/** Forward-only migrations. */
 function migrate(d: Automerge.Doc<ManabiDocument>): Automerge.Doc<ManabiDocument> {
 	let next = d;
-	if ((next.schemaVersion ?? 0) < 1) {
+	if ((next.schemaVersion ?? 0) < 2) {
 		next = Automerge.change(next, (doc) => {
-			doc.schemaVersion = SCHEMA_VERSION;
 			if (!doc.settings) doc.settings = defaultSettings();
+			if (!doc.seededIds) doc.seededIds = {};
+			doc.schemaVersion = SCHEMA_VERSION;
 		});
-		void saveDoc(next);
 	}
 	return next;
+}
+
+/**
+ * Idempotently add any built-in seed items not yet applied to this document.
+ * Tracked via `seededIds` so new releases' content reaches existing users
+ * without re-adding items they've since deleted.
+ */
+function applyNewSeeds(): void {
+	const missing = seedsToApply(doc.seededIds);
+	if (missing.length === 0) return;
+	doc = Automerge.change(doc, (d) => {
+		if (!d.seededIds) d.seededIds = {};
+		for (const it of missing) {
+			if (!d.learningItems[it.id]) d.learningItems[it.id] = stripUndefined(it);
+			d.seededIds[it.id] = true;
+		}
+	});
 }
 
 async function saveDoc(d: Automerge.Doc<ManabiDocument> = doc): Promise<void> {
