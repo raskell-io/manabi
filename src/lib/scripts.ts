@@ -156,7 +156,7 @@ const SECTIONS: Record<Language, ScriptSection[]> = {
 		{
 			id: 'hanzi',
 			title: 'Hanzi',
-			subtitle: 'Common characters by HSK level',
+			subtitle: 'Characters by HSK 3.0 level',
 			kind: 'leveled',
 			levels: [
 				{ label: 'HSK 1', glyphs: HANZI_HSK1 },

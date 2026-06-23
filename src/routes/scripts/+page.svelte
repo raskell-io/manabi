@@ -115,7 +115,7 @@
 	{#if active.kind === 'leveled'}
 		<p class="credits">
 			Kanji data from KANJIDIC2 (© EDRDG, CC BY-SA) with Tanos JLPT levels; hanzi from
-			HSK word lists and makemeahanzi.
+			HSK 3.0 word lists and makemeahanzi.
 		</p>
 	{/if}
 {/if}

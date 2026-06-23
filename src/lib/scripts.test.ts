@@ -32,13 +32,14 @@ describe('script sections', () => {
 		expect(s.levels![2].glyphs.length).toBeGreaterThanOrEqual(350); // N3 ≈ 367
 	});
 
-	it('hanzi has the full HSK 1/2/3 character sets', () => {
+	it('hanzi has the full HSK 3.0 level 1/2/3 character sets', () => {
 		const s = section('zh', 'hanzi')!;
 		expect(s.kind).toBe('leveled');
 		expect(s.levels!.map((l) => l.label)).toEqual(['HSK 1', 'HSK 2', 'HSK 3']);
-		expect(s.levels![0].glyphs.length).toBeGreaterThanOrEqual(170); // HSK 1 ≈ 178
-		expect(s.levels![1].glyphs.length).toBeGreaterThanOrEqual(150); // HSK 2 ≈ 168
-		expect(s.levels![2].glyphs.length).toBeGreaterThanOrEqual(250); // HSK 3 ≈ 272
+		// HSK 3.0 character syllabus: ~300 new per level (300 / 600 / 900 cumulative).
+		expect(s.levels![0].glyphs.length).toBeGreaterThanOrEqual(290); // HSK 1 ≈ 300
+		expect(s.levels![1].glyphs.length).toBeGreaterThanOrEqual(290); // HSK 2 ≈ 298
+		expect(s.levels![2].glyphs.length).toBeGreaterThanOrEqual(290); // HSK 3 ≈ 301
 	});
 
 	it('has the full Hebrew alef-bet (22) plus 5 final forms', () => {
