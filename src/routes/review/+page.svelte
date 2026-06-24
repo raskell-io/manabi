@@ -11,8 +11,8 @@
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
-	import { loadAudioManifest, hasPrerecorded, type AudioManifest } from '$lib/audio';
+	import { DIMENSION_LABELS, type Dimension, type Language, type LearningItem } from '$lib/db/types';
+	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 
@@ -24,7 +24,7 @@
 
 	let mode = $state<Mode | null>(null); // null → show the picker
 	let allTasks = $state<QueueTask[]>([]);
-	let manifest = $state<AudioManifest>({});
+	let manifests = $state<Record<string, LangManifest>>({});
 	let tasks = $state<QueueTask[]>([]);
 	let index = $state(0);
 	let pool: LearningItem[] = [];
@@ -37,7 +37,7 @@
 	// A listening task is only usable if the word has a prerecorded clip to play.
 	function listenable(t: QueueTask): boolean {
 		const it = getItem(t.itemId);
-		return !!it && hasPrerecorded(manifest, it.language, it.target);
+		return !!it && hasPrerecorded(manifests[it.language] ?? {}, it.target);
 	}
 	function tasksFor(m: Mode): QueueTask[] {
 		return allTasks.filter((t) => {
@@ -83,7 +83,15 @@
 	onMount(async () => {
 		pool = get(activeItems);
 		allTasks = snapshotQueue().tasks;
-		manifest = await loadAudioManifest();
+		const langs = new Set<Language>();
+		for (const t of allTasks) {
+			const it = getItem(t.itemId);
+			if (it) langs.add(it.language);
+		}
+		const loaded = await Promise.all(
+			[...langs].map(async (l) => [l, await loadAudioManifest(l)] as const)
+		);
+		manifests = Object.fromEntries(loaded);
 	});
 
 	function advance() {

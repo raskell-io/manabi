@@ -29,6 +29,7 @@ const TYPES = {
 	'.png': 'image/png',
 	'.mp3': 'audio/mpeg',
 	'.wav': 'audio/wav',
+	'.webm': 'audio/webm',
 	'.ico': 'image/x-icon',
 	'.wasm': 'application/wasm',
 	'.woff': 'font/woff',

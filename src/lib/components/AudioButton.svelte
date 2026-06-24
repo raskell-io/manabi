@@ -3,7 +3,7 @@
 	import { get } from 'svelte/store';
 	import { settings, updateItem } from '$lib/db/store';
 	import { canSynthesize } from '$lib/inference/router';
-	import { hasBlob, playRef, synthesizeToRef, prerecordedUrl, playUrl } from '$lib/audio';
+	import { hasBlob, playRef, synthesizeToRef, loadAudioManifest, hasPrerecorded, playPrerecorded } from '$lib/audio';
 	import type { Language } from '$lib/db/types';
 
 	let {
@@ -24,29 +24,28 @@
 
 	let busy = $state(false);
 	let error = $state('');
-	let preUrl = $state<string | null>(null);
+	let prerecorded = $state(false);
 
-	// Resolve a prerecorded clip for this exact text — the primary audio path
-	// (works with no in-browser TTS). Re-checks when text/language change.
+	// Check whether a prerecorded clip exists for this exact text — the primary
+	// audio path (works with no in-browser TTS). Re-checks when text/lang change.
 	$effect(() => {
 		const t = text;
 		const l = language;
-		preUrl = null;
-		prerecordedUrl(l, t).then((u) => {
-			if (t === text && l === language) preUrl = u;
+		prerecorded = false;
+		loadAudioManifest(l).then((m) => {
+			if (t === text && l === language) prerecorded = hasPrerecorded(m, t);
 		});
 	});
 
-	const available = $derived(preUrl !== null || canSynthesize(get(settings)) || !!audioRef);
+	const available = $derived(prerecorded || canSynthesize(get(settings)) || !!audioRef);
 
 	async function play() {
 		if (busy) return;
 		error = '';
 		busy = true;
 		try {
-			// 1. Prerecorded static clip (best quality, no TTS needed).
-			if (preUrl) {
-				await playUrl(preUrl);
+			// 1. Prerecorded clip from an audio pack (best quality, no TTS needed).
+			if (prerecorded && (await playPrerecorded(language, text))) {
 				return;
 			}
 			// 2. A previously synthesized clip cached on this device.

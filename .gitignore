@@ -21,3 +21,9 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Audio prerecording — local cache + logs (packs+manifests in static/audio ARE committed)
+tools/.audio-cache/
+tools/.gen-audio.log
+tools/.seed.mjs
+tools/.scripts.mjs
