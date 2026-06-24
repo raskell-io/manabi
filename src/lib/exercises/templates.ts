@@ -41,6 +41,11 @@ export interface Exercise {
 	/** Cloze sentence with the answer blanked out. */
 	clozeText?: string;
 	clozeMeaning?: string;
+	/** Full cloze sentence (answer filled in) + its reading and transliteration,
+	 *  revealed only after the learner has answered. */
+	clozeFull?: string;
+	clozeReading?: string;
+	clozeTranslit?: string;
 	/** Audio ref for audio prompts (resolved/synthesized by the runner). */
 	promptAudioRef?: string;
 	/** Multiple-choice options (absent for record-compare). */

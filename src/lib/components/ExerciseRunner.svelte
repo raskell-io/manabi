@@ -8,7 +8,7 @@
 	import { playPrerecorded } from '$lib/audio';
 	import { playCorrect, playWrong } from '$lib/sounds';
 	import type { Exercise, Choice } from '$lib/exercises/templates';
-	import type { LearningItem, SelfRating } from '$lib/db/types';
+	import { languageDir, type LearningItem, type SelfRating } from '$lib/db/types';
 
 	export type CompleteResult =
 		| { kind: 'mcq'; quality: number; chosen: string }
@@ -26,6 +26,16 @@
 
 	let selected = $state<Choice | null>(null);
 	const answered = $derived(selected !== null);
+
+	// Split the full cloze sentence around the answer so we can highlight the
+	// inserted word in the post-answer reveal.
+	const clozeParts = $derived.by(() => {
+		const full = exercise.clozeFull;
+		if (!full) return null;
+		const i = full.indexOf(item.target);
+		if (i < 0) return null;
+		return { before: full.slice(0, i), word: item.target, after: full.slice(i + item.target.length) };
+	});
 
 	// Auto-play the word when it appears (the script prompt of a reading card, or
 	// a listening card) — but not when it would give the answer away (recall /
@@ -166,6 +176,17 @@
 						{#if item.reading}<span class="reveal-reading">{item.reading}</span>{/if}
 						<span class="reveal-meaning">{item.meaning}</span>
 					</p>
+				{/if}
+
+				<!-- Cloze: reveal the full sentence with the answer filled in + its reading. -->
+				{#if exercise.type === 'cloze' && exercise.clozeFull}
+					<div class="cloze-reveal">
+						<p class="cloze-sentence" dir={languageDir(exercise.language)} lang={exercise.language}>
+							{#if clozeParts}{clozeParts.before}<strong>{clozeParts.word}</strong>{clozeParts.after}{:else}{exercise.clozeFull}{/if}
+						</p>
+						{#if exercise.clozeReading}<span class="reveal-reading">{exercise.clozeReading}</span>{/if}
+						{#if exercise.clozeTranslit}<span class="reveal-translit">{exercise.clozeTranslit}</span>{/if}
+					</div>
 				{/if}
 
 				{#if selected?.correct}
@@ -330,6 +351,28 @@
 	.reveal-meaning {
 		font-weight: 600;
 		font-size: 1.05rem;
+	}
+	.cloze-reveal {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		align-items: center;
+		margin: 0.6rem 0 0;
+	}
+	.cloze-sentence {
+		margin: 0;
+		font-family: var(--font-script);
+		font-size: 1.25rem;
+		line-height: 1.5;
+	}
+	.cloze-sentence strong {
+		color: var(--color-accent);
+		font-weight: 700;
+	}
+	.reveal-translit {
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
+		font-style: italic;
 	}
 	.grade-row {
 		display: flex;

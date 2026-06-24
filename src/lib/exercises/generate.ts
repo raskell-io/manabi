@@ -188,6 +188,9 @@ export function buildExercise(
 				promptMode: 'cloze',
 				clozeText: blanked,
 				clozeMeaning: example.meaning,
+				clozeFull: example.target,
+				clozeReading: example.reading,
+				clozeTranslit: example.transliteration,
 				choices,
 				answer: item.target
 			};
