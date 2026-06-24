@@ -14,17 +14,23 @@ export default defineConfig({
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
 			manifest: {
+				id: '/',
 				name: 'Manabi — Language Learning',
 				short_name: 'Manabi',
-				description: 'A local-first, reading-first language learning app',
+				description: 'A local-first, reading-first language learning app for Chinese, Japanese & Hebrew',
+				lang: 'en',
+				dir: 'ltr',
+				categories: ['education'],
 				theme_color: '#1e1e2e',
 				background_color: '#1e1e2e',
 				display: 'standalone',
 				scope: '/',
 				start_url: '/',
 				icons: [
-					{ src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-					{ src: '/icon-512.png', sizes: '512x512', type: 'image/png' }
+					{ src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+					{ src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+					{ src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png', purpose: 'any' },
+					{ src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
 				]
 			},
 			workbox: {
