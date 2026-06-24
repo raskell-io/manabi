@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { Check, X, BookOpen, Mic } from 'lucide-svelte';
+	import { Check, X, BookOpen, Mic, Headphones, Layers } from 'lucide-svelte';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
@@ -11,14 +11,20 @@
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSION_LABELS, type LearningItem } from '$lib/db/types';
+	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
+	import { loadAudioManifest, hasPrerecorded, type AudioManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 
-	type Mode = 'reading' | 'speaking' | 'both';
+	type Mode = 'reading' | 'listening' | 'speaking' | 'everything';
+
+	// Which dimensions each mode covers. Reading = text-only; Listening = hear &
+	// choose (needs a prerecorded clip); Speaking = record & compare.
+	const READING_DIMS = new Set<Dimension>(['recognition', 'recall', 'context']);
 
 	let mode = $state<Mode | null>(null); // null → show the picker
 	let allTasks = $state<QueueTask[]>([]);
+	let manifest = $state<AudioManifest>({});
 	let tasks = $state<QueueTask[]>([]);
 	let index = $state(0);
 	let pool: LearningItem[] = [];
@@ -27,17 +33,34 @@
 	let done = $state(false);
 
 	const started = $derived(mode !== null);
-	// "Speaking" only drills the pronunciation dimension (record-and-compare).
-	// "Reading" reviews everything as text. Audio playback / listening are off
-	// for now, so reading mode needs no audio.
-	const readingCount = $derived(allTasks.length);
-	const speakingCount = $derived(allTasks.filter((t) => t.dimension === 'pronunciation').length);
+
+	// A listening task is only usable if the word has a prerecorded clip to play.
+	function listenable(t: QueueTask): boolean {
+		const it = getItem(t.itemId);
+		return !!it && hasPrerecorded(manifest, it.language, it.target);
+	}
+	function tasksFor(m: Mode): QueueTask[] {
+		return allTasks.filter((t) => {
+			if (READING_DIMS.has(t.dimension)) return m === 'reading' || m === 'everything';
+			if (t.dimension === 'listening')
+				return (m === 'listening' || m === 'everything') && listenable(t);
+			if (t.dimension === 'pronunciation') return m === 'speaking' || m === 'everything';
+			return false;
+		});
+	}
+
+	const readingCount = $derived(tasksFor('reading').length);
+	const listeningCount = $derived(tasksFor('listening').length);
+	const speakingCount = $derived(tasksFor('speaking').length);
+	const everythingCount = $derived(tasksFor('everything').length);
 
 	let current = $derived(tasks[index]);
 	let item = $derived<LearningItem | undefined>(current ? getItem(current.itemId) : undefined);
-	// Only pronunciation, in a speaking-enabled mode, uses the mic (record-compare);
-	// everything else is text-only.
-	const taskAudio = $derived(mode !== 'reading' && current?.dimension === 'pronunciation');
+	// Listening (hear→word) and pronunciation (record-compare) use audio; the
+	// reading dimensions are text-only.
+	const taskAudio = $derived(
+		current?.dimension === 'listening' || current?.dimension === 'pronunciation'
+	);
 	let exercise = $derived<Exercise | null>(
 		current && item ? buildExercise(item, current.dimension, pool, { audio: taskAudio }) : null
 	);
@@ -47,7 +70,7 @@
 		index = 0;
 		correct = 0;
 		wrong = 0;
-		tasks = m === 'speaking' ? allTasks.filter((t) => t.dimension === 'pronunciation') : allTasks;
+		tasks = tasksFor(m);
 		done = tasks.length === 0;
 	}
 
@@ -57,9 +80,10 @@
 		allTasks = snapshotQueue().tasks;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		pool = get(activeItems);
 		allTasks = snapshotQueue().tasks;
+		manifest = await loadAudioManifest();
 	});
 
 	function advance() {
@@ -92,14 +116,19 @@
 			<p class="muted">Nothing's due right now. Add items in <a href="/items">Items</a>, browse
 				<a href="/vocab">Vocab</a>, or generate a batch in the <a href="/workbench">Workbench</a>.</p>
 		{:else}
-			<p class="muted">What do you want to practice? Audio playback isn't available right now —
-				<strong>Reading</strong> needs no microphone or audio.</p>
+			<p class="muted">What do you want to practice?</p>
 			<div class="modes">
-				<button class="mode-card" onclick={() => start('reading')}>
+				<button class="mode-card" onclick={() => start('reading')} disabled={readingCount === 0}>
 					<BookOpen size={22} />
 					<span class="m-title">Reading</span>
 					<span class="m-desc">Recognition, recall &amp; context — text only.</span>
 					<span class="m-count">{readingCount} {readingCount === 1 ? 'card' : 'cards'}</span>
+				</button>
+				<button class="mode-card" onclick={() => start('listening')} disabled={listeningCount === 0}>
+					<Headphones size={22} />
+					<span class="m-title">Listening</span>
+					<span class="m-desc">Hear the word and choose it.</span>
+					<span class="m-count">{listeningCount} {listeningCount === 1 ? 'card' : 'cards'}</span>
 				</button>
 				<button class="mode-card" onclick={() => start('speaking')} disabled={speakingCount === 0}>
 					<Mic size={22} />
@@ -107,11 +136,11 @@
 					<span class="m-desc">Record &amp; compare your pronunciation.</span>
 					<span class="m-count">{speakingCount} {speakingCount === 1 ? 'card' : 'cards'}</span>
 				</button>
-				<button class="mode-card" onclick={() => start('both')}>
-					<span class="m-icons"><BookOpen size={20} /><Mic size={20} /></span>
-					<span class="m-title">Reading + Speaking</span>
-					<span class="m-desc">Everything that's due.</span>
-					<span class="m-count">{readingCount} {readingCount === 1 ? 'card' : 'cards'}</span>
+				<button class="mode-card" onclick={() => start('everything')} disabled={everythingCount === 0}>
+					<Layers size={22} />
+					<span class="m-title">Everything</span>
+					<span class="m-desc">All of the above that's due.</span>
+					<span class="m-count">{everythingCount} {everythingCount === 1 ? 'card' : 'cards'}</span>
 				</button>
 			</div>
 		{/if}
@@ -263,10 +292,6 @@
 	.mode-card:disabled {
 		opacity: 0.45;
 		cursor: not-allowed;
-	}
-	.m-icons {
-		display: inline-flex;
-		gap: 0.2rem;
 	}
 	.m-title {
 		font-weight: 700;

@@ -15,10 +15,11 @@ import { synthesize } from '$lib/inference/router';
 // Generated offline with edge-tts; the manifest maps language → text → clip id.
 // This is the primary audio path: it works with no in-browser TTS at all.
 
-type AudioManifest = Record<string, Record<string, string>>;
+export type AudioManifest = Record<string, Record<string, string>>;
 let manifestPromise: Promise<AudioManifest> | null = null;
 
-function loadManifest(): Promise<AudioManifest> {
+/** Load (and cache) the prerecorded-audio manifest: language → text → clip id. */
+export function loadAudioManifest(): Promise<AudioManifest> {
 	if (!manifestPromise) {
 		manifestPromise = fetch(`${base}/audio/manifest.json`)
 			.then((r) => (r.ok ? r.json() : {}))
@@ -27,9 +28,14 @@ function loadManifest(): Promise<AudioManifest> {
 	return manifestPromise;
 }
 
+/** Whether a prerecorded clip exists for this exact text (sync, given a manifest). */
+export function hasPrerecorded(manifest: AudioManifest, language: Language, text: string): boolean {
+	return !!manifest[language]?.[text.trim()];
+}
+
 /** URL of a prerecorded clip for this exact text, or null if none exists. */
 export async function prerecordedUrl(language: Language, text: string): Promise<string | null> {
-	const id = (await loadManifest())[language]?.[text.trim()];
+	const id = (await loadAudioManifest())[language]?.[text.trim()];
 	return id ? `${base}/audio/${id}.mp3` : null;
 }
 
