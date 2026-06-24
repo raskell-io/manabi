@@ -6,8 +6,7 @@
 		Home, GraduationCap, BookOpen, Table2, BookA, Library, LayoutGrid, BarChart3,
 		Sparkles, Settings as SettingsIcon, Menu, X, Sun, Moon
 	} from 'lucide-svelte';
-	import { initDB, settings, setActiveLanguage, updateSettings } from '$lib/db/store';
-	import { LANGUAGES, type Language } from '$lib/db/types';
+	import { initDB, settings, updateSettings } from '$lib/db/store';
 
 	let { children } = $props();
 	let ready = $state(false);
@@ -75,11 +74,6 @@
 			{#if drawerOpen}<X size={20} />{:else}<Menu size={20} />{/if}
 		</button>
 		<a href="/" class="tb-brand"><span class="logo">学</span><span class="name">Manabi</span></a>
-		<div class="tb-lang">
-			{#each LANGUAGES as l (l.code)}
-				<button class="lang" class:active={$settings.activeLanguage === l.code} onclick={() => setActiveLanguage(l.code as Language)} title={l.name}>{l.native}</button>
-			{/each}
-		</div>
 		<button class="icon-btn" onclick={toggleTheme} aria-label="Toggle light/dark theme">
 			{#if isDark}<Sun size={18} />{:else}<Moon size={18} />{/if}
 		</button>
@@ -90,12 +84,6 @@
 			<div class="brand">
 				<span class="logo">学</span>
 				<span class="name">Manabi</span>
-			</div>
-
-			<div class="lang-switch">
-				{#each LANGUAGES as l (l.code)}
-					<button class="lang" class:active={$settings.activeLanguage === l.code} onclick={() => setActiveLanguage(l.code as Language)} title={l.name}>{l.native}</button>
-				{/each}
 			</div>
 
 			<nav>
@@ -163,26 +151,6 @@
 	.name {
 		font-weight: 700;
 		font-size: 1.15rem;
-	}
-	.lang-switch,
-	.tb-lang {
-		display: flex;
-		gap: 0.4rem;
-	}
-	.lang {
-		flex: 1;
-		padding: 0.4rem 0;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text-muted);
-		font-family: var(--font-script);
-		font-size: 0.95rem;
-	}
-	.lang.active {
-		border-color: var(--color-accent);
-		color: var(--color-accent);
-		font-weight: 700;
 	}
 	nav {
 		display: flex;
@@ -273,12 +241,6 @@
 		.tb-brand .name {
 			font-size: 1.05rem;
 		}
-		.tb-lang .lang {
-			min-width: 2.2rem;
-			flex: none;
-			padding: 0.3rem 0.4rem;
-			font-size: 0.85rem;
-		}
 
 		.shell {
 			display: block;
@@ -303,9 +265,8 @@
 		.sidebar.open {
 			transform: none;
 		}
-		/* In the mobile drawer the brand/lang/theme live in the top bar instead. */
+		/* In the mobile drawer the brand and theme toggle live in the top bar instead. */
 		.sidebar .brand,
-		.sidebar .lang-switch,
 		.sidebar .theme-row {
 			display: none;
 		}

@@ -28,9 +28,11 @@ download the first time you use them, then stay cached.
 
 ## Choosing a language
 
-The language switcher is in the top bar (mobile) or the sidebar (desktop): **中 / 日 / עב**.
-Everything — your due queue, vocabulary, scripts, and reading material — is scoped to the
-active language. Your progress in each language is tracked separately.
+The **home screen** (`/`) is the language selector: tap one of the **中文 / 日本語 / עברית**
+cards to make it the active language. Each card shows how many items are due in that
+language, so you can see at a glance where work is waiting. Everything — your due queue,
+vocabulary, scripts, and reading material — is scoped to the active language, and your
+progress in each is tracked separately.
 
 ## The learning model
 

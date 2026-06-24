@@ -13,12 +13,13 @@ import { derived, writable, type Readable } from 'svelte/store';
 import { deleteBlob } from './blob-store';
 import { passagesToApply, seedsToApply } from './seed';
 import { gradeDimension, isPass } from '$lib/srs/schedule';
-import { buildQueue, type QueueSummary } from '$lib/srs/queue';
+import { buildQueue, queueCounts, type QueueSummary } from '$lib/srs/queue';
 import {
 	createEmptyDocument,
 	defaultSettings,
 	freshSkillMemory,
 	generateId,
+	LANGUAGES,
 	SCHEMA_VERSION,
 	type ContentDraft,
 	type Dimension,
@@ -123,6 +124,27 @@ export const reviewSummary: Readable<QueueSummary> = derived(docStore, ($doc) =>
 	if (!$doc) return { dueReviews: 0, newItems: 0, tasks: [] };
 	return buildQueue($doc, $doc.settings);
 });
+
+/** Per-language due/new counts (for the home-page language selector cards). */
+export type LanguageCount = { dueReviews: number; newItems: number; published: number };
+export const languageCounts: Readable<Record<Language, LanguageCount>> = derived(
+	docStore,
+	($doc) => {
+		const out = {} as Record<Language, LanguageCount>;
+		for (const { code } of LANGUAGES) {
+			if (!$doc) {
+				out[code] = { dueReviews: 0, newItems: 0, published: 0 };
+				continue;
+			}
+			const { dueReviews, newItems } = queueCounts($doc, { ...$doc.settings, activeLanguage: code });
+			const published = Object.values($doc.learningItems).filter(
+				(it) => it.language === code && it.status === 'published'
+			).length;
+			out[code] = { dueReviews, newItems, published };
+		}
+		return out;
+	}
+);
 
 /** Build a stable queue snapshot for a review session (call once at start). */
 export function snapshotQueue(): QueueSummary {

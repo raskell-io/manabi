@@ -70,9 +70,9 @@ src/
   app.html              HTML shell — PWA meta, icons, manifest link
   app.css               Catppuccin theme (CSS variables), light/dark
   routes/
-    +layout.svelte      app shell: nav, language switch, theme, boot, SW registration
+    +layout.svelte      app shell: nav, theme, boot, SW registration
     +layout.ts          ssr=false, prerender=false (SPA)
-    +page.svelte        home / today's plan
+    +page.svelte        home / today's plan + the language-selector cards
     review/             the core review loop (mode picker + ExerciseRunner)
     read/, read/[id]/   graded reading + sentence mining
     scripts/            kana/kanji/hanzi/alef-bet/tones reference tables
