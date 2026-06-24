@@ -114,11 +114,11 @@
 		<ul class="list">
 			{#each shown as w (w.t)}
 				<li>
-					<span class="word"><ScriptText text={w.t} language={lang} size="lg" /></span>
-					<div class="info">
-						<span class="reading">{w.r}</span>
-						<span class="meaning">{w.m}</span>
+					<div class="word-col">
+						{#if w.r}<span class="reading">{w.r}</span>{/if}
+						<ScriptText text={w.t} language={lang} size="lg" />
 					</div>
+					<span class="meaning">{w.m}</span>
 					<button class="study" class:done={added.has(w.t)} onclick={() => add(w)} title="Add this word to your spaced-repetition reviews">
 						{#if added.has(w.t)}<Check size={15} /> Added{:else}<Plus size={15} /> Add{/if}
 					</button>
@@ -248,18 +248,17 @@
 		border-radius: 0.55rem;
 		background: var(--color-bg-secondary);
 	}
-	.word {
-		min-width: 0;
-	}
-	.info {
+	.word-col {
 		display: flex;
 		flex-direction: column;
-		gap: 0.1rem;
+		align-items: flex-start;
+		gap: 0.05rem;
 		min-width: 0;
+		line-height: 1.15;
 	}
 	.reading {
 		color: var(--color-text-muted);
-		font-size: 0.85rem;
+		font-size: 0.8rem;
 	}
 	.meaning {
 		color: var(--color-text);
