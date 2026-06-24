@@ -3,7 +3,7 @@
 	import { get } from 'svelte/store';
 	import { settings, updateItem } from '$lib/db/store';
 	import { canSynthesize } from '$lib/inference/router';
-	import { hasBlob, playRef, synthesizeToRef } from '$lib/audio';
+	import { hasBlob, playRef, synthesizeToRef, prerecordedUrl, playUrl } from '$lib/audio';
 	import type { Language } from '$lib/db/types';
 
 	let {
@@ -24,20 +24,37 @@
 
 	let busy = $state(false);
 	let error = $state('');
+	let preUrl = $state<string | null>(null);
 
-	const available = $derived(canSynthesize(get(settings)) || !!audioRef);
+	// Resolve a prerecorded clip for this exact text — the primary audio path
+	// (works with no in-browser TTS). Re-checks when text/language change.
+	$effect(() => {
+		const t = text;
+		const l = language;
+		preUrl = null;
+		prerecordedUrl(l, t).then((u) => {
+			if (t === text && l === language) preUrl = u;
+		});
+	});
+
+	const available = $derived(preUrl !== null || canSynthesize(get(settings)) || !!audioRef);
 
 	async function play() {
 		if (busy) return;
 		error = '';
 		busy = true;
 		try {
-			// Cached clip first.
+			// 1. Prerecorded static clip (best quality, no TTS needed).
+			if (preUrl) {
+				await playUrl(preUrl);
+				return;
+			}
+			// 2. A previously synthesized clip cached on this device.
 			if (audioRef && (await hasBlob(audioRef))) {
 				await playRef(audioRef);
 				return;
 			}
-			// Otherwise synthesize, cache, and (optionally) attach to the item.
+			// 3. Fall back to on-the-fly synthesis (cache + attach to the item).
 			const ref = await synthesizeToRef(text, language, get(settings));
 			if (!ref) {
 				error = 'No audio';

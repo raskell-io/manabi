@@ -27,6 +27,8 @@ const TYPES = {
 	'.webmanifest': 'application/manifest+json; charset=utf-8',
 	'.svg': 'image/svg+xml',
 	'.png': 'image/png',
+	'.mp3': 'audio/mpeg',
+	'.wav': 'audio/wav',
 	'.ico': 'image/x-icon',
 	'.wasm': 'application/wasm',
 	'.woff': 'font/woff',
