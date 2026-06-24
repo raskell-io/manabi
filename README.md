@@ -20,6 +20,13 @@ Built on the same stack as [kurumi](../kurumi): **SvelteKit 2 + Svelte 5 runes, 
 CSS 4, Automerge CRDTs over IndexedDB, transformers.js, OpenAI fallback, adapter-static
 PWA**. No server, no database — your data lives in your browser.
 
+> **Full documentation lives in [`docs/`](./docs/)** — a [user guide](./docs/user-guide.md)
+> plus dev-centric deep dives on [architecture](./docs/architecture.md), the
+> [data model](./docs/data-model.md), the [SRS engine](./docs/srs.md), the
+> [content](./docs/content.md) and [audio](./docs/audio.md) pipelines, the
+> [AI workbench](./docs/ai-workbench.md), [PWA & deployment](./docs/pwa-and-deployment.md),
+> and [extending the app](./docs/development.md).
+
 ## Core ideas
 
 - **Items, not lessons.** The atomic unit is a `LearningItem` (word / phrase / sentence /
