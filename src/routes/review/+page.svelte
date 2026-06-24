@@ -5,21 +5,24 @@
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
+		activeLanguage,
 		gradeItem,
 		getItem,
+		getSkillMemory,
 		recordPronunciationAttempt,
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSION_LABELS, type Dimension, type Language, type LearningItem } from '$lib/db/types';
+	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 
 	type Mode = 'reading' | 'listening' | 'speaking' | 'everything';
 
-	// Which dimensions each mode covers. Reading = text-only; Listening = hear &
-	// choose (needs a prerecorded clip); Speaking = record & compare.
+	// Reading is the spaced-repetition core (text-only skills, due-scheduled).
+	// Listening & Speaking are dead-simple practice over ANY of your words that
+	// have a recorded clip — always available, no unlock and no due-date gating.
 	const READING_DIMS = new Set<Dimension>(['recognition', 'recall', 'context']);
 
 	let mode = $state<Mode | null>(null); // null → show the picker
@@ -27,32 +30,41 @@
 	let manifests = $state<Record<string, LangManifest>>({});
 	let tasks = $state<QueueTask[]>([]);
 	let index = $state(0);
-	let pool: LearningItem[] = [];
+	let pool = $state<LearningItem[]>([]);
 	let correct = $state(0);
 	let wrong = $state(0);
 	let done = $state(false);
 
 	const started = $derived(mode !== null);
 
-	// A listening task is only usable if the word has a prerecorded clip to play.
-	function listenable(t: QueueTask): boolean {
-		const it = getItem(t.itemId);
-		return !!it && hasPrerecorded(manifests[it.language] ?? {}, it.target);
+	// Your words that have a prerecorded clip — the pool for audio practice.
+	const audioPool = $derived(
+		pool.filter((it) => hasPrerecorded(manifests[it.language] ?? {}, it.target))
+	);
+
+	function isNew(itemId: string, dim: Dimension): boolean {
+		return !getSkillMemory(itemId)?.dims[dim]?.introduced;
+	}
+	function readingTasks(): QueueTask[] {
+		return allTasks.filter((t) => READING_DIMS.has(t.dimension));
+	}
+	// Audio practice over every clip-having word, un-introduced ones first.
+	function audioTasks(dim: Dimension): QueueTask[] {
+		return audioPool
+			.map((it) => ({ itemId: it.id, dimension: dim, isNew: isNew(it.id, dim) }))
+			.sort((a, b) => Number(b.isNew) - Number(a.isNew));
 	}
 	function tasksFor(m: Mode): QueueTask[] {
-		return allTasks.filter((t) => {
-			if (READING_DIMS.has(t.dimension)) return m === 'reading' || m === 'everything';
-			if (t.dimension === 'listening')
-				return (m === 'listening' || m === 'everything') && listenable(t);
-			if (t.dimension === 'pronunciation') return m === 'speaking' || m === 'everything';
-			return false;
-		});
+		if (m === 'reading') return readingTasks();
+		if (m === 'listening') return audioTasks('listening');
+		if (m === 'speaking') return audioTasks('pronunciation');
+		return [...readingTasks(), ...audioTasks('listening'), ...audioTasks('pronunciation')];
 	}
 
-	const readingCount = $derived(tasksFor('reading').length);
-	const listeningCount = $derived(tasksFor('listening').length);
-	const speakingCount = $derived(tasksFor('speaking').length);
-	const everythingCount = $derived(tasksFor('everything').length);
+	const readingCount = $derived(readingTasks().length);
+	const listeningCount = $derived(audioPool.length);
+	const speakingCount = $derived(audioPool.length);
+	const everythingCount = $derived(readingCount + listeningCount + speakingCount);
 
 	let current = $derived(tasks[index]);
 	let item = $derived<LearningItem | undefined>(current ? getItem(current.itemId) : undefined);
@@ -83,15 +95,10 @@
 	onMount(async () => {
 		pool = get(activeItems);
 		allTasks = snapshotQueue().tasks;
-		const langs = new Set<Language>();
-		for (const t of allTasks) {
-			const it = getItem(t.itemId);
-			if (it) langs.add(it.language);
-		}
-		const loaded = await Promise.all(
-			[...langs].map(async (l) => [l, await loadAudioManifest(l)] as const)
-		);
-		manifests = Object.fromEntries(loaded);
+		// Load the active language's audio index so Listening/Speaking know which
+		// words are playable (the pool is all one language).
+		const lang = get(activeLanguage);
+		manifests = { [lang]: await loadAudioManifest(lang) };
 	});
 
 	function advance() {
@@ -120,8 +127,8 @@
 {#if !started}
 	<div class="picker">
 		<h1>Review</h1>
-		{#if allTasks.length === 0}
-			<p class="muted">Nothing's due right now. Add items in <a href="/items">Items</a>, browse
+		{#if everythingCount === 0}
+			<p class="muted">Nothing to practice yet. Add items in <a href="/items">Items</a>, browse
 				<a href="/vocab">Vocab</a>, or generate a batch in the <a href="/workbench">Workbench</a>.</p>
 		{:else}
 			<p class="muted">What do you want to practice?</p>

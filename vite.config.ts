@@ -41,6 +41,17 @@ export default defineConfig({
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MiB for Automerge WASM
 				runtimeCaching: [
 					{
+						// Audio index + vocab word lists: small JSON fetched on demand.
+						// Cache them so Listening and Vocab keep working offline / on a
+						// flaky connection instead of silently coming up empty.
+						urlPattern: /\/(audio\/manifest-[a-z]+|wordlists\/[^/]+)\.json$/,
+						handler: 'StaleWhileRevalidate',
+						options: {
+							cacheName: 'manabi-data',
+							expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 60 }
+						}
+					},
+					{
 						urlPattern: /^https:\/\/api\.openai\.com\/.*/i,
 						handler: 'NetworkOnly'
 					},

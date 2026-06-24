@@ -57,10 +57,13 @@ repetition, so you review exactly what you are about to forget.
 - **Home (`/`)** — today's plan: how many new items and reviews are due, with a "Start
   review" button.
 - **Review (`/review`)** — the core loop. Pick a mode and answer cards:
-  - **Reading** — text-only recognition, recall, and context (cloze) exercises.
-  - **Listening** — hear a word and choose it. Only offered for words that have audio.
-  - **Speaking** — record yourself and self-rate your pronunciation against the native clip.
-  - **Everything** — all of the above that is due.
+  - **Reading** — text-only recognition, recall, and context (cloze) exercises, scheduled
+    by spaced repetition (what's due).
+  - **Listening** — hear a word and choose it. Simple practice over **any** of your words
+    that have audio — always available, no need to study them first.
+  - **Speaking** — record yourself and self-rate against the native clip. Also available for
+    any of your words that have audio.
+  - **Everything** — all of the above together.
   Grading buttons (Hard / Good / Easy) are optional; you can keep them off and just mark
   right/wrong. Keyboard shortcuts work throughout.
 - **Read (`/read`)** — graded reading material: natural conversations and short
