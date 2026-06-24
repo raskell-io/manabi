@@ -143,6 +143,13 @@ buildExercise(item, dimension, pool, { audio, rng })
 `CompleteResult` back to the page, which calls `gradeItem` (MCQ/cloze) or
 `recordPronunciationAttempt` (speaking).
 
+**Audio feedback.** On mount, the runner auto-plays the word when it is on screen and
+won't give the answer away (the recognition `script` prompt and listening `audio` prompt;
+not recall/cloze/record-compare); recognition cards also get a replay button. Answering an
+MCQ plays a short synthesized chime — a bright rising triad for correct, a soft descending
+tone for wrong — from [`$lib/sounds.ts`](../src/lib/sounds.ts) (Web Audio, no asset files,
+tweakable by editing the notes).
+
 ## Extending the scheduler
 
 - **Tune the algorithm** (intervals, ease floor, lapse behavior): edit `gradeDimension` and

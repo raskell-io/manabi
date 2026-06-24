@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { Check, X } from 'lucide-svelte';
 	import AudioButton from './AudioButton.svelte';
 	import Recorder from './Recorder.svelte';
 	import ScriptText from './ScriptText.svelte';
 	import { settings } from '$lib/db/store';
+	import { playPrerecorded } from '$lib/audio';
+	import { playCorrect, playWrong } from '$lib/sounds';
 	import type { Exercise, Choice } from '$lib/exercises/templates';
 	import type { LearningItem, SelfRating } from '$lib/db/types';
 
@@ -24,9 +27,21 @@
 	let selected = $state<Choice | null>(null);
 	const answered = $derived(selected !== null);
 
+	// Auto-play the word when it appears (the script prompt of a reading card, or
+	// a listening card) — but not when it would give the answer away (recall /
+	// cloze / record-compare). Runs once per card (keyed remount in the parent).
+	onMount(() => {
+		const autoPlay =
+			exercise.type !== 'record-compare' &&
+			(exercise.promptMode === 'script' || exercise.promptMode === 'audio');
+		if (autoPlay) void playPrerecorded(item.language, item.target);
+	});
+
 	function choose(c: Choice) {
 		if (answered) return;
 		selected = c;
+		if (c.correct) playCorrect();
+		else playWrong();
 	}
 
 	function finish(quality: number) {
@@ -92,6 +107,7 @@
 			{#if exercise.promptReading}
 				<div class="reading">{exercise.promptReading}</div>
 			{/if}
+			<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play word" />
 		{:else if exercise.promptMode === 'reading'}
 			<div class="big-reading">{exercise.promptReading}</div>
 			{#if exercise.promptMeaning}<div class="reading">{exercise.promptMeaning}</div>{/if}
