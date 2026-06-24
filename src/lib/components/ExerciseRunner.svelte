@@ -138,6 +138,21 @@
 			<div class="grade">
 				{#if selected?.correct}
 					<p class="feedback ok">Correct</p>
+				{:else}
+					<p class="feedback no">
+						Answer: <ScriptText text={exercise.answer} language={exercise.language} size="sm" />
+					</p>
+				{/if}
+
+				<!-- Listening: confirm what the word was by revealing its reading + meaning. -->
+				{#if exercise.type === 'audio-to-word'}
+					<p class="reveal">
+						{#if item.reading}<span class="reveal-reading">{item.reading}</span>{/if}
+						<span class="reveal-meaning">{item.meaning}</span>
+					</p>
+				{/if}
+
+				{#if selected?.correct}
 					{#if $settings.gradeButtons}
 						<div class="grade-row">
 							<button class="g hard" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
@@ -150,9 +165,6 @@
 						</div>
 					{/if}
 				{:else}
-					<p class="feedback no">
-						Answer: <ScriptText text={exercise.answer} language={exercise.language} size="sm" />
-					</p>
 					<div class="grade-row">
 						<button class="g again" onclick={() => finish(0)}>Continue <kbd>↵</kbd></button>
 					</div>
@@ -287,6 +299,21 @@
 	}
 	.feedback.no {
 		color: var(--color-danger);
+	}
+	.reveal {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		align-items: center;
+		margin: 0.6rem 0 0;
+	}
+	.reveal-reading {
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+	.reveal-meaning {
+		font-weight: 600;
+		font-size: 1.05rem;
 	}
 	.grade-row {
 		display: flex;

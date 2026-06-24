@@ -126,6 +126,9 @@ buildExercise(item, dimension, pool, { audio, rng })
 - **MCQ** exercises (recognition, listening, recall) pick the correct answer plus
   distractors from `pool` — preferring items of the **same kind / level / tags / language**
   so wrong options are plausible, not random.
+  - The **listening** drill (`audio-to-word`) hides the reading on each option (so the
+    answer is decided by ear, not read), and reveals the word's reading + translation after
+    you answer, to confirm what you heard.
 - **Cloze** (context) blanks the target inside one of its example sentences.
 - **Record-and-compare** (pronunciation) plays the native clip and records you; you
   self-rate `bad | okay | good`.

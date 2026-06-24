@@ -134,10 +134,12 @@ export function buildExercise(
 			};
 		}
 		case 'audio-to-word': {
+			// Listening drill: hide the reading on each option so the answer is not
+			// given away in text — it should be decided by ear.
 			const choices = shuffle(
 				[
-					choice(item.target, item.reading, true, item.id),
-					...distractors.map((d) => choice(d.target, d.reading, false, d.id))
+					choice(item.target, undefined, true, item.id),
+					...distractors.map((d) => choice(d.target, undefined, false, d.id))
 				],
 				rng
 			);
