@@ -57,7 +57,34 @@ const server = createServer(async (req, res) => {
 
 		if (info?.isFile()) {
 			const type = TYPES[extname(filePath)] || 'application/octet-stream';
-			return send(res, 200, await readFile(filePath), type);
+			const buf = await readFile(filePath);
+			const size = buf.length;
+			// HTTP Range support — required for media seeking (audio sprite slices).
+			const range = req.headers.range;
+			const m = range && /^bytes=(\d*)-(\d*)$/.exec(range);
+			if (m) {
+				const start = m[1] ? parseInt(m[1], 10) : 0;
+				const end = m[2] ? parseInt(m[2], 10) : size - 1;
+				if (start <= end && end < size) {
+					res.writeHead(206, {
+						'Content-Type': type,
+						'Accept-Ranges': 'bytes',
+						'Content-Range': `bytes ${start}-${end}/${size}`,
+						'Content-Length': end - start + 1,
+						'Cache-Control': 'no-cache'
+					});
+					res.end(buf.subarray(start, end + 1));
+					return;
+				}
+			}
+			res.writeHead(200, {
+				'Content-Type': type,
+				'Accept-Ranges': 'bytes',
+				'Content-Length': size,
+				'Cache-Control': 'no-cache'
+			});
+			res.end(buf);
+			return;
 		}
 
 		// SPA fallback — serve index.html with a 200 so the client app boots.
