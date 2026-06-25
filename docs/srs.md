@@ -136,7 +136,8 @@ buildExercise(item, dimension, pool, { audio, rng })
     you answer, to confirm what you heard.
 - **Cloze** (context) blanks the target inside one of its example sentences; after you
   answer, the blank is **filled in place** (answer highlighted) with the sentence's
-  reading/transliteration shown directly beneath it.
+  reading/transliteration beneath it, the full sentence's clip **auto-plays** (the seed
+  example sentences are prerecorded), and a replay button is shown.
 - **Record-and-compare** (pronunciation) plays the native clip and records you; you
   self-rate `bad | okay | good`.
 - `rng` is injectable, so distractor selection is deterministic in tests.

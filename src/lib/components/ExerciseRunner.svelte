@@ -62,6 +62,12 @@
 		selected = c;
 		if (c.correct) playCorrect();
 		else playWrong();
+		// Cloze: play the full sentence once answered (after the chime rings).
+		if (exercise.type === 'cloze' && exercise.clozeFull) {
+			const lang = exercise.language;
+			const text = exercise.clozeFull;
+			setTimeout(() => void playPrerecorded(lang, text), 350);
+		}
 	}
 
 	function finish(quality: number) {
@@ -146,6 +152,7 @@
 				</p>
 				{#if exercise.clozeReading}<div class="reading">{exercise.clozeReading}</div>{/if}
 				{#if exercise.clozeTranslit}<div class="translit">{exercise.clozeTranslit}</div>{/if}
+				<AudioButton text={exercise.clozeFull} language={exercise.language} label="Play sentence" />
 			{:else}
 				<ScriptText text={exercise.clozeText ?? ''} language={exercise.language} size="lg" />
 			{/if}
