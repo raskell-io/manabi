@@ -8,7 +8,7 @@
 	import { playPrerecorded } from '$lib/audio';
 	import { playCorrect, playWrong } from '$lib/sounds';
 	import type { Exercise, Choice } from '$lib/exercises/templates';
-	import { languageDir, type LearningItem, type SelfRating } from '$lib/db/types';
+	import { languageDir, stripNiqqud, type LearningItem, type SelfRating } from '$lib/db/types';
 
 	export type CompleteResult =
 		| { kind: 'mcq'; quality: number; chosen: string }
@@ -27,14 +27,24 @@
 	let selected = $state<Choice | null>(null);
 	const answered = $derived(selected !== null);
 
-	// Split the full cloze sentence around the answer so we can highlight the
-	// inserted word in the post-answer reveal.
+	// Respect the Hebrew "hide vowels" setting in text we render by hand (ScriptText
+	// does this automatically, but here we split the sentence to highlight the word).
+	function vowelAware(t: string): string {
+		return exercise.language === 'he' && $settings.hideHebrewVowels ? stripNiqqud(t) : t;
+	}
+
+	// Split the full cloze sentence around the answer so we can fill the blank in
+	// place and highlight the inserted word once answered.
 	const clozeParts = $derived.by(() => {
 		const full = exercise.clozeFull;
 		if (!full) return null;
 		const i = full.indexOf(item.target);
 		if (i < 0) return null;
-		return { before: full.slice(0, i), word: item.target, after: full.slice(i + item.target.length) };
+		return {
+			before: vowelAware(full.slice(0, i)),
+			word: vowelAware(item.target),
+			after: vowelAware(full.slice(i + item.target.length))
+		};
 	});
 
 	// Auto-play the word when it appears (the script prompt of a reading card, or
@@ -129,8 +139,17 @@
 				<span class="hint">Tap to listen</span>
 			</div>
 		{:else if exercise.promptMode === 'cloze'}
-			<ScriptText text={exercise.clozeText ?? ''} language={exercise.language} size="lg" />
-			{#if exercise.clozeMeaning}<div class="reading">“{exercise.clozeMeaning}”</div>{/if}
+			{#if answered && exercise.clozeFull}
+				<!-- Answered: complete the sentence in place, with the reading beneath it. -->
+				<p class="cloze-sentence" dir={languageDir(exercise.language)} lang={exercise.language}>
+					{#if clozeParts}{clozeParts.before}<strong>{clozeParts.word}</strong>{clozeParts.after}{:else}{vowelAware(exercise.clozeFull ?? '')}{/if}
+				</p>
+				{#if exercise.clozeReading}<div class="reading">{exercise.clozeReading}</div>{/if}
+				{#if exercise.clozeTranslit}<div class="translit">{exercise.clozeTranslit}</div>{/if}
+			{:else}
+				<ScriptText text={exercise.clozeText ?? ''} language={exercise.language} size="lg" />
+			{/if}
+			{#if exercise.clozeMeaning}<div class="meaning-line">“{exercise.clozeMeaning}”</div>{/if}
 		{/if}
 	</div>
 
@@ -176,17 +195,6 @@
 						{#if item.reading}<span class="reveal-reading">{item.reading}</span>{/if}
 						<span class="reveal-meaning">{item.meaning}</span>
 					</p>
-				{/if}
-
-				<!-- Cloze: reveal the full sentence with the answer filled in + its reading. -->
-				{#if exercise.type === 'cloze' && exercise.clozeFull}
-					<div class="cloze-reveal">
-						<p class="cloze-sentence" dir={languageDir(exercise.language)} lang={exercise.language}>
-							{#if clozeParts}{clozeParts.before}<strong>{clozeParts.word}</strong>{clozeParts.after}{:else}{exercise.clozeFull}{/if}
-						</p>
-						{#if exercise.clozeReading}<span class="reveal-reading">{exercise.clozeReading}</span>{/if}
-						{#if exercise.clozeTranslit}<span class="reveal-translit">{exercise.clozeTranslit}</span>{/if}
-					</div>
 				{/if}
 
 				{#if selected?.correct}
@@ -352,26 +360,23 @@
 		font-weight: 600;
 		font-size: 1.05rem;
 	}
-	.cloze-reveal {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		align-items: center;
-		margin: 0.6rem 0 0;
-	}
 	.cloze-sentence {
 		margin: 0;
 		font-family: var(--font-script);
-		font-size: 1.25rem;
-		line-height: 1.5;
+		font-size: 2.25rem;
+		line-height: 1.35;
 	}
 	.cloze-sentence strong {
 		color: var(--color-accent);
 		font-weight: 700;
 	}
-	.reveal-translit {
+	.translit {
 		color: var(--color-text-muted);
-		font-size: 0.85rem;
+		font-size: 0.9rem;
+		font-style: italic;
+	}
+	.meaning-line {
+		color: var(--color-text-muted);
 		font-style: italic;
 	}
 	.grade-row {
