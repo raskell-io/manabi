@@ -48,7 +48,7 @@ PWA**. No server, no database — your data lives in your browser.
 | Listening | hear audio → choose word |
 | Context | cloze — fill the blank in a sentence |
 | Recall | see English → choose the word |
-| Pronunciation | listen to native (synthesized) audio, record yourself, self-rate |
+| Pronunciation | listen to the native clip, record yourself, see what speech recognition heard and how close it was, confirm the rating |
 
 ## Tech stack
 
@@ -144,5 +144,5 @@ hand-verified seed ships built-in so the app is usable before you generate anyth
 ## Status
 
 MVP: M1 (data model + item browser) · M2 (SRS + review loop) · M3 (audio) · AI workbench.
-Deferred: markdown round-trip in the sync repo, Hebrew diacritization, ASR-based
-pronunciation scoring.
+Deferred: markdown round-trip in the sync repo; on-device models for transcription and
+Hebrew diacritization (both use OpenAI today).

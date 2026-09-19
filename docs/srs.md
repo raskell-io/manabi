@@ -172,6 +172,22 @@ MCQ plays a short synthesized chime — a bright rising triad for correct, a sof
 tone for wrong — from [`$lib/sounds.ts`](../src/lib/sounds.ts) (Web Audio, no asset files,
 tweakable by editing the notes).
 
+## Pronunciation scoring (ASR)
+
+`record-compare` is self-rated (bad / okay / good → quality 1 / 3 / 5). When an OpenAI key is
+set and **Settings → Pronunciation** is on, the `Recorder` also sends the take to the router's
+`transcribe` task and scores the transcript with
+[`scorePronunciation`](../src/lib/pronunciation.ts): both strings are normalized (NFKC,
+lowercase, no spaces/punctuation, niqqud stripped, katakana → hiragana) and compared by
+Levenshtein similarity against the item's `target` — and, for Japanese, also its kana
+`reading`, since recognition may return 食べる or たべる for the same word. The result is shown
+as "Heard … · N% match" with a **suggested** rating (≥85 good, ≥60 okay, else bad) highlighted;
+the learner confirms or overrides, so recognition mistakes never grade silently. The
+transcript and score are stored on the `PronunciationAttempt`.
+
+Known limits: Chinese traditional/simplified variants and Japanese homophone kanji can lower
+a correct take's score — the transcript is shown precisely so the learner can judge.
+
 ## Extending the scheduler
 
 - **Tune the algorithm** (intervals, ease floor, lapse behavior): edit `gradeDimension` and

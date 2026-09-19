@@ -455,11 +455,17 @@ export function gradeItem(
 export function recordPronunciationAttempt(
 	itemId: string,
 	audioRef: string,
-	selfRating: SelfRating
+	selfRating: SelfRating,
+	asr?: { transcript: string; score: number }
 ): void {
 	updateDoc((d) => {
 		const id = generateId();
-		d.pronunciationAttempts[id] = { id, itemId, audioRef, selfRating, at: Date.now() };
+		const attempt: PronunciationAttempt = { id, itemId, audioRef, selfRating, at: Date.now() };
+		if (asr) {
+			attempt.transcript = asr.transcript;
+			attempt.score = asr.score;
+		}
+		d.pronunciationAttempts[id] = attempt;
 	});
 	// A self-rating also feeds the pronunciation SRS dimension.
 	const quality = selfRating === 'good' ? 5 : selfRating === 'okay' ? 3 : 1;

@@ -46,7 +46,9 @@ src/routes/   / · review[?lesson=id] · items[/[id]] · lessons · dashboard ·
   `isUnlocked` gates context behind 1 recognition rep, recall behind 2.
 - `exercises/generate.ts` — `buildExercise(item, dimension, pool, {audio, rng})`;
   distractors prefer same kind/level/tags. `rng` injectable for deterministic tests.
-- `inference/router.ts` — TTS is local-first (MMS) then OpenAI; generation is OpenAI-only.
+- `inference/router.ts` — TTS is local-first (MMS) then OpenAI; generation, Hebrew
+  diacritization (`lib/hebrew.ts` — accepts a result only if the letters are unchanged) and
+  transcription (`lib/pronunciation.ts` scores it; learner confirms) are OpenAI-only.
 - `db/store.ts` — `gradeItem`, `recordPronunciationAttempt`, `approveDraft`, derived
   stores (`activeItems`, `reviewSummary`, `lessonCounts`, `skillMemories`, …),
   `snapshotQueue(lesson?)` for a stable per-session review order.
@@ -56,6 +58,9 @@ src/routes/   / · review[?lesson=id] · items[/[id]] · lessons · dashboard ·
   root `+layout.ts`; dynamic routes use the 404.html fallback.
 - Script text always rendered via `ScriptText` (sets `dir`/`lang` — RTL for Hebrew).
 - Optional fields (`transliteration`, `audioRef`) may be absent; never write `undefined`.
+- In `.svelte` `<script lang="ts">`, never declare optional *function parameters*
+  (`function f(x?: T)`): the compiler strips the type but leaves the `?`, so the browser
+  gets a syntax error that svelte-check does not catch. Use `x: T | undefined`.
 
 ## Development
 ```
@@ -67,5 +72,5 @@ in-repo browser test; smoke-test by driving the dev server with a headless brows
 
 ## Deferred (future milestones)
 Markdown round-trip of content in the sync repo (snapshot sync itself ships — `sync.ts`;
-isomorphic-git is out because GitHub's git-over-HTTP has no CORS), Hebrew diacritization
-(the vowel-hiding toggle exists), ASR-based pronunciation scoring.
+isomorphic-git is out because GitHub's git-over-HTTP has no CORS); on-device models for
+transcription and Hebrew diacritization (both OpenAI-only today).

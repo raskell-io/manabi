@@ -160,6 +160,14 @@
 </section>
 
 <section class="group">
+	<h2>Pronunciation</h2>
+	<label class="check">
+		<input type="checkbox" checked={s.asrScoring} onchange={(e) => updateSettings({ asrScoring: e.currentTarget.checked })} />
+		<span>Score recordings with speech recognition (OpenAI transcription; needs the key below). After you record, Manabi transcribes the take, compares it with the word and suggests a rating — you still confirm it.</span>
+	</label>
+</section>
+
+<section class="group">
 	<h2>Hebrew</h2>
 	<label class="check">
 		<input type="checkbox" checked={s.hideHebrewVowels} onchange={(e) => updateSettings({ hideHebrewVowels: e.currentTarget.checked })} />

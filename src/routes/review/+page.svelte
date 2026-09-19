@@ -148,7 +148,7 @@
 		} else {
 			if (result.rating === 'good') correct += 1;
 			else if (result.rating === 'bad') wrong += 1;
-			recordPronunciationAttempt(item.id, result.audioRef, result.rating);
+			recordPronunciationAttempt(item.id, result.audioRef, result.rating, result.asr);
 		}
 		advance();
 	}

@@ -9,10 +9,11 @@
 	import { playCorrect, playWrong } from '$lib/sounds';
 	import type { Exercise, Choice } from '$lib/exercises/templates';
 	import { languageDir, stripNiqqud, type LearningItem, type SelfRating } from '$lib/db/types';
+	import type { AsrResult } from '$lib/pronunciation';
 
 	export type CompleteResult =
 		| { kind: 'mcq'; quality: number; chosen: string }
-		| { kind: 'record'; rating: SelfRating; audioRef: string };
+		| { kind: 'record'; rating: SelfRating; audioRef: string; asr?: AsrResult };
 
 	let {
 		exercise,
@@ -75,8 +76,9 @@
 		onComplete({ kind: 'mcq', quality, chosen: selected.label });
 	}
 
-	function onRate(rating: SelfRating, audioRef: string) {
-		onComplete({ kind: 'record', rating, audioRef });
+	// (`asr: T | undefined`, not `asr?: T` — the Svelte compiler leaves the `?` in place.)
+	function onRate(rating: SelfRating, audioRef: string, asr: AsrResult | undefined) {
+		onComplete(asr ? { kind: 'record', rating, audioRef, asr } : { kind: 'record', rating, audioRef });
 	}
 
 	// Keyboard control: number keys pick a choice; once answered, grade keys

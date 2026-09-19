@@ -62,7 +62,9 @@ repetition, so you review exactly what you are about to forget.
   - **Listening** — hear a word and choose it. Simple practice over **any** of your words
     that have audio — always available, no need to study them first.
   - **Speaking** — record yourself and self-rate against the native clip. Also available for
-    any of your words that have audio.
+    any of your words that have audio. With an OpenAI key set, speech recognition transcribes
+    your take and shows what it heard and how closely it matched, with a suggested rating that
+    you confirm or adjust (turn this off under Settings → Pronunciation).
   - **Everything** — all of the above together.
   Grading buttons (Hard / Good / Easy) are optional; you can keep them off and just mark
   right/wrong. Keyboard shortcuts work throughout.
@@ -102,6 +104,12 @@ Hebrew is shown **right-to-left** and **vowelled (with niqqud)** by default, whi
 right way to learn to read it. Once you are comfortable, the **hide vowels** toggle in
 settings strips the niqqud so you practice reading unpointed text, the way real Hebrew is
 written.
+
+Content you add yourself may arrive bare. Items whose Hebrew has no vowel points show a
+**no vowels** badge in the Items list, and their editor offers **Add vowels (AI)**: with an
+OpenAI key, the text is pointed for you to check before saving. The letters are guaranteed
+untouched — a result that changes anything but the marks is discarded. The Workbench points
+its Hebrew output the same way before it reaches the review queue.
 
 ## Daily limits
 
