@@ -4,7 +4,7 @@
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import { allItems, createItem, settings } from '$lib/db/store';
-	import { LANGUAGES } from '$lib/db/types';
+	import { LANGUAGES, needsNiqqud } from '$lib/db/types';
 
 	let query = $state('');
 	let onlyActive = $state(true);
@@ -74,6 +74,7 @@
 						<span class="lang">{langName(it.language)}</span>
 						{#each it.tags.slice(0, 4) as t (t)}<span class="tag">{t}</span>{/each}
 						{#if it.status === 'draft'}<span class="tag draft">draft</span>{/if}
+						{#if it.language === 'he' && needsNiqqud(it.target)}<span class="tag draft">no vowels</span>{/if}
 					</div>
 				</div>
 			</a>

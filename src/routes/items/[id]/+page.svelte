@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Trash2, Plus } from 'lucide-svelte';
+	import { ArrowLeft, Trash2, Plus, Sparkles } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
-	import { deleteItem, getItem, updateItem } from '$lib/db/store';
-	import { LANGUAGES, type ExampleSentence, type ItemKind, type ItemStatus, type Language, type LearningItem } from '$lib/db/types';
+	import { deleteItem, getItem, settings, updateItem } from '$lib/db/store';
+	import { LANGUAGES, needsNiqqud, type ExampleSentence, type ItemKind, type ItemStatus, type Language, type LearningItem } from '$lib/db/types';
+	import { canDiacritize } from '$lib/inference/router';
+	import { diacritizeItem } from '$lib/hebrew';
 
 	const id = $derived($page.params.id);
 	const item = $derived<LearningItem | undefined>(id ? getItem(id) : undefined);
@@ -57,6 +59,30 @@
 		form.examples = form.examples.filter((_, idx) => idx !== i);
 	}
 
+	// Hebrew: offer to add niqqud to any bare target / example (AI; the learner reviews, then saves).
+	const bareHebrew = $derived(
+		!!form && form.language === 'he' && (needsNiqqud(form.target) || form.examples.some((e) => needsNiqqud(e.target)))
+	);
+	let vowelBusy = $state(false);
+	let vowelMsg = $state('');
+	async function addVowels() {
+		if (!form) return;
+		vowelBusy = true;
+		vowelMsg = '';
+		try {
+			const r = await diacritizeItem(form, $settings);
+			form.target = r.item.target;
+			form.examples = r.item.examples;
+			vowelMsg = r.error
+				? `Couldn't add vowels: ${r.error}`
+				: r.failed
+					? `Vowelled ${r.changed}; ${r.failed} left unchanged because the model altered the letters.`
+					: `Vowelled ${r.changed} ${r.changed === 1 ? 'text' : 'texts'} — check them, then Save.`;
+		} finally {
+			vowelBusy = false;
+		}
+	}
+
 	const KINDS: ItemKind[] = ['word', 'phrase', 'sentence', 'grammar', 'character'];
 	const STATUSES: ItemStatus[] = ['published', 'draft'];
 	function langName(code: string): string {
@@ -79,6 +105,19 @@
 		</div>
 		<button class="danger" onclick={remove}><Trash2 size={16} /> Delete</button>
 	</header>
+
+	{#if bareHebrew || vowelMsg}
+		<div class="vowel-row">
+			{#if bareHebrew && canDiacritize($settings)}
+				<button class="vowel" onclick={addVowels} disabled={vowelBusy}>
+					<Sparkles size={14} /> {vowelBusy ? 'Adding vowels…' : 'Add vowels (AI)'}
+				</button>
+			{:else if bareHebrew}
+				<span class="muted">This Hebrew has no vowel points. Add an OpenAI key in Settings to point it automatically.</span>
+			{/if}
+			{#if vowelMsg}<span class="muted">{vowelMsg}</span>{/if}
+		</div>
+	{/if}
 
 	<div class="grid">
 		<label>
@@ -251,5 +290,27 @@
 		color: #fff;
 		border: none;
 		font-weight: 600;
+	}
+	.vowel-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		margin: 0 0 1rem;
+	}
+	.vowel {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.45rem 0.9rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+		color: var(--color-accent);
+		font-weight: 600;
+		font-size: 0.88rem;
+	}
+	.vowel:disabled {
+		opacity: 0.6;
 	}
 </style>

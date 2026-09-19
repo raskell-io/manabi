@@ -49,6 +49,23 @@ export function stripNiqqud(text: string): string {
 	return text.replace(/[֑-ׇ]/g, '');
 }
 
+const HEBREW_LETTERS = /[\u05D0-\u05EA]/g;
+const HEBREW_MARKS = /[\u05B0-\u05C7]/;
+
+/** Whether the text carries any niqqud / dagesh / shin-sin dots. */
+export function hasNiqqud(text: string): boolean {
+	return HEBREW_MARKS.test(text);
+}
+
+/**
+ * Hebrew text that still needs vowel points: two or more Hebrew letters and
+ * no marks at all. (A lone letter — an alef-bet item — is fine bare.)
+ */
+export function needsNiqqud(text: string): boolean {
+	const letters = text.match(HEBREW_LETTERS)?.length ?? 0;
+	return letters >= 2 && !hasNiqqud(text);
+}
+
 export type ItemKind = 'word' | 'phrase' | 'sentence' | 'grammar' | 'character';
 
 /**
@@ -215,6 +232,8 @@ export interface PronunciationAttempt {
 	itemId: string;
 	audioRef: string; // blob ref of the recording
 	selfRating: SelfRating;
+	transcript?: string; // what speech recognition heard (ASR scoring)
+	score?: number; // 0–100 similarity of the transcript to the target
 	at: number;
 	[key: string]: unknown;
 }
@@ -283,6 +302,7 @@ export interface ManabiSettings {
 	githubSyncToken: string; // fine-grained PAT (Contents: read & write); stored locally
 	syncAuto: boolean; // sync on start, after a review session, and when back online
 	localTtsEnabled: boolean; // synthesize pronunciation on-device
+	asrScoring: boolean; // score recordings with speech recognition (needs the OpenAI key)
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
 	theme: 'system' | 'light' | 'dark';
@@ -300,6 +320,7 @@ export function defaultSettings(): ManabiSettings {
 		githubSyncToken: '',
 		syncAuto: true,
 		localTtsEnabled: true,
+		asrScoring: true,
 		hideHebrewVowels: false,
 		gradeButtons: true,
 		theme: 'system'
@@ -308,7 +329,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export interface ManabiDocument {
 	schemaVersion: number;

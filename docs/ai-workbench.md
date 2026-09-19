@@ -91,3 +91,22 @@ re-run the [audio pipeline](./audio.md) over the new texts.
 The end-to-end flow is verifiable by stubbing the OpenAI `fetch` in a headless browser
 (the mock must handle the CORS preflight `OPTIONS` and return CORS headers). The validators
 themselves are plain unit tests (`passages.test.ts`).
+
+## Other router tasks: Hebrew diacritization & transcription
+
+The same router serves two more OpenAI-only tasks (both advertised through
+`ProviderCapabilities` and implemented in `providers/openai.ts`):
+
+- **`diacritize({ texts })`** — adds niqqud to bare Hebrew strings (Chat Completions, JSON
+  mode, temperature 0). The provider only checks the shape; [`src/lib/hebrew.ts`](../src/lib/hebrew.ts)
+  does the real validation: a pointed string is accepted only if stripping its marks gives
+  back exactly the input (`acceptDiacritized`), so the model can never rewrite letters.
+  `diacritizeItems` / `diacritizePassages` batch a whole generation into one request and only
+  send strings that `needsNiqqud` (two or more Hebrew letters, no marks). Used by the item
+  editor's **Add vowels (AI)** button and automatically by the Workbench for Hebrew output.
+- **`transcribe({ audio, language })`** — sends a learner's recording (multipart) to the
+  transcription endpoint with the language hint; for Chinese a neutral Simplified-script
+  prompt keeps the output in the same script as the items. Gated by the **Pronunciation**
+  setting (`asrScoring`). Scoring is pure and lives in
+  [`src/lib/pronunciation.ts`](../src/lib/pronunciation.ts) — see [SRS → Pronunciation
+  scoring](./srs.md#pronunciation-scoring-asr).

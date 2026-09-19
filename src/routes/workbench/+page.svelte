@@ -16,6 +16,7 @@
 		settings
 	} from '$lib/db/store';
 	import { canGenerate, generateItems, generatePassages } from '$lib/inference/router';
+	import { diacritizeItems, diacritizePassages } from '$lib/hebrew';
 	import { PASSAGE_KIND_LABELS, type ItemKind, type PassageKind } from '$lib/db/types';
 
 	type Mode = 'vocab' | 'reading';
@@ -64,8 +65,17 @@
 		);
 		if (!res.ok || !res.value) return (error = res.error ?? 'Generation failed');
 		if (res.value.items.length === 0) return (error = 'Model returned no usable items. Try again.');
-		const n = addDrafts($settings.activeLanguage, kind, res.value.items, `${kind} · ${level}${topic ? ' · ' + topic : ''}`);
-		notice = `Generated ${n} item draft${n === 1 ? '' : 's'} for review.`;
+		let items = res.value.items;
+		let vowelNote = '';
+		if ($settings.activeLanguage === 'he') {
+			// Hebrew must be vowelled; point whatever the model left bare (letters are verified unchanged).
+			const v = await diacritizeItems(items, $settings);
+			items = v.items;
+			if (v.changed) vowelNote += ` Added vowels to ${v.changed} text${v.changed === 1 ? '' : 's'}.`;
+			if (v.failed) vowelNote += ` ${v.failed} text${v.failed === 1 ? '' : 's'} still lack vowels — fix after approving.`;
+		}
+		const n = addDrafts($settings.activeLanguage, kind, items, `${kind} · ${level}${topic ? ' · ' + topic : ''}`);
+		notice = `Generated ${n} item draft${n === 1 ? '' : 's'} for review.${vowelNote}`;
 	}
 
 	async function generateReading() {
@@ -75,8 +85,16 @@
 		);
 		if (!res.ok || !res.value) return (error = res.error ?? 'Generation failed');
 		if (res.value.passages.length === 0) return (error = 'Model returned no usable passages. Try again.');
-		const n = addPassageDrafts($settings.activeLanguage, pkind, plevel, res.value.passages, `${pkind} · ${plevel}${ptopic ? ' · ' + ptopic : ''}`);
-		notice = `Generated ${n} ${pkind} draft${n === 1 ? '' : 's'} for review.`;
+		let passages = res.value.passages;
+		let vowelNote = '';
+		if ($settings.activeLanguage === 'he') {
+			const v = await diacritizePassages(passages, $settings);
+			passages = v.passages;
+			if (v.changed) vowelNote += ` Added vowels to ${v.changed} line${v.changed === 1 ? '' : 's'}.`;
+			if (v.failed) vowelNote += ` ${v.failed} line${v.failed === 1 ? '' : 's'} still lack vowels.`;
+		}
+		const n = addPassageDrafts($settings.activeLanguage, pkind, plevel, passages, `${pkind} · ${plevel}${ptopic ? ' · ' + ptopic : ''}`);
+		notice = `Generated ${n} ${pkind} draft${n === 1 ? '' : 's'} for review.${vowelNote}`;
 	}
 
 	async function generate() {

@@ -1,9 +1,11 @@
 /**
  * Inference layer — task-level provider abstraction (mirrors kurumi).
  *
- * Manabi needs two tasks: text-to-speech (pronunciation audio) and item
- * generation (the AI content workbench). Providers advertise which tasks they
- * support; the router picks the first capable provider in priority order.
+ * Manabi needs four tasks: text-to-speech (pronunciation audio), item /
+ * passage generation (the AI content workbench), Hebrew diacritization
+ * (adding niqqud) and speech transcription (pronunciation scoring). Providers
+ * advertise which tasks they support; the router picks the first capable
+ * provider in priority order.
  */
 
 import type {
@@ -58,9 +60,28 @@ export interface GeneratePassagesResult {
 	passages: GeneratedPassage[];
 }
 
+/** Hebrew strings to point with niqqud; one output per input, same order. */
+export interface DiacritizeInput {
+	texts: string[];
+}
+export interface DiacritizeResult {
+	texts: string[];
+}
+
+/** A learner's recording to transcribe (for pronunciation scoring). */
+export interface TranscribeInput {
+	audio: Blob;
+	language: Language;
+}
+export interface TranscribeResult {
+	text: string;
+}
+
 export interface ProviderCapabilities {
 	tts: boolean;
 	generate: boolean;
+	diacritize: boolean;
+	transcribe: boolean;
 }
 
 export interface InferenceProvider {
@@ -76,4 +97,12 @@ export interface InferenceProvider {
 		input: GeneratePassagesInput,
 		settings: ManabiSettings
 	): Promise<InferenceResult<GeneratePassagesResult>>;
+	diacritize?(
+		input: DiacritizeInput,
+		settings: ManabiSettings
+	): Promise<InferenceResult<DiacritizeResult>>;
+	transcribe?(
+		input: TranscribeInput,
+		settings: ManabiSettings
+	): Promise<InferenceResult<TranscribeResult>>;
 }

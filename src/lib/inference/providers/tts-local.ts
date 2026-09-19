@@ -63,7 +63,7 @@ export const ttsLocalProvider: InferenceProvider = {
 	id: 'tts-local',
 	target: 'local',
 	capabilities(settings: ManabiSettings): ProviderCapabilities {
-		return { tts: settings.localTtsEnabled, generate: false };
+		return { tts: settings.localTtsEnabled, generate: false, diacritize: false, transcribe: false };
 	},
 	async tts(input: TtsInput, settings: ManabiSettings): Promise<InferenceResult<TtsResult>> {
 		if (!settings.localTtsEnabled) {

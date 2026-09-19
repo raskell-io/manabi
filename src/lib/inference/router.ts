@@ -2,19 +2,24 @@
  * Inference router — picks the first capable provider for a task.
  *
  * TTS is local-first (the user's choice): try on-device MMS, fall back to
- * OpenAI when available. Item generation is OpenAI-only.
+ * OpenAI when available. Generation, Hebrew diacritization and transcription
+ * are OpenAI-only.
  */
 
 import type { ManabiSettings } from '$lib/db/types';
 import { ttsLocalProvider } from './providers/tts-local';
 import { openaiProvider } from './providers/openai';
 import type {
+	DiacritizeInput,
+	DiacritizeResult,
 	GenerateItemsInput,
 	GenerateItemsResult,
 	GeneratePassagesInput,
 	GeneratePassagesResult,
 	InferenceProvider,
 	InferenceResult,
+	TranscribeInput,
+	TranscribeResult,
 	TtsInput,
 	TtsResult
 } from './types';
@@ -59,6 +64,38 @@ export async function generatePassages(
 		return p.generatePassages(input, settings);
 	}
 	return { ok: false, error: 'No generation provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+}
+
+/** Add niqqud to Hebrew strings (OpenAI only). Callers validate the result. */
+export async function diacritize(
+	input: DiacritizeInput,
+	settings: ManabiSettings
+): Promise<InferenceResult<DiacritizeResult>> {
+	for (const p of PROVIDERS) {
+		if (!p.diacritize || !p.capabilities(settings).diacritize) continue;
+		return p.diacritize(input, settings);
+	}
+	return { ok: false, error: 'No diacritization provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+}
+
+/** Transcribe a learner's recording (OpenAI only). */
+export async function transcribe(
+	input: TranscribeInput,
+	settings: ManabiSettings
+): Promise<InferenceResult<TranscribeResult>> {
+	for (const p of PROVIDERS) {
+		if (!p.transcribe || !p.capabilities(settings).transcribe) continue;
+		return p.transcribe(input, settings);
+	}
+	return { ok: false, error: 'No transcription provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+}
+
+export function canDiacritize(settings: ManabiSettings): boolean {
+	return PROVIDERS.some((p) => p.diacritize && p.capabilities(settings).diacritize);
+}
+
+export function canTranscribe(settings: ManabiSettings): boolean {
+	return PROVIDERS.some((p) => p.transcribe && p.capabilities(settings).transcribe);
 }
 
 export function canGenerate(settings: ManabiSettings): boolean {

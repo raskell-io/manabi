@@ -1,6 +1,8 @@
 /**
- * OpenAI provider — remote fallback for TTS and the engine behind the AI
- * content workbench (item generation via Chat Completions JSON mode).
+ * OpenAI provider — remote fallback for TTS, the engine behind the AI content
+ * workbench (item generation via Chat Completions JSON mode), Hebrew
+ * diacritization (same endpoint, temperature 0) and speech transcription
+ * (pronunciation scoring).
  *
  * The API key lives in local settings and is sent directly from the browser
  * (single-user, local-first app — no proxy). Generated items are validated
@@ -9,6 +11,8 @@
 
 import type { GeneratedItem, GeneratedPassage, Language, ManabiSettings, PassageLine } from '$lib/db/types';
 import type {
+	DiacritizeInput,
+	DiacritizeResult,
 	GenerateItemsInput,
 	GenerateItemsResult,
 	GeneratePassagesInput,
@@ -16,12 +20,41 @@ import type {
 	InferenceProvider,
 	InferenceResult,
 	ProviderCapabilities,
+	TranscribeInput,
+	TranscribeResult,
 	TtsInput,
 	TtsResult
 } from '../types';
 
 const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const TTS_URL = 'https://api.openai.com/v1/audio/speech';
+const TRANSCRIBE_URL = 'https://api.openai.com/v1/audio/transcriptions';
+const TRANSCRIBE_MODEL = 'gpt-4o-mini-transcribe';
+
+/**
+ * Style prompts that steer the transcript's *script* without hinting at the
+ * answer — e.g. keep Chinese in Simplified characters, which the items use.
+ */
+const TRANSCRIBE_PROMPT: Partial<Record<Language, string>> = {
+	zh: '以下是普通话的句子。'
+};
+
+function audioFilename(mime: string): string {
+	if (mime.includes('mp4') || mime.includes('m4a') || mime.includes('aac')) return 'recording.m4a';
+	if (mime.includes('ogg')) return 'recording.ogg';
+	if (mime.includes('wav')) return 'recording.wav';
+	if (mime.includes('mpeg') || mime.includes('mp3')) return 'recording.mp3';
+	return 'recording.webm';
+}
+
+function buildDiacritizePrompt(texts: string[]): string {
+	return [
+		"Add full niqqud to each Hebrew string below: vowel points, dagesh/mappiq and shin/sin dots, as in a learner's textbook (Modern Israeli Hebrew).",
+		'Preserve every letter, space, punctuation mark and line break exactly — change nothing except adding marks. Keep the order.',
+		'Return STRICT JSON only, shape: {"texts":["…"]} with exactly one output string per input string.',
+		JSON.stringify({ texts })
+	].join('\n');
+}
 
 const READING_GUIDE: Record<Language, string> = {
 	zh: 'reading = Hanyu Pinyin WITH tone marks (e.g. "jīntiān"). Use Simplified characters for target.',
@@ -149,7 +182,79 @@ export const openaiProvider: InferenceProvider = {
 	target: 'remote',
 	capabilities(settings: ManabiSettings): ProviderCapabilities {
 		const hasKey = settings.openaiApiKey.trim().length > 0;
-		return { tts: hasKey, generate: hasKey };
+		return {
+			tts: hasKey,
+			generate: hasKey,
+			diacritize: hasKey,
+			transcribe: hasKey && settings.asrScoring !== false
+		};
+	},
+
+	async diacritize(
+		input: DiacritizeInput,
+		settings: ManabiSettings
+	): Promise<InferenceResult<DiacritizeResult>> {
+		const key = settings.openaiApiKey.trim();
+		if (!key) return { ok: false, error: 'No OpenAI API key set', providerId: 'openai', target: 'remote' };
+		try {
+			const res = await fetch(CHAT_URL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+				body: JSON.stringify({
+					model: settings.openaiModel || 'gpt-4o',
+					temperature: 0,
+					response_format: { type: 'json_object' },
+					messages: [
+						{ role: 'system', content: 'You are an expert in Modern Hebrew niqqud (vowel pointing). Output only valid JSON.' },
+						{ role: 'user', content: buildDiacritizePrompt(input.texts) }
+					]
+				})
+			});
+			if (!res.ok) {
+				const text = await res.text();
+				return { ok: false, error: `OpenAI ${res.status}: ${text.slice(0, 200)}`, providerId: 'openai', target: 'remote' };
+			}
+			const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+			const content = data.choices?.[0]?.message?.content ?? '{}';
+			const parsed = JSON.parse(content) as { texts?: unknown };
+			const texts = Array.isArray(parsed.texts) ? parsed.texts.map((t) => String(t)) : [];
+			if (texts.length !== input.texts.length) {
+				return { ok: false, error: `Expected ${input.texts.length} strings back, got ${texts.length}`, providerId: 'openai', target: 'remote' };
+			}
+			return { ok: true, value: { texts }, providerId: 'openai', target: 'remote' };
+		} catch (err) {
+			return { ok: false, error: err instanceof Error ? err.message : 'Diacritization failed', providerId: 'openai', target: 'remote' };
+		}
+	},
+
+	async transcribe(
+		input: TranscribeInput,
+		settings: ManabiSettings
+	): Promise<InferenceResult<TranscribeResult>> {
+		const key = settings.openaiApiKey.trim();
+		if (!key) return { ok: false, error: 'No OpenAI API key set', providerId: 'openai', target: 'remote' };
+		try {
+			const form = new FormData();
+			form.append('file', input.audio, audioFilename(input.audio.type));
+			form.append('model', TRANSCRIBE_MODEL);
+			form.append('language', input.language);
+			form.append('response_format', 'json');
+			const prompt = TRANSCRIBE_PROMPT[input.language];
+			if (prompt) form.append('prompt', prompt);
+			const res = await fetch(TRANSCRIBE_URL, {
+				method: 'POST',
+				headers: { Authorization: `Bearer ${key}` },
+				body: form
+			});
+			if (!res.ok) {
+				const text = await res.text();
+				return { ok: false, error: `OpenAI transcription ${res.status}: ${text.slice(0, 200)}`, providerId: 'openai', target: 'remote' };
+			}
+			const data = (await res.json()) as { text?: string };
+			return { ok: true, value: { text: (data.text ?? '').trim() }, providerId: 'openai', target: 'remote' };
+		} catch (err) {
+			return { ok: false, error: err instanceof Error ? err.message : 'Transcription failed', providerId: 'openai', target: 'remote' };
+		}
 	},
 
 	async generateItems(
