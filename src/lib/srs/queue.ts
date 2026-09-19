@@ -9,6 +9,10 @@
  * Dimensions unlock progressively over an item's life (pitch §1.4): you learn
  * to recognize a word before you're asked to recall it cold. Brand-new items
  * are gated by `newPerDay`; reviews are capped by `reviewCap`.
+ *
+ * A queue can also be *scoped* to a set of item ids (a lesson). A scope is a
+ * bounded, deliberately chosen set, so inside one the daily caps do not apply
+ * — "review this lesson" means all of it.
  */
 
 import {
@@ -32,6 +36,14 @@ export interface QueueSummary {
 	dueReviews: number;
 	newItems: number;
 	tasks: QueueTask[];
+}
+
+export interface QueueOptions {
+	/**
+	 * Restrict the queue to these item ids (e.g. a lesson's `itemIds`). Items
+	 * keep the scope's order, and `newPerDay` / `reviewCap` are not applied.
+	 */
+	scope?: ReadonlySet<string>;
 }
 
 /**
@@ -64,14 +76,26 @@ function publishedItemsFor(doc: ManabiDocument, language: string): LearningItem[
  * Build the review queue for the active language.
  *
  * @param onIso  ISO date to schedule against (defaults to today; injectable for tests)
+ * @param opts   optional `scope` — restrict to (and order by) a set of item ids
  */
 export function buildQueue(
 	doc: ManabiDocument,
 	settings: ManabiSettings,
-	onIso: string = todayIso()
+	onIso: string = todayIso(),
+	opts: QueueOptions = {}
 ): QueueSummary {
 	const language = settings.activeLanguage;
-	const items = publishedItemsFor(doc, language);
+	const scope = opts.scope;
+	let items = publishedItemsFor(doc, language);
+	if (scope) {
+		const order = new Map([...scope].map((id, i) => [id, i] as const));
+		items = items
+			.filter((it) => order.has(it.id))
+			.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
+	}
+	// A scope is its own bound; the daily caps only apply to the whole collection.
+	const reviewLimit = scope ? Infinity : settings.reviewCap;
+	const newLimit = scope ? Infinity : settings.newPerDay;
 
 	const reviewTasks: { task: QueueTask; due: string }[] = [];
 	const newItemIds: string[] = [];
@@ -97,11 +121,11 @@ export function buildQueue(
 
 	// Most-overdue first.
 	reviewTasks.sort((a, b) => a.due.localeCompare(b.due));
-	const reviews = reviewTasks.slice(0, settings.reviewCap).map((r) => r.task);
+	const reviews = reviewTasks.slice(0, reviewLimit).map((r) => r.task);
 
 	// Introduce up to `newPerDay` brand-new items via their recognition skill.
 	const newTasks: QueueTask[] = newItemIds
-		.slice(0, settings.newPerDay)
+		.slice(0, newLimit)
 		.map((itemId) => ({ itemId, dimension: 'recognition' as Dimension, isNew: true }));
 
 	// New items first so the session starts by learning, then reinforces.
@@ -116,8 +140,9 @@ export function buildQueue(
 export function queueCounts(
 	doc: ManabiDocument,
 	settings: ManabiSettings,
-	onIso: string = todayIso()
+	onIso: string = todayIso(),
+	opts: QueueOptions = {}
 ): { dueReviews: number; newItems: number } {
-	const summary = buildQueue(doc, settings, onIso);
+	const summary = buildQueue(doc, settings, onIso, opts);
 	return { dueReviews: summary.dueReviews, newItems: summary.newItems };
 }

@@ -104,6 +104,43 @@ describe('buildQueue', () => {
 		const q = buildQueue(doc, { ...defaultSettings(), reviewCap: 3 });
 		expect(q.dueReviews).toBe(3);
 	});
+
+	describe('scoped to a lesson', () => {
+		it('only includes items in the scope, in the scope order', () => {
+			const doc = docWith([makeItem('a'), makeItem('b'), makeItem('c'), makeItem('d')]);
+			const q = buildQueue(doc, defaultSettings(), todayIso(), { scope: new Set(['c', 'a']) });
+			expect(q.tasks.map((t) => t.itemId)).toEqual(['c', 'a']);
+			expect(q.newItems).toBe(2);
+		});
+
+		it('lifts newPerDay and reviewCap inside the scope', () => {
+			const fresh = Array.from({ length: 6 }, (_, i) => makeItem(`n${i}`));
+			const due = Array.from({ length: 6 }, (_, i) => makeItem(`r${i}`));
+			const doc = docWith([...fresh, ...due]);
+			for (const it of due) {
+				const srs = freshSkillMemory(it.id);
+				srs.dims.recognition.introduced = true;
+				srs.dims.recognition.nextReview = todayIso();
+				doc.srsStates[it.id] = srs;
+			}
+			const settings = { ...defaultSettings(), newPerDay: 1, reviewCap: 1 };
+			const scope = new Set([...fresh, ...due].map((it) => it.id));
+			expect(buildQueue(doc, settings).newItems).toBe(1);
+			expect(buildQueue(doc, settings).dueReviews).toBe(1);
+			const q = buildQueue(doc, settings, todayIso(), { scope });
+			expect(q.newItems).toBe(6);
+			// Each due item surfaces recognition (due) + pronunciation & listening (fresh, unlocked).
+			expect(q.dueReviews).toBe(18);
+		});
+
+		it('still skips unpublished items and other languages inside the scope', () => {
+			const draft = { ...makeItem('d'), status: 'draft' as const };
+			const doc = docWith([makeItem('a', 'zh'), makeItem('j', 'ja'), draft]);
+			const settings = { ...defaultSettings(), activeLanguage: 'zh' as const };
+			const q = buildQueue(doc, settings, todayIso(), { scope: new Set(['a', 'j', 'd', 'ghost']) });
+			expect(q.tasks.map((t) => t.itemId)).toEqual(['a']);
+		});
+	});
 });
 
 describe('isUnlocked', () => {

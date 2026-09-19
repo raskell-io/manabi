@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { untrack } from 'svelte';
 	import { get } from 'svelte/store';
-	import { Check, X, BookOpen, Mic, Headphones, Layers } from 'lucide-svelte';
+	import { page } from '$app/stores';
+	import { Check, X, BookOpen, Mic, Headphones, Layers, LayoutGrid } from 'lucide-svelte';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
 		activeLanguage,
+		getLesson,
 		gradeItem,
 		getItem,
 		getSkillMemory,
@@ -13,7 +15,7 @@
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
+	import { DIMENSION_LABELS, type Dimension, type LearningItem, type Lesson } from '$lib/db/types';
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
@@ -24,6 +26,12 @@
 	// Listening & Speaking are dead-simple practice over ANY of your words that
 	// have a recorded clip — always available, no unlock and no due-date gating.
 	const READING_DIMS = new Set<Dimension>(['recognition', 'recall', 'context']);
+
+	// Optional lesson scope (`/review?lesson=<id>`): every mode is restricted to
+	// that lesson's items and the daily caps are lifted — the lesson is the bound.
+	const lessonId = $derived($page.url.searchParams.get('lesson'));
+	let lesson = $state.raw<Lesson | undefined>(undefined);
+	let lessonMissing = $state(false);
 
 	let mode = $state<Mode | null>(null); // null → show the picker
 	let allTasks = $state<QueueTask[]>([]);
@@ -89,16 +97,36 @@
 	function backToModes() {
 		mode = null;
 		done = false;
-		allTasks = snapshotQueue().tasks;
+		allTasks = snapshotQueue(lesson).tasks;
 	}
 
-	onMount(async () => {
-		pool = get(activeItems);
-		allTasks = snapshotQueue().tasks;
-		// Load the active language's audio index so Listening/Speaking know which
-		// words are playable (the pool is all one language).
-		const lang = get(activeLanguage);
+	async function loadSession(lid: string | null) {
+		mode = null;
+		done = false;
+		lesson = lid ? getLesson(lid) : undefined;
+		lessonMissing = lid !== null && !lesson;
+		if (lessonMissing) {
+			pool = [];
+			allTasks = [];
+			return;
+		}
+		pool = lesson
+			? lesson.itemIds
+					.map((id) => getItem(id))
+					.filter((it): it is LearningItem => !!it && it.status === 'published')
+			: get(activeItems);
+		allTasks = snapshotQueue(lesson).tasks;
+		// Load the language's audio index so Listening/Speaking know which words
+		// are playable (the pool is all one language).
+		const lang = lesson?.language ?? get(activeLanguage);
 		manifests = { [lang]: await loadAudioManifest(lang) };
+	}
+
+	// (Re)load whenever the scope changes: SvelteKit keeps this component
+	// mounted across `/review` ↔ `/review?lesson=…` navigations.
+	$effect(() => {
+		const lid = lessonId;
+		untrack(() => void loadSession(lid));
 	});
 
 	function advance() {
@@ -127,7 +155,20 @@
 {#if !started}
 	<div class="picker">
 		<h1>Review</h1>
-		{#if everythingCount === 0}
+		{#if lesson}
+			<p class="scope">
+				<LayoutGrid size={14} />
+				<span>Lesson · <strong>{lesson.title}</strong> · {pool.length} {pool.length === 1 ? 'item' : 'items'}</span>
+				<a href="/review">Review everything instead</a>
+			</p>
+		{/if}
+		{#if lessonMissing}
+			<p class="muted">That lesson no longer exists. <a href="/lessons">Back to lessons</a> or
+				<a href="/review">review everything</a>.</p>
+		{:else if everythingCount === 0 && lesson}
+			<p class="muted">Nothing to practice in this lesson right now — nothing is due, and none of
+				its words have audio. <a href="/review">Review everything instead</a>.</p>
+		{:else if everythingCount === 0}
 			<p class="muted">Nothing to practice yet. Add items in <a href="/items">Items</a>, browse
 				<a href="/vocab">Vocab</a>, or generate a batch in the <a href="/workbench">Workbench</a>.</p>
 		{:else}
@@ -171,7 +212,7 @@
 			<p class="muted">Nothing was due for this mode.</p>
 		{/if}
 		<div class="actions">
-			<a class="btn" href="/">Home</a>
+			<a class="btn" href={lesson ? '/lessons' : '/'}>{lesson ? 'Lessons' : 'Home'}</a>
 			<button class="btn primary" onclick={backToModes}>Choose mode</button>
 		</div>
 	</div>
@@ -181,7 +222,10 @@
 	</div>
 	<div class="meta">
 		<span>{index + 1} / {tasks.length}</span>
-		<span class="dim">{DIMENSION_LABELS[current.dimension]}{current.isNew ? ' · new' : ''}</span>
+		<span class="meta-right">
+			{#if lesson}<span class="scope-tag">{lesson.title}</span>{/if}
+			<span class="dim">{DIMENSION_LABELS[current.dimension]}{current.isNew ? ' · new' : ''}</span>
+		</span>
 	</div>
 
 	{#key index}
@@ -212,6 +256,17 @@
 		color: var(--color-text-muted);
 		font-size: 0.85rem;
 		margin-bottom: 2rem;
+	}
+	.meta-right {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.scope-tag {
+		padding: 0.1rem 0.55rem;
+		border-radius: 999px;
+		background: var(--color-bg-elevated);
+		font-size: 0.78rem;
 	}
 	.dim {
 		text-transform: capitalize;
@@ -280,6 +335,25 @@
 		margin: 0 0 0.25rem;
 	}
 	.picker .muted a {
+		color: var(--color-accent);
+	}
+	.scope {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0.25rem 0 0.75rem;
+		padding: 0.4rem 0.8rem;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		background: var(--color-bg-secondary);
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
+	}
+	.scope strong {
+		color: var(--color-text);
+	}
+	.scope a {
 		color: var(--color-accent);
 	}
 	.modes {

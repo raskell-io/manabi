@@ -78,7 +78,9 @@ repetition, so you review exactly what you are about to forget.
   start studying it, or add an entire level.
 - **Items (`/items`)** — every item you are studying. Filter by level/tag/status, edit, or
   delete. Each item has a play button for its audio.
-- **Lessons (`/lessons`)** — group items into named bundles.
+- **Lessons (`/lessons`)** — group items into named bundles. Each card shows what's new
+  and due inside it, and its **Review** button runs any review mode over just that lesson's
+  items. Daily limits don't apply inside a lesson — you get all of it.
 - **Progress (`/dashboard`)** — your weak spots: per-skill scores and the items that need
   the most work.
 - **Workbench (`/workbench`)** — generate new vocabulary or reading passages with AI (see
@@ -105,6 +107,9 @@ written.
 In settings you control **new items per day** and the **review cap**. New items are
 introduced gradually so you do not get buried; reviews are capped so a backlog never makes
 a session unbounded. The most-overdue reviews always come first.
+
+Reviewing a single lesson from the Lessons page ignores both limits: a lesson is a bounded
+set you chose deliberately, so it is never "too much".
 
 ## Privacy & your data
 

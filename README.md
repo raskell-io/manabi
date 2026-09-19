@@ -30,7 +30,7 @@ PWA**. No server, no database — your data lives in your browser.
 ## Core ideas
 
 - **Items, not lessons.** The atomic unit is a `LearningItem` (word / phrase / sentence /
-  grammar). Lessons are just curated bundles.
+  grammar). Lessons are just curated bundles — reviewable on their own, without daily caps.
 - **Five skills, tracked separately.** You might *recognize* a word but fail to *pronounce*
   it. Each skill gets its own SM-2 schedule; the hardest (recall, context) unlock later.
 - **Reading-first.** Pinyin tone marks, kana/furigana, vowelled (niqqud) Hebrew with RTL.
@@ -142,4 +142,4 @@ hand-verified seed ships built-in so the app is usable before you generate anyth
 ## Status
 
 MVP: M1 (data model + item browser) · M2 (SRS + review loop) · M3 (audio) · AI workbench.
-Deferred: git sync, vowel-hiding for Hebrew, ASR-based pronunciation scoring.
+Deferred: git sync, Hebrew diacritization, ASR-based pronunciation scoring.

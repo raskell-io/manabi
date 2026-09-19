@@ -146,10 +146,40 @@ export const languageCounts: Readable<Record<Language, LanguageCount>> = derived
 	}
 );
 
-/** Build a stable queue snapshot for a review session (call once at start). */
-export function snapshotQueue(): QueueSummary {
+/** Per-lesson due/new counts, plus how many of its items still exist (published). */
+export type LessonCount = { dueReviews: number; newItems: number; total: number };
+export const lessonCounts: Readable<Record<string, LessonCount>> = derived(docStore, ($doc) => {
+	const out: Record<string, LessonCount> = {};
+	if (!$doc) return out;
+	for (const lesson of Object.values($doc.lessons)) {
+		const { dueReviews, newItems } = queueCounts(
+			$doc,
+			{ ...$doc.settings, activeLanguage: lesson.language },
+			undefined,
+			{ scope: new Set(lesson.itemIds) }
+		);
+		const total = lesson.itemIds.filter(
+			(id) => $doc.learningItems[id]?.status === 'published'
+		).length;
+		out[lesson.id] = { dueReviews, newItems, total };
+	}
+	return out;
+});
+
+/**
+ * Build a stable queue snapshot for a review session (call once at start).
+ * With a `lesson`, the queue is scoped to that lesson's items (in its language)
+ * and the daily caps are lifted — see `buildQueue`.
+ */
+export function snapshotQueue(lesson?: Lesson): QueueSummary {
 	if (!doc) return { dueReviews: 0, newItems: 0, tasks: [] };
-	return buildQueue(doc, doc.settings);
+	if (!lesson) return buildQueue(doc, doc.settings);
+	return buildQueue(
+		doc,
+		{ ...doc.settings, activeLanguage: lesson.language },
+		undefined,
+		{ scope: new Set(lesson.itemIds) }
+	);
 }
 
 // --- Init / persistence -----------------------------------------------------
@@ -397,6 +427,10 @@ export function deleteLesson(id: string): void {
 	updateDoc((d) => {
 		delete d.lessons[id];
 	});
+}
+
+export function getLesson(id: string): Lesson | undefined {
+	return doc?.lessons[id];
 }
 
 // --- Passages (reading material) --------------------------------------------

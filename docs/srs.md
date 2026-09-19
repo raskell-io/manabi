@@ -79,7 +79,7 @@ So you first learn to recognize a word, then practice saying/hearing it, and onl
 you asked to use it in context or produce it from English. This mirrors how reading
 fluency actually develops.
 
-## The queue — `buildQueue(doc, settings, onIso?)`
+## The queue — `buildQueue(doc, settings, onIso?, opts?)`
 
 Produces a `QueueSummary { dueReviews, newItems, tasks }` for the **active language**.
 A task is `{ itemId, dimension, isNew }`. The algorithm:
@@ -96,6 +96,18 @@ A task is `{ itemId, dimension, isNew }`. The algorithm:
 
 `reviewSummary` (a derived store) and `queueCounts` give the home screen its counts without
 building the full task list.
+
+### Scoped queues (lessons)
+
+`opts.scope` (a `ReadonlySet` of item ids) restricts steps 1–7 to those items and keeps them
+in the scope's order (so a lesson's new items come up in the order you arranged them).
+Inside a scope the two caps — `reviewCap` and `newPerDay` — are **not applied**: a scope is
+already a bounded, deliberately chosen set, so "review this lesson" means all of it.
+Everything else (published-only, active-language, unlock rules, due dates) still holds.
+
+In the store, `snapshotQueue(lesson?)` builds a scoped queue for a lesson (overriding
+`settings.activeLanguage` with the lesson's language), and the `lessonCounts` derived store
+gives the Lessons page its per-lesson `{ dueReviews, newItems, total }` badges.
 
 ## The review screen — `/review`
 
@@ -117,6 +129,13 @@ first. This keeps them from mysteriously showing "0 cards" just because a word h
 reviewed for recognition yet. Grading still advances each skill's SM-2 state, so progress
 and the dashboard stay accurate. The page loads the active language's manifest on mount
 ([audio](./audio.md)).
+
+**Lesson scope.** Opening `/review?lesson=<id>` (the **Review** button on a lesson card)
+restricts every mode to that lesson: the Reading queue comes from `snapshotQueue(lesson)`
+(scoped, caps lifted — see above) and the Listening/Speaking pools are the lesson's published
+items that have a clip. A chip under the title names the lesson and links back to the
+whole-collection review; the query param is read reactively, so switching between the two
+never needs a reload.
 
 ## Exercises
 

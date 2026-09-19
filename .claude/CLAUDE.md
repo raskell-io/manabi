@@ -31,19 +31,20 @@ src/lib/
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
   components/ ScriptText · AudioButton · Recorder · ExerciseRunner
-src/routes/   / · review · items[/[id]] · lessons · dashboard · workbench · settings
+src/routes/   / · review[?lesson=id] · items[/[id]] · lessons · dashboard · workbench · settings
 ```
 
 ## Key modules
 - `srs/schedule.ts` — `gradeDimension(state, quality 0-5)` SM-2; <3 is a lapse.
-- `srs/queue.ts` — `buildQueue` (new items gated by `newPerDay`, reviews by `reviewCap`);
+- `srs/queue.ts` — `buildQueue` (new items gated by `newPerDay`, reviews by `reviewCap`;
+  `{ scope }` = a lesson's item-id set → scope order, both caps lifted);
   `isUnlocked` gates context behind 1 recognition rep, recall behind 2.
 - `exercises/generate.ts` — `buildExercise(item, dimension, pool, {audio, rng})`;
   distractors prefer same kind/level/tags. `rng` injectable for deterministic tests.
 - `inference/router.ts` — TTS is local-first (MMS) then OpenAI; generation is OpenAI-only.
 - `db/store.ts` — `gradeItem`, `recordPronunciationAttempt`, `approveDraft`, derived
-  stores (`activeItems`, `reviewSummary`, `skillMemories`, …), `snapshotQueue()` for a
-  stable per-session review order.
+  stores (`activeItems`, `reviewSummary`, `lessonCounts`, `skillMemories`, …),
+  `snapshotQueue(lesson?)` for a stable per-session review order.
 
 ## Conventions
 - Svelte 5 runes (`$state`, `$derived`, `$props`, `$effect`). SPA: `ssr=false` in
@@ -60,5 +61,5 @@ Vitest covers SRS scheduling, queue building, and exercise generation. There is 
 in-repo browser test; smoke-test by driving the dev server with a headless browser.
 
 ## Deferred (future milestones)
-Git sync (isomorphic-git markdown round-trip), Hebrew vowel-hiding toggle +
-diacritization, ASR-based pronunciation scoring, lesson-scoped review.
+Git sync (isomorphic-git markdown round-trip), Hebrew diacritization (the vowel-hiding
+toggle exists), ASR-based pronunciation scoring.

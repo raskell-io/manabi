@@ -1,7 +1,15 @@
 <script lang="ts">
-	import { Plus, Trash2 } from 'lucide-svelte';
+	import { GraduationCap, Plus, Trash2 } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
-	import { activeItems, createLesson, deleteLesson, getItem, lessons, settings } from '$lib/db/store';
+	import {
+		activeItems,
+		createLesson,
+		deleteLesson,
+		getItem,
+		lessonCounts,
+		lessons,
+		settings
+	} from '$lib/db/store';
 
 	let creating = $state(false);
 	let title = $state('');
@@ -29,7 +37,7 @@
 	<h1>Lessons</h1>
 	<button class="new" onclick={() => (creating = !creating)}><Plus size={18} /> New lesson</button>
 </header>
-<p class="muted">Curated bundles of items in the active language. Review is scheduled across your whole collection; lessons are for grouping and browsing.</p>
+<p class="muted">Curated bundles of items in the active language. <strong>Review</strong> a lesson to practice just its items — daily limits don't apply inside a lesson, you get all of it.</p>
 
 {#if creating}
 	<section class="builder">
@@ -52,6 +60,7 @@
 
 <section class="grid">
 	{#each langLessons as lesson (lesson.id)}
+		{@const c = $lessonCounts[lesson.id] ?? { dueReviews: 0, newItems: 0, total: 0 }}
 		<div class="lesson">
 			<div class="l-head">
 				<h3>{lesson.title}</h3>
@@ -68,6 +77,24 @@
 					{/if}
 				{/each}
 				{#if lesson.itemIds.length > 8}<span class="more">+{lesson.itemIds.length - 8}</span>{/if}
+			</div>
+			<div class="l-foot">
+				<span class="l-due">
+					{#if c.total === 0}
+						No items left
+					{:else if c.dueReviews + c.newItems === 0}
+						Nothing due
+					{:else}
+						{#if c.newItems > 0}<span class="l-new">{c.newItems} new</span>{/if}
+						{#if c.newItems > 0 && c.dueReviews > 0} · {/if}
+						{#if c.dueReviews > 0}<span class="l-overdue">{c.dueReviews} due</span>{/if}
+					{/if}
+				</span>
+				{#if c.total > 0}
+					<a class="review" href="/review?lesson={lesson.id}"><GraduationCap size={15} /> Review</a>
+				{:else}
+					<span class="review off"><GraduationCap size={15} /> Review</span>
+				{/if}
 			</div>
 		</div>
 	{:else}
@@ -216,6 +243,42 @@
 	.more {
 		color: var(--color-text-muted);
 		font-size: 0.82rem;
+	}
+	.l-foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 0.9rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--color-border);
+	}
+	.l-due {
+		font-size: 0.82rem;
+		color: var(--color-text-muted);
+	}
+	.l-new {
+		color: var(--color-accent);
+		font-weight: 600;
+	}
+	.l-overdue {
+		color: var(--color-warning);
+		font-weight: 600;
+	}
+	.review {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.4rem 0.8rem;
+		border-radius: 0.5rem;
+		background: var(--color-accent);
+		color: #fff;
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+	.review.off {
+		opacity: 0.45;
+		cursor: not-allowed;
 	}
 	.empty {
 		grid-column: 1 / -1;
