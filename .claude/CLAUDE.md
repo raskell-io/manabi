@@ -21,11 +21,15 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
   fire-and-forget `saveDoc`. **Automerge rejects `undefined`** — all inserts go
   through `stripUndefined()`.
 - Audio blobs (synthesized + recordings) live in a separate raw-IDB blob store.
+- Backup: `exportBackup()` = history-free Automerge snapshot (API key blanked);
+  `importBackup()` merges **semantically** via `db/merge.ts` (union by id, newest
+  wins, never deletes). Raw `Automerge.merge` is unsafe here — devices don't share
+  a root change, so root maps would conflict and one side would be dropped.
 
 ## Project structure
 ```
 src/lib/
-  db/         types.ts · store.ts (doc + CRUD + SRS ops) · blob-store.ts · seed.ts
+  db/         types.ts · store.ts (doc + CRUD + SRS ops) · merge.ts (backup merge) · blob-store.ts · seed.ts
   srs/        schedule.ts (SM-2 gradeDimension) · queue.ts (buildQueue, unlock rules)
   exercises/  templates.ts (Exercise shape) · generate.ts (buildExercise + distractors)
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts

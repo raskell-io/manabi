@@ -1,8 +1,73 @@
 <script lang="ts">
-	import { settings, updateSettings } from '$lib/db/store';
-	import { LANGUAGES, stripNiqqud, type Language } from '$lib/db/types';
+	import { Download, Upload } from 'lucide-svelte';
+	import {
+		allItems,
+		exerciseAttempts,
+		exportBackup,
+		importBackup,
+		lessons,
+		settings,
+		skillMemories,
+		updateSettings
+	} from '$lib/db/store';
+	import { LANGUAGES, stripNiqqud, todayIso, type Language } from '$lib/db/types';
+	import type { MergeSummary } from '$lib/db/merge';
 
 	let s = $derived($settings);
+
+	// --- Backup ---
+	let fileInput = $state<HTMLInputElement | null>(null);
+	let backupMsg = $state<{ kind: 'ok' | 'error'; text: string } | null>(null);
+
+	function downloadBackup() {
+		try {
+			const bytes = exportBackup();
+			const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' }));
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `manabi-${todayIso()}.manabi`;
+			a.click();
+			setTimeout(() => URL.revokeObjectURL(url), 1000);
+			backupMsg = { kind: 'ok', text: `Exported ${formatBytes(bytes.byteLength)} — keep the file somewhere safe.` };
+		} catch (err) {
+			backupMsg = { kind: 'error', text: err instanceof Error ? err.message : String(err) };
+		}
+	}
+
+	async function importFile(input: HTMLInputElement) {
+		const file = input.files?.[0];
+		input.value = '';
+		if (!file) return;
+		try {
+			const bytes = new Uint8Array(await file.arrayBuffer());
+			backupMsg = { kind: 'ok', text: describeMerge(importBackup(bytes)) };
+		} catch (err) {
+			backupMsg = { kind: 'error', text: err instanceof Error ? err.message : String(err) };
+		}
+	}
+
+	function describeMerge(m: MergeSummary): string {
+		const parts: string[] = [];
+		const pair = (label: string, c: { added: number; updated: number }) => {
+			const bits: string[] = [];
+			if (c.added) bits.push(`${c.added} added`);
+			if (c.updated) bits.push(`${c.updated} updated`);
+			if (bits.length) parts.push(`${label}: ${bits.join(', ')}`);
+		};
+		pair('items', m.items);
+		pair('progress', m.srs);
+		pair('lessons', m.lessons);
+		pair('passages', m.passages);
+		pair('drafts', m.drafts);
+		if (m.attempts) parts.push(`${m.attempts} attempts`);
+		return parts.length
+			? `Merged — ${parts.join(' · ')}.`
+			: 'Nothing new to merge — this device already has everything in that backup.';
+	}
+
+	function formatBytes(n: number): string {
+		return n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
+	}
 	const MODELS = ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini'];
 	const THEMES: { value: 'system' | 'light' | 'dark'; label: string }[] = [
 		{ value: 'system', label: 'System' },
@@ -82,6 +147,20 @@
 			{#each MODELS as m (m)}<option value={m}>{m}</option>{/each}
 		</select>
 	</label>
+</section>
+
+<section class="group">
+	<h2>Backup</h2>
+	<p class="muted">Everything lives in this browser. Export a backup to keep it safe or to move it to another device. Importing <strong>merges</strong>: nothing is deleted, and progress from both devices is combined — for each skill, the more recent review wins. Recordings and your OpenAI key are not included.</p>
+	<p class="stats">This device: {$allItems.length} items · {$skillMemories.length} with progress · {$exerciseAttempts.length} attempts · {$lessons.length} lessons</p>
+	<div class="backup-row">
+		<button class="action" onclick={downloadBackup}><Download size={16} /> Export backup</button>
+		<button class="action secondary" onclick={() => fileInput?.click()}><Upload size={16} /> Import &amp; merge…</button>
+		<input class="file" type="file" bind:this={fileInput} onchange={(e) => void importFile(e.currentTarget)} />
+	</div>
+	{#if backupMsg}
+		<p class="backup-msg" class:error={backupMsg.kind === 'error'} role="status">{backupMsg.text}</p>
+	{/if}
 </section>
 
 <section class="group">
@@ -191,5 +270,42 @@
 		border-color: var(--color-accent);
 		color: var(--color-accent);
 		font-weight: 600;
+	}
+	.stats {
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+		margin: 0 0 0.85rem;
+	}
+	.backup-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+	}
+	.action {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.55rem 1rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-accent);
+		background: var(--color-accent);
+		color: #fff;
+		font-weight: 600;
+	}
+	.action.secondary {
+		background: var(--color-bg);
+		color: var(--color-text);
+		border-color: var(--color-border);
+	}
+	.file {
+		display: none;
+	}
+	.backup-msg {
+		margin: 0.85rem 0 0;
+		font-size: 0.88rem;
+		color: var(--color-success);
+	}
+	.backup-msg.error {
+		color: var(--color-danger);
 	}
 </style>

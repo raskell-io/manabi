@@ -174,6 +174,37 @@ d.learningItems[id] = stripUndefined(item);
 If you add a new store write, route it through `stripUndefined` for any object that may
 carry optional fields. Forgetting this is the single most common runtime error.
 
+## Backup & merge
+
+`exportBackup()` (store) serializes a **history-free Automerge snapshot** of the current
+state — `Automerge.save(Automerge.from(plain(doc)))` — with `settings.openaiApiKey`
+blanked. Dropping the history keeps the file small and, more importantly, keeps the key
+(and every value it ever had) out of it. The `.manabi` file is still an Automerge document,
+so `Automerge.load` rejects anything that is not one.
+
+`importBackup(bytes)` loads the file, checks its shape (`isManabiDocument`) and that its
+`schemaVersion` is not newer than the app's, then merges it inside a single
+`Automerge.change` via [`merge.ts`](../src/lib/db/merge.ts).
+
+**Why not `Automerge.merge`?** Every device creates its own document with
+`Automerge.from(createEmptyDocument())` — a random actor and its own root change. Two such
+documents share no history, so merging them makes their root collections *conflicting
+assignments*: one side's `learningItems` map wins and the other's is silently dropped.
+The merge is therefore **semantic**, collection by collection:
+
+| Collection | Rule when a record exists on both sides |
+| --- | --- |
+| `learningItems`, `passages` | newer `updatedAt` wins (only if the content differs, ignoring timestamps) |
+| `srsStates` | per skill: later `lastReviewed` wins (then more repetitions); `lapses` = max |
+| `lessons` | `itemIds` are unioned |
+| `contentDrafts`, `passageDrafts` | a decision (approved / rejected) beats `pending` |
+| `exerciseAttempts`, `pronunciationAttempts`, `seededIds` | union by id |
+| `settings` | never touched |
+
+An import **never deletes** anything, and merging the same file twice is a no-op
+(`MergeSummary` reports zero changes). Records are copied with `plain()` (a JSON round-trip),
+which both detaches them from the loaded document and strips `undefined`.
+
 ## Migrations
 
 Migrations are **forward-only and idempotent**. On load, `migrate()` runs if the stored

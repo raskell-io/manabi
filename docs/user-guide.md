@@ -86,7 +86,8 @@ repetition, so you review exactly what you are about to forget.
 - **Workbench (`/workbench`)** — generate new vocabulary or reading passages with AI (see
   below) into a review queue you approve before anything is added.
 - **Settings (`/settings`)** — active language, daily limits, theme, the Hebrew
-  vowel-hiding toggle, and your OpenAI key (for the workbench).
+  vowel-hiding toggle, your OpenAI key (for the workbench), and **Backup** (export a file /
+  import & merge — see below).
 
 ## Audio
 
@@ -121,3 +122,16 @@ set you chose deliberately, so it is never "too much".
 - Because data is per-browser, it does not automatically sync between devices. The data
   model is built on CRDTs, so cross-device sync can be added later, but today each device
   is independent. Clearing your browser storage clears your progress.
+
+## Backup & moving between devices
+
+Because everything is local, clearing your browser's site data would erase your progress.
+**Settings → Backup → Export backup** downloads a single `manabi-<date>.manabi` file with
+all your items, lessons, passages, drafts, progress, and review history (recordings and your
+OpenAI key are left out). Keep it somewhere safe.
+
+**Import & merge** reads such a file into the current device. It **merges** rather than
+replaces: nothing you have is deleted, items and lessons from both sides are combined, and
+for each item and each skill the more recently reviewed state wins. So you can study on
+your phone, export, import on your laptop, study there, and go back the other way — both
+histories combine. Importing the same file twice is harmless ("nothing new to merge").

@@ -11,6 +11,7 @@ import * as Automerge from '@automerge/automerge';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 import { derived, writable, type Readable } from 'svelte/store';
 import { deleteBlob } from './blob-store';
+import { emptySummary, isManabiDocument, mergeInto, plain, type MergeSummary } from './merge';
 import { passagesToApply, seedsToApply } from './seed';
 import { gradeDimension, isPass } from '$lib/srs/schedule';
 import { buildQueue, queueCounts, type QueueSummary } from '$lib/srs/queue';
@@ -269,6 +270,46 @@ function updateDoc(changeFn: (doc: ManabiDocument) => void): void {
 	doc = Automerge.change(doc, changeFn);
 	docStore.set(doc);
 	void saveDoc();
+}
+
+// --- Backup -----------------------------------------------------------------
+
+/**
+ * Serialize a backup: a fresh, history-free Automerge snapshot of the current
+ * state with the OpenAI key removed. Compact and self-validating (`load`
+ * rejects anything that isn't Automerge). Audio blobs are not included.
+ */
+export function exportBackup(): Uint8Array {
+	if (!doc) throw new Error('Manabi database not initialized');
+	const snapshot = plain(doc) as ManabiDocument;
+	snapshot.settings = { ...snapshot.settings, openaiApiKey: '' };
+	return Automerge.save(Automerge.from<ManabiDocument>(snapshot));
+}
+
+/**
+ * Merge a backup file into this device's document (see `merge.ts` for the
+ * rules — union by id, newest wins, never deletes). Returns what changed.
+ */
+export function importBackup(bytes: Uint8Array): MergeSummary {
+	if (!doc) throw new Error('Manabi database not initialized');
+	let other: unknown;
+	try {
+		other = Automerge.load(bytes);
+	} catch {
+		throw new Error('That file is not a Manabi backup.');
+	}
+	if (!isManabiDocument(other)) throw new Error('That file is not a Manabi backup.');
+	if (other.schemaVersion > SCHEMA_VERSION) {
+		throw new Error(
+			`That backup was made by a newer Manabi (schema ${other.schemaVersion}, this app has ${SCHEMA_VERSION}). Update the app, then import again.`
+		);
+	}
+	const snapshot = other;
+	let summary = emptySummary();
+	updateDoc((d) => {
+		summary = mergeInto(d, snapshot);
+	});
+	return summary;
 }
 
 // --- Settings ---------------------------------------------------------------

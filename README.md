@@ -36,7 +36,9 @@ PWA**. No server, no database — your data lives in your browser.
 - **Reading-first.** Pinyin tone marks, kana/furigana, vowelled (niqqud) Hebrew with RTL.
 - **Human-in-the-loop AI.** The workbench generates draft items; nothing is published
   without your approval.
-- **Local-first.** Everything works offline in IndexedDB. (Git sync is a future milestone.)
+- **Local-first.** Everything works offline in IndexedDB. Settings → Backup exports a
+  single file you can import on another device; imports merge, never delete. (Git sync
+  is a future milestone.)
 
 ## Learning modes
 
