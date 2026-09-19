@@ -34,6 +34,7 @@ src/lib/
   exercises/  templates.ts (Exercise shape) · generate.ts (buildExercise + distractors)
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
+  sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO)
   components/ ScriptText · AudioButton · Recorder · ExerciseRunner
 src/routes/   / · review[?lesson=id] · items[/[id]] · lessons · dashboard · workbench · settings
 ```
@@ -65,5 +66,6 @@ Vitest covers SRS scheduling, queue building, and exercise generation. There is 
 in-repo browser test; smoke-test by driving the dev server with a headless browser.
 
 ## Deferred (future milestones)
-Git sync (isomorphic-git markdown round-trip), Hebrew diacritization (the vowel-hiding
-toggle exists), ASR-based pronunciation scoring.
+Markdown round-trip of content in the sync repo (snapshot sync itself ships — `sync.ts`;
+isomorphic-git is out because GitHub's git-over-HTTP has no CORS), Hebrew diacritization
+(the vowel-hiding toggle exists), ASR-based pronunciation scoring.

@@ -55,30 +55,105 @@ export function plain<T>(v: T): T {
 	return JSON.parse(JSON.stringify(v)) as T;
 }
 
+/** Deterministic JSON: object keys sorted at every level, undefined dropped. */
+export function stableStringify(v: unknown): string {
+	if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']';
+	if (v && typeof v === 'object') {
+		const o = v as Record<string, unknown>;
+		return (
+			'{' +
+			Object.keys(o)
+				.sort()
+				.filter((k) => o[k] !== undefined)
+				.map((k) => JSON.stringify(k) + ':' + stableStringify(o[k]))
+				.join(',') +
+			'}'
+		);
+	}
+	return JSON.stringify(v) ?? 'null';
+}
+
+/** A record without its timestamps (seeds get `Date.now()` per device). */
+function stripTs<T extends object>(r: T): T {
+	const c = { ...plain(r) } as Record<string, unknown>;
+	delete c.createdAt;
+	delete c.updatedAt;
+	return c as T;
+}
+
+/**
+ * The synced part of a document, normalized so that two devices holding the
+ * same *meaning* produce the same fingerprint: settings left out, record
+ * timestamps dropped, lesson item lists order-insensitive. Must agree with
+ * `mergeInto`: whatever a merge treats as "nothing to do" fingerprints equal.
+ */
+export function contentOf(doc: ManabiDocument): Record<string, unknown> {
+	const map = <T extends object>(
+		coll: Record<string, T> | undefined,
+		f: (r: T) => unknown = stripTs
+	) => Object.fromEntries(Object.entries(coll ?? {}).map(([k, v]) => [k, f(v)]));
+	return {
+		learningItems: map(doc.learningItems),
+		lessons: map(doc.lessons, (l) => ({ ...stripTs(l), itemIds: [...l.itemIds].sort() })),
+		passages: map(doc.passages),
+		srsStates: map(doc.srsStates),
+		exerciseAttempts: doc.exerciseAttempts ?? {},
+		pronunciationAttempts: doc.pronunciationAttempts ?? {},
+		contentDrafts: map(doc.contentDrafts),
+		passageDrafts: map(doc.passageDrafts),
+		seededIds: doc.seededIds ?? {}
+	};
+}
+
+/** SHA-256 hex of a document's synced content — equal ⇔ nothing to sync. */
+export async function fingerprint(doc: ManabiDocument): Promise<string> {
+	const data = new TextEncoder().encode(stableStringify(contentOf(doc)));
+	const hash = await crypto.subtle.digest('SHA-256', data);
+	return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 function entries<T>(coll: Record<string, T> | undefined): [string, T][] {
 	return coll ? Object.entries(coll) : [];
 }
 
-/** Content equality ignoring timestamps (seeds get `Date.now()` per device). */
-function sameContent(a: object, b: object): boolean {
-	const strip = (v: object) => JSON.stringify({ ...plain(v), createdAt: 0, updatedAt: 0 });
-	return strip(a) === strip(b);
+/**
+ * Whether the other side's record should replace ours: newer `updatedAt`
+ * wins; identical content (timestamps aside) is never a change; an exact
+ * timestamp tie is broken deterministically so both devices converge.
+ */
+function otherRecordWins(
+	mine: { updatedAt: number } & object,
+	other: { updatedAt: number } & object
+): boolean {
+	const m = stableStringify(stripTs(mine));
+	const o = stableStringify(stripTs(other));
+	if (m === o) return false;
+	if (other.updatedAt !== mine.updatedAt) return other.updatedAt > mine.updatedAt;
+	return o > m;
 }
 
-/** Whether the other side's dimension state is more recent than ours. */
+/**
+ * Whether the other side's dimension state should replace ours: later review
+ * wins, then more repetitions; an exact tie (same day, same count, e.g. graded
+ * on both devices before a sync) is broken deterministically.
+ */
 function otherDimWins(local: DimState, other: DimState): boolean {
 	const l = local.lastReviewed ?? '';
 	const o = other.lastReviewed ?? '';
 	if (o !== l) return o > l;
-	return other.repetitions > local.repetitions;
+	if (other.repetitions !== local.repetitions) return other.repetitions > local.repetitions;
+	return stableStringify(other) > stableStringify(local);
 }
+
+/** Draft outcomes: an approval (it published an item) beats a rejection beats pending. */
+const DRAFT_RANK = { pending: 0, rejected: 1, approved: 2 } as const;
 
 /**
  * Merge `other` into `local` (mutating `local`) and report what changed.
  * Records that exist on both sides: items/passages → newer `updatedAt` wins
  * (only if the content actually differs); SRS → per skill, the more recently
  * reviewed state wins and `lapses` takes the max; lessons → item ids are
- * unioned; drafts → a decision (approved/rejected) beats pending; attempts
+ * unioned; drafts → approved beats rejected beats pending; attempts
  * and `seededIds` are unioned. Settings are never touched.
  */
 export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSummary {
@@ -89,7 +164,7 @@ export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSu
 		if (!mine) {
 			local.learningItems[id] = plain(it);
 			s.items.added++;
-		} else if (it.updatedAt > mine.updatedAt && !sameContent(it, mine)) {
+		} else if (otherRecordWins(mine, it)) {
 			local.learningItems[id] = plain(it);
 			s.items.updated++;
 		}
@@ -160,7 +235,7 @@ export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSu
 		if (!mine) {
 			local.passages[id] = plain(p);
 			s.passages.added++;
-		} else if (p.updatedAt > mine.updatedAt && !sameContent(p, mine)) {
+		} else if (otherRecordWins(mine, p)) {
 			local.passages[id] = plain(p);
 			s.passages.updated++;
 		}
@@ -171,7 +246,7 @@ export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSu
 		if (!mine) {
 			local.contentDrafts[id] = plain(dr);
 			s.drafts.added++;
-		} else if (mine.status === 'pending' && dr.status !== 'pending') {
+		} else if (DRAFT_RANK[dr.status] > DRAFT_RANK[mine.status]) {
 			mine.status = dr.status;
 			s.drafts.updated++;
 		}
@@ -182,7 +257,7 @@ export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSu
 		if (!mine) {
 			local.passageDrafts[id] = plain(dr);
 			s.drafts.added++;
-		} else if (mine.status === 'pending' && dr.status !== 'pending') {
+		} else if (DRAFT_RANK[dr.status] > DRAFT_RANK[mine.status]) {
 			mine.status = dr.status;
 			s.drafts.updated++;
 		}

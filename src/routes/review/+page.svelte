@@ -19,6 +19,7 @@
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
+	import { maybeAutoSync } from '$lib/sync';
 
 	type Mode = 'reading' | 'listening' | 'speaking' | 'everything';
 
@@ -132,6 +133,7 @@
 	function advance() {
 		if (index + 1 >= tasks.length) {
 			done = true;
+			void maybeAutoSync(); // push this session's progress (no-op unless configured)
 		} else {
 			index += 1;
 		}

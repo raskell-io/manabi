@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as Automerge from '@automerge/automerge';
-import { isManabiDocument, mergeInto } from './merge';
+import { fingerprint, isManabiDocument, mergeInto } from './merge';
 import {
 	createEmptyDocument,
 	freshSkillMemory,
@@ -158,6 +158,65 @@ describe('mergeInto', () => {
 			summary = mergeInto(d, loaded);
 		});
 		expect(summary).toMatchObject({ items: { added: 0, updated: 0 }, srs: { added: 0, updated: 0 } });
+	});
+});
+
+describe('convergence (both devices merge each other → identical fingerprints)', () => {
+	const clone = (d: ManabiDocument) => JSON.parse(JSON.stringify(d)) as ManabiDocument;
+	async function converge(a: ManabiDocument, b: ManabiDocument) {
+		const a2 = clone(a);
+		mergeInto(a2, clone(b));
+		const b2 = clone(b);
+		mergeInto(b2, clone(a));
+		expect(await fingerprint(a2)).toBe(await fingerprint(b2));
+		// And a second round changes nothing on either side.
+		const before = await fingerprint(a2);
+		mergeInto(a2, clone(b2));
+		expect(await fingerprint(a2)).toBe(before);
+		return [a2, b2] as const;
+	}
+
+	it('same content with per-device timestamps (seeds) fingerprints equal without merging', async () => {
+		const a = createEmptyDocument();
+		a.learningItems.s = item('s', 1000);
+		const b = createEmptyDocument();
+		b.learningItems.s = item('s', 5000);
+		b.learningItems.s.createdAt = 5000;
+		expect(await fingerprint(a)).toBe(await fingerprint(b));
+	});
+
+	it('tied SRS states (same day, same repetitions, different ease) converge', async () => {
+		const a = createEmptyDocument();
+		const b = createEmptyDocument();
+		const sa = freshSkillMemory('x');
+		sa.dims.recognition = { ...sa.dims.recognition, introduced: true, repetitions: 2, lastReviewed: '2026-09-19', ease: 2.6, interval: 6, lapses: 1 };
+		const sb = freshSkillMemory('x');
+		sb.dims.recognition = { ...sb.dims.recognition, introduced: true, repetitions: 2, lastReviewed: '2026-09-19', ease: 2.36, interval: 4, lapses: 0 };
+		a.srsStates.x = sa;
+		b.srsStates.x = sb;
+		const [a2, b2] = await converge(a, b);
+		expect(a2.srsStates.x.dims.recognition.lapses).toBe(1);
+		expect(b2.srsStates.x.dims.recognition.lapses).toBe(1);
+	});
+
+	it('lesson item order and membership converge', async () => {
+		const a = createEmptyDocument();
+		const b = createEmptyDocument();
+		a.lessons.l = { id: 'l', title: 'L', language: 'zh', itemIds: ['a', 'b', 'c'], createdAt: 1 };
+		b.lessons.l = { id: 'l', title: 'L', language: 'zh', itemIds: ['c', 'a', 'd'], createdAt: 1 };
+		await converge(a, b);
+	});
+
+	it('items edited at the same instant, and drafts decided differently, converge', async () => {
+		const a = createEmptyDocument();
+		const b = createEmptyDocument();
+		a.learningItems.x = item('x', 7777, 'edit-A');
+		b.learningItems.x = item('x', 7777, 'edit-B');
+		a.contentDrafts.d = { id: 'd', language: 'zh', kind: 'word', item: item('z'), sourcePrompt: '', status: 'approved', createdAt: 1 };
+		b.contentDrafts.d = { ...a.contentDrafts.d, status: 'rejected' };
+		const [a2, b2] = await converge(a, b);
+		expect(a2.contentDrafts.d.status).toBe('approved');
+		expect(b2.contentDrafts.d.status).toBe('approved');
 	});
 });
 

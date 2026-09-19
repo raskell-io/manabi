@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Download, Upload } from 'lucide-svelte';
+	import { Download, RefreshCw, Upload } from 'lucide-svelte';
 	import {
 		allItems,
 		exerciseAttempts,
@@ -12,8 +12,40 @@
 	} from '$lib/db/store';
 	import { LANGUAGES, stripNiqqud, todayIso, type Language } from '$lib/db/types';
 	import type { MergeSummary } from '$lib/db/merge';
+	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
 
 	let s = $derived($settings);
+
+	// --- Sync ---
+	const syncConfigured = $derived(isSyncConfigured(s));
+
+	function ago(ts: number): string {
+		const mins = Math.round((Date.now() - ts) / 60000);
+		if (mins < 1) return 'just now';
+		if (mins < 60) return `${mins} min ago`;
+		const hrs = Math.round(mins / 60);
+		if (hrs < 24) return `${hrs} h ago`;
+		return `on ${new Date(ts).toLocaleDateString()}`;
+	}
+
+	function syncStatusText(st: SyncState): string {
+		switch (st.status) {
+			case 'syncing':
+				return 'Syncing…';
+			case 'offline':
+				return 'Offline — will sync when back online.';
+			case 'error':
+				return st.error ?? 'Sync failed.';
+			case 'ok': {
+				const parts = st.lastPulled ? mergeParts(st.lastPulled) : [];
+				const pulled = parts.length ? `pulled ${parts.join(', ')}` : 'nothing new';
+				return `Synced ${st.lastSyncAt ? ago(st.lastSyncAt) : ''} · ${pulled}${st.lastPushed ? ' · pushed' : ''}.`;
+			}
+			default:
+				if (!syncConfigured) return 'Not configured.';
+				return st.lastSyncAt ? `Last synced ${ago(st.lastSyncAt)}.` : 'Not synced yet.';
+		}
+	}
 
 	// --- Backup ---
 	let fileInput = $state<HTMLInputElement | null>(null);
@@ -46,7 +78,7 @@
 		}
 	}
 
-	function describeMerge(m: MergeSummary): string {
+	function mergeParts(m: MergeSummary): string[] {
 		const parts: string[] = [];
 		const pair = (label: string, c: { added: number; updated: number }) => {
 			const bits: string[] = [];
@@ -60,6 +92,11 @@
 		pair('passages', m.passages);
 		pair('drafts', m.drafts);
 		if (m.attempts) parts.push(`${m.attempts} attempts`);
+		return parts;
+	}
+
+	function describeMerge(m: MergeSummary): string {
+		const parts = mergeParts(m);
 		return parts.length
 			? `Merged — ${parts.join(' · ')}.`
 			: 'Nothing new to merge — this device already has everything in that backup.';
@@ -161,6 +198,27 @@
 	{#if backupMsg}
 		<p class="backup-msg" class:error={backupMsg.kind === 'error'} role="status">{backupMsg.text}</p>
 	{/if}
+</section>
+
+<section class="group">
+	<h2>Sync (GitHub)</h2>
+	<p class="muted">Keeps your devices in step automatically by storing the backup snapshot in a <strong>private</strong> GitHub repository — no server involved. Create an empty private repo, then a fine-grained personal access token with <em>Contents: read &amp; write</em> for just that repo. Every sync pulls, merges (never deletes) and pushes only if something changed.</p>
+	<label>
+		<span>Repository (owner/repo)</span>
+		<input placeholder="you/manabi-sync" value={s.githubSyncRepo} onchange={(e) => updateSettings({ githubSyncRepo: e.currentTarget.value.trim() })} />
+	</label>
+	<label>
+		<span>Token</span>
+		<input type="password" placeholder="github_pat_…" value={s.githubSyncToken} onchange={(e) => updateSettings({ githubSyncToken: e.currentTarget.value.trim() })} />
+	</label>
+	<label class="check">
+		<input type="checkbox" checked={s.syncAuto} onchange={(e) => updateSettings({ syncAuto: e.currentTarget.checked })} />
+		<span>Sync automatically — on start, after each review session, and when the device comes back online.</span>
+	</label>
+	<div class="backup-row">
+		<button class="action" onclick={() => void syncNow()} disabled={!syncConfigured || $syncState.status === 'syncing'}><RefreshCw size={16} /> Sync now</button>
+		<span class="sync-status" class:error={$syncState.status === 'error'} role="status">{syncStatusText($syncState)}</span>
+	</div>
 </section>
 
 <section class="group">
@@ -279,7 +337,19 @@
 	.backup-row {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
 		gap: 0.6rem;
+	}
+	.sync-status {
+		font-size: 0.88rem;
+		color: var(--color-text-muted);
+	}
+	.sync-status.error {
+		color: var(--color-danger);
+	}
+	.action:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 	.action {
 		display: inline-flex;

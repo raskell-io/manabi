@@ -86,8 +86,8 @@ repetition, so you review exactly what you are about to forget.
 - **Workbench (`/workbench`)** — generate new vocabulary or reading passages with AI (see
   below) into a review queue you approve before anything is added.
 - **Settings (`/settings`)** — active language, daily limits, theme, the Hebrew
-  vowel-hiding toggle, your OpenAI key (for the workbench), and **Backup** (export a file /
-  import & merge — see below).
+  vowel-hiding toggle, your OpenAI key (for the workbench), **Backup** (export a file /
+  import & merge) and **Sync (GitHub)** — both described below.
 
 ## Audio
 
@@ -135,3 +135,16 @@ replaces: nothing you have is deleted, items and lessons from both sides are com
 for each item and each skill the more recently reviewed state wins. So you can study on
 your phone, export, import on your laptop, study there, and go back the other way — both
 histories combine. Importing the same file twice is harmless ("nothing new to merge").
+
+## Sync between devices (GitHub)
+
+If you would rather not shuffle files, **Settings → Sync (GitHub)** keeps your devices in
+step automatically. You need a GitHub account, an empty **private** repository (say
+`you/manabi-sync`), and a fine-grained personal access token that can read and write that
+repository's contents. Enter both on every device.
+
+From then on Manabi syncs when it starts, after every review session, and when a device
+comes back online — or whenever you press **Sync now**. A sync pulls the other devices'
+progress, merges it exactly like an import (nothing is ever deleted), and pushes only when
+something actually changed. The token never leaves your browser except in calls to GitHub,
+and it is not included in backups.

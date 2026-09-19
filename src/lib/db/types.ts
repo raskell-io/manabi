@@ -279,6 +279,9 @@ export interface ManabiSettings {
 	reviewCap: number; // max reviews per session
 	openaiApiKey: string; // stored locally; never committed
 	openaiModel: string; // chat model for content generation
+	githubSyncRepo: string; // "owner/repo" holding the sync snapshot ('' = sync off)
+	githubSyncToken: string; // fine-grained PAT (Contents: read & write); stored locally
+	syncAuto: boolean; // sync on start, after a review session, and when back online
 	localTtsEnabled: boolean; // synthesize pronunciation on-device
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
@@ -293,6 +296,9 @@ export function defaultSettings(): ManabiSettings {
 		reviewCap: 40,
 		openaiApiKey: '',
 		openaiModel: 'gpt-4o',
+		githubSyncRepo: '',
+		githubSyncToken: '',
+		syncAuto: true,
 		localTtsEnabled: true,
 		hideHebrewVowels: false,
 		gradeButtons: true,
@@ -302,7 +308,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export interface ManabiDocument {
 	schemaVersion: number;

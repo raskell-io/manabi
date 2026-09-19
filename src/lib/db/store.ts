@@ -212,6 +212,10 @@ function migrate(d: Automerge.Doc<ManabiDocument>): Automerge.Doc<ManabiDocument
 			if (!doc.seededIds) doc.seededIds = {};
 			if (!doc.passages) doc.passages = {};
 			if (!doc.passageDrafts) doc.passageDrafts = {};
+			// Fill in any settings added since this document was created.
+			for (const [k, v] of Object.entries(defaultSettings())) {
+				if (doc.settings[k] === undefined) doc.settings[k] = v;
+			}
 			doc.schemaVersion = SCHEMA_VERSION;
 		});
 	}
@@ -282,16 +286,12 @@ function updateDoc(changeFn: (doc: ManabiDocument) => void): void {
 export function exportBackup(): Uint8Array {
 	if (!doc) throw new Error('Manabi database not initialized');
 	const snapshot = plain(doc) as ManabiDocument;
-	snapshot.settings = { ...snapshot.settings, openaiApiKey: '' };
+	snapshot.settings = { ...snapshot.settings, openaiApiKey: '', githubSyncToken: '' };
 	return Automerge.save(Automerge.from<ManabiDocument>(snapshot));
 }
 
-/**
- * Merge a backup file into this device's document (see `merge.ts` for the
- * rules — union by id, newest wins, never deletes). Returns what changed.
- */
-export function importBackup(bytes: Uint8Array): MergeSummary {
-	if (!doc) throw new Error('Manabi database not initialized');
+/** Parse and validate a backup file. Does not touch this device's document. */
+export function loadBackup(bytes: Uint8Array): ManabiDocument {
 	let other: unknown;
 	try {
 		other = Automerge.load(bytes);
@@ -304,12 +304,24 @@ export function importBackup(bytes: Uint8Array): MergeSummary {
 			`That backup was made by a newer Manabi (schema ${other.schemaVersion}, this app has ${SCHEMA_VERSION}). Update the app, then import again.`
 		);
 	}
-	const snapshot = other;
+	return other;
+}
+
+/**
+ * Merge a loaded backup into this device's document (see `merge.ts` for the
+ * rules — union by id, newest wins, never deletes). Returns what changed.
+ */
+export function mergeBackup(other: ManabiDocument): MergeSummary {
+	if (!doc) throw new Error('Manabi database not initialized');
 	let summary = emptySummary();
 	updateDoc((d) => {
-		summary = mergeInto(d, snapshot);
+		summary = mergeInto(d, other);
 	});
 	return summary;
+}
+
+export function importBackup(bytes: Uint8Array): MergeSummary {
+	return mergeBackup(loadBackup(bytes));
 }
 
 // --- Settings ---------------------------------------------------------------

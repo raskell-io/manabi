@@ -29,6 +29,7 @@ first, then dive into whichever subsystem you are touching.
 | [Audio pipeline](./audio.md) | Dev | Prerecorded Opus sprite packs, the playback engine, regenerating audio |
 | [AI content workbench](./ai-workbench.md) | Dev | The inference router, providers, draft → review → publish, adding a provider |
 | [PWA & deployment](./pwa-and-deployment.md) | Dev | PWA wiring, offline/service worker, Cloudflare Pages, local hosting |
+| [GitHub sync](./sync.md) | Dev | Multi-device sync of the backup snapshot via the GitHub Contents API: the sync round, triggers, security, limits |
 | [Development & extending](./development.md) | Dev | Setup, tasks, testing, conventions, and step-by-step extension recipes |
 
 ## The one-paragraph version

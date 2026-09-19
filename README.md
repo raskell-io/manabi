@@ -37,8 +37,8 @@ PWA**. No server, no database — your data lives in your browser.
 - **Human-in-the-loop AI.** The workbench generates draft items; nothing is published
   without your approval.
 - **Local-first.** Everything works offline in IndexedDB. Settings → Backup exports a
-  single file you can import on another device; imports merge, never delete. (Git sync
-  is a future milestone.)
+  single file you can import on another device; imports merge, never delete. Settings →
+  Sync does the same automatically through a private GitHub repo — still no server.
 
 ## Learning modes
 
@@ -144,4 +144,5 @@ hand-verified seed ships built-in so the app is usable before you generate anyth
 ## Status
 
 MVP: M1 (data model + item browser) · M2 (SRS + review loop) · M3 (audio) · AI workbench.
-Deferred: git sync, Hebrew diacritization, ASR-based pronunciation scoring.
+Deferred: markdown round-trip in the sync repo, Hebrew diacritization, ASR-based
+pronunciation scoring.
