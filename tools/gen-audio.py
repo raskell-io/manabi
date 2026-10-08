@@ -21,7 +21,7 @@ import subprocess
 
 import edge_tts
 
-VOICE = {"zh": "zh-CN-XiaoxiaoNeural", "ja": "ja-JP-NanamiNeural", "he": "he-IL-HilaNeural"}
+VOICE = {"zh": "zh-CN-XiaoxiaoNeural", "ja": "ja-JP-NanamiNeural", "ko": "ko-KR-SunHiNeural", "he": "he-IL-HilaNeural"}
 CACHE = "tools/.audio-cache"
 GAP = f"{CACHE}/_gap.mp3"
 OUT = "static/audio"
@@ -124,7 +124,7 @@ def pack(texts: list[dict]) -> None:
     if dropped:
         print(f"  skipped {dropped} missing/corrupt clips")
 
-    manifest: dict[str, dict[str, dict]] = {"zh": {}, "ja": {}, "he": {}}
+    manifest: dict[str, dict[str, dict]] = {lang: {} for lang in VOICE}
     npacks = 0
     for group, clips in groups.items():
         for ci in range(0, len(clips), CHUNK):

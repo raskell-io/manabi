@@ -1,6 +1,6 @@
 # User guide
 
-Manabi is a personal language-learning app for reading **Chinese, Japanese, and Hebrew**.
+Manabi is a personal language-learning app for reading **Chinese, Japanese, Korean, and Hebrew**.
 The philosophy: you want to *recognize words, pronounce them correctly, understand them in
 context, and gradually read real material* — not to handwrite characters. Every feature
 serves that goal.

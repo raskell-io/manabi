@@ -1,7 +1,7 @@
 # Manabi (学び)
 
 A local-first, reading-first language learning PWA for Chinese (zh), Japanese (ja),
-and Hebrew (he). Trains reading and speaking — explicitly **no handwriting**. Same
+Korean (ko), and Hebrew (he). Trains reading and speaking — explicitly **no handwriting**. Same
 stack as kurumi: SvelteKit 2 + Svelte 5 runes, Tailwind 4, Automerge over IndexedDB,
 transformers.js + OpenAI behind an inference router, adapter-static PWA.
 
@@ -9,7 +9,9 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 1. **Items, not lessons.** `LearningItem` is the atomic unit; lessons are bundles.
 2. **Five skills, tracked separately.** recognition · pronunciation · listening ·
    context · recall — each has its own SM-2 schedule; recall/context unlock later.
-3. **Reading-first.** pinyin tone marks, kana, vowelled (niqqud) Hebrew + RTL.
+3. **Reading-first.** pinyin tone marks, kana, Hangul + Revised Romanization, vowelled
+   (niqqud) Hebrew + RTL. Adding a language = `Language` + `LANGUAGES` in types.ts, then
+   every `Record<Language, …>` (seed, scripts, MMS model, reading guide, gen-audio VOICE).
 4. **Human-in-the-loop AI.** Workbench generates *drafts*; user approves to publish.
 5. **Local-first.** All state in IndexedDB. svelte-check must be 0/0.
 

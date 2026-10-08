@@ -10,7 +10,7 @@
 	--font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 	/* Script-heavy text: prefer native CJK/Hebrew system fonts. */
 	--font-script:
-		'Hiragino Sans', 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Noto Sans Hebrew',
+		'Hiragino Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Noto Sans CJK KR', 'Noto Sans KR', 'Noto Sans Hebrew',
 		'Microsoft YaHei', 'PingFang SC', sans-serif;
 
 	--color-bg: #ffffff;

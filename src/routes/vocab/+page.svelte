@@ -81,7 +81,7 @@
 <header class="head">
 	<h1>Vocabulary</h1>
 	<p class="muted">
-		{lang === 'zh' ? 'Full HSK 3.0' : 'JLPT N5–N1'} {langName} word lists. Use
+		{lang === 'zh' ? 'Full HSK 3.0' : lang === 'ja' ? 'JLPT N5–N1' : lang === 'ko' ? 'TOPIK' : ''} {langName} word lists. Use
 		<strong>＋ Add</strong> to drop a word into your spaced-repetition reviews — or add a whole level at once.
 	</p>
 </header>

@@ -27,11 +27,12 @@ export function generateId(length: number = 12): string {
 
 // --- Core enums -------------------------------------------------------------
 
-export type Language = 'zh' | 'ja' | 'he';
+export type Language = 'zh' | 'ja' | 'ko' | 'he';
 
 export const LANGUAGES: { code: Language; name: string; native: string; dir: 'ltr' | 'rtl' }[] = [
 	{ code: 'zh', name: 'Chinese', native: '中文', dir: 'ltr' },
 	{ code: 'ja', name: 'Japanese', native: '日本語', dir: 'ltr' },
+	{ code: 'ko', name: 'Korean', native: '한국어', dir: 'ltr' },
 	{ code: 'he', name: 'Hebrew', native: 'עברית', dir: 'rtl' }
 ];
 

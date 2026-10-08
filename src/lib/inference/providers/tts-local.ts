@@ -20,6 +20,7 @@ import type {
 const MMS_MODEL: Record<Language, string> = {
 	zh: 'Xenova/mms-tts-cmn', // Mandarin
 	ja: 'Xenova/mms-tts-jpn',
+	ko: 'Xenova/mms-tts-kor',
 	he: 'Xenova/mms-tts-heb'
 };
 

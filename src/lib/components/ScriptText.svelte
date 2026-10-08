@@ -18,7 +18,9 @@
 	} = $props();
 
 	const dir = $derived(languageDir(language));
-	const langAttr = $derived(language === 'zh' ? 'zh-Hans' : language === 'ja' ? 'ja' : 'he');
+	const langAttr = $derived(
+		language === 'zh' ? 'zh-Hans' : language === 'ja' ? 'ja' : language === 'ko' ? 'ko' : 'he'
+	);
 	const display = $derived(
 		language === 'he' && $settings.hideHebrewVowels && !forceVowels ? stripNiqqud(text) : text
 	);

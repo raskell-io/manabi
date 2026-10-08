@@ -16,7 +16,8 @@ This doc covers the first two. Audio for all of it is covered in [audio](./audio
 
 [`src/lib/db/seed.ts`](../src/lib/db/seed.ts) defines a small leveled set tuned to the
 target learner: Chinese A1→A2 (HSK 1–3), a Japanese B1 refresher (N4/N3 grammar), and
-Hebrew A1 (alef-bet, numbers, phrases — vowelled). It also seeds natural reading passages
+Korean A1 (TOPIK I basics in polite -요 forms), Hebrew A1 (alef-bet, numbers, phrases —
+vowelled). It also seeds natural reading passages
 (modern conversations + short non-fiction) for `/read`.
 
 Exports:
@@ -35,6 +36,7 @@ Exports:
 - `kind` must be a valid `ItemKind` (`word | phrase | sentence | grammar | character`).
   Verbs are `word` with a `'verb'` tag, not a separate kind.
 - Hebrew `target`/`reading` are **vowelled** (niqqud); provide a `transliteration`.
+- Korean `target` is Hangul (no hanja); `reading` is Revised Romanization.
 - Optional fields must be omitted, not `undefined` (the doc's
   [`stripUndefined`](./data-model.md#the-undefined-gotcha) handles writes, but keep seed
   literals clean).

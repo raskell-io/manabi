@@ -1,6 +1,7 @@
 /**
- * Script reference data for the Scripts page — full kana, the Hebrew alef-bet,
- * and kanji/hanzi grouped by proficiency level (JLPT / HSK). Rendered on
+ * Script reference data for the Scripts page — full kana, Hangul (jamo +
+ * syllable blocks), the Hebrew alef-bet, and kanji/hanzi grouped by
+ * proficiency level (JLPT / HSK). Rendered on
  * `/scripts`; any glyph can be sent into the SRS (store `studyScriptChar`).
  *
  * Kana are laid out as the gojūon 5-column grid (a/i/u/e/o columns), `null`
@@ -99,6 +100,55 @@ const PINYIN_TONES: Glyph[] = [
 	g('ma', 'neutral', 'question particle (吗)')
 ];
 
+// --- Korean Hangul ----------------------------------------------------------
+// Jamo (letters) with their names, then syllable blocks: each consonant row ×
+// the ten basic vowels, split into two 5-column blocks like the kana grids.
+
+const JAMO_CONSONANTS: Glyph[] = [
+	g('ㄱ', 'giyeok', 'g / k'), g('ㄴ', 'nieun', 'n'), g('ㄷ', 'digeut', 'd / t'), g('ㄹ', 'rieul', 'r / l'),
+	g('ㅁ', 'mieum', 'm'), g('ㅂ', 'bieup', 'b / p'), g('ㅅ', 'siot', 's'), g('ㅇ', 'ieung', 'silent / -ng (final)'),
+	g('ㅈ', 'jieut', 'j'), g('ㅊ', 'chieut', 'ch'), g('ㅋ', 'kieuk', 'k (aspirated)'), g('ㅌ', 'tieut', 't (aspirated)'),
+	g('ㅍ', 'pieup', 'p (aspirated)'), g('ㅎ', 'hieut', 'h')
+];
+
+const JAMO_TENSE: Glyph[] = [
+	g('ㄲ', 'ssanggiyeok', 'kk (tense)'), g('ㄸ', 'ssangdigeut', 'tt (tense)'), g('ㅃ', 'ssangbieup', 'pp (tense)'),
+	g('ㅆ', 'ssangsiot', 'ss (tense)'), g('ㅉ', 'ssangjieut', 'jj (tense)')
+];
+
+const JAMO_VOWELS: Glyph[] = [
+	g('ㅏ', 'a'), g('ㅑ', 'ya'), g('ㅓ', 'eo'), g('ㅕ', 'yeo'), g('ㅗ', 'o'),
+	g('ㅛ', 'yo'), g('ㅜ', 'u'), g('ㅠ', 'yu'), g('ㅡ', 'eu'), g('ㅣ', 'i')
+];
+
+const JAMO_VOWELS_COMPOUND: Glyph[] = [
+	g('ㅐ', 'ae'), g('ㅒ', 'yae'), g('ㅔ', 'e'), g('ㅖ', 'ye'), g('ㅘ', 'wa'), g('ㅙ', 'wae'),
+	g('ㅚ', 'oe'), g('ㅝ', 'wo'), g('ㅞ', 'we'), g('ㅟ', 'wi'), g('ㅢ', 'ui')
+];
+
+// Syllable blocks are composed from the jamo: Hangul syllables are
+// U+AC00 + (initial × 21 + vowel) × 28. Initials and vowels below are in the
+// Unicode order used by that formula.
+const INITIALS = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+const INITIAL_ROMAN = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'ch', 'k', 't', 'p', 'h'];
+const MEDIALS = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
+const MEDIAL_ROMAN = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i'];
+
+function syllable(initial: string, medial: string): Glyph {
+	const i = INITIALS.indexOf(initial);
+	const m = MEDIALS.indexOf(medial);
+	return g(String.fromCharCode(0xac00 + (i * 21 + m) * 28), INITIAL_ROMAN[i] + MEDIAL_ROMAN[m]);
+}
+
+/** Rows = the 14 basic consonants (ㅇ as the silent initial); columns = the given vowels. */
+function syllableRows(vowels: string[]): (Glyph | null)[][] {
+	const consonants = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+	return consonants.map((c) => vowels.map((v) => syllable(c, v)));
+}
+
+const HANGUL_SYLLABLES_1 = syllableRows(['ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ']);
+const HANGUL_SYLLABLES_2 = syllableRows(['ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ']);
+
 // --- Hebrew alef-bet --------------------------------------------------------
 
 const ALEFBET: Glyph[] = [
@@ -170,6 +220,25 @@ const SECTIONS: Record<Language, ScriptSection[]> = {
 			subtitle: 'The four tones (+ neutral) on the syllable “ma”',
 			kind: 'wrap',
 			glyphs: PINYIN_TONES
+		}
+	],
+	ko: [
+		{
+			id: 'jamo',
+			title: 'Jamo',
+			subtitle: '자모 — the letters: 14 consonants, 5 tense consonants, 10 vowels + 11 compound vowels',
+			kind: 'wrap',
+			glyphs: [...JAMO_CONSONANTS, ...JAMO_TENSE, ...JAMO_VOWELS, ...JAMO_VOWELS_COMPOUND]
+		},
+		{
+			id: 'syllables',
+			title: 'Syllables',
+			subtitle: '음절 — consonant + vowel blocks (rows: ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ)',
+			kind: 'kana',
+			kana: [
+				{ label: 'ㅏ ㅑ ㅓ ㅕ ㅗ', rows: HANGUL_SYLLABLES_1 },
+				{ label: 'ㅛ ㅜ ㅠ ㅡ ㅣ', rows: HANGUL_SYLLABLES_2 }
+			]
 		}
 	],
 	he: [

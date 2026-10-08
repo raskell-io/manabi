@@ -59,6 +59,7 @@ function buildDiacritizePrompt(texts: string[]): string {
 const READING_GUIDE: Record<Language, string> = {
 	zh: 'reading = Hanyu Pinyin WITH tone marks (e.g. "jīntiān"). Use Simplified characters for target.',
 	ja: 'reading = kana (hiragana/katakana) for the whole target; transliteration = romaji (e.g. "taberu").',
+	ko: 'target = standard Korean in Hangul (no hanja); reading and transliteration = Revised Romanization (e.g. "annyeonghaseyo"). Use polite -요 forms in examples.',
 	he: 'target = fully vowelled (niqqud) Modern Hebrew; reading and transliteration = Latin transcription (e.g. "shalom").'
 };
 

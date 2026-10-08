@@ -1,7 +1,8 @@
 /**
  * Built-in starter content — a hand-verified seed per language, tuned to the
  * learner's levels: Chinese A1→A2 (HSK1-2), Japanese B1 refresher (N4/N3),
- * Hebrew A1 (alef-bet, numbers, everyday phrases, vowelled).
+ * Korean A1 (TOPIK I basics, polite forms), Hebrew A1 (alef-bet, numbers,
+ * everyday phrases, vowelled).
  *
  * Each spec carries a STABLE `id` so the seed upserts idempotently into an
  * existing document (see store `applyNewSeeds`). Never change an existing id;
@@ -487,7 +488,131 @@ const HE: SeedSpec[] = [
 		examples: [{ target: 'מָתַי אַתָּה בָּא?', reading: 'matay ata ba?', meaning: 'When are you coming?' }] }
 ];
 
-const SEED: Record<Language, SeedSpec[]> = { zh: ZH, ja: JA, he: HE };
+// ---------------------------------------------------------------------------
+// Korean — A1 (TOPIK I): greetings, people, numbers, time, food, basic verbs.
+// Readings are Revised Romanization; examples use polite -요 forms.
+// ---------------------------------------------------------------------------
+const KO: SeedSpec[] = [
+	// — greetings & politeness —
+	{ id: 'seed-ko-hello', target: '안녕하세요', reading: 'annyeonghaseyo', meaning: 'hello', tags: ['greeting', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '안녕하세요, 선생님.', reading: 'annyeonghaseyo, seonsaengnim.', meaning: 'Hello, teacher.' }] },
+	{ id: 'seed-ko-thanks', target: '감사합니다', reading: 'gamsahamnida', meaning: 'thank you', tags: ['greeting', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '도와주셔서 감사합니다.', reading: 'dowajusyeoseo gamsahamnida.', meaning: 'Thank you for helping me.' }] },
+	{ id: 'seed-ko-yes', target: '네', reading: 'ne', meaning: 'yes', tags: ['daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '네, 맞아요.', reading: 'ne, majayo.', meaning: 'Yes, that’s right.' }] },
+	{ id: 'seed-ko-no', target: '아니요', reading: 'aniyo', meaning: 'no', tags: ['daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '아니요, 괜찮아요.', reading: 'aniyo, gwaenchanayo.', meaning: 'No, it’s fine.' }] },
+	{ id: 'seed-ko-sorry', target: '죄송합니다', reading: 'joesonghamnida', meaning: 'I’m sorry (formal)', tags: ['greeting', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '늦어서 죄송합니다.', reading: 'neujeoseo joesonghamnida.', meaning: 'I’m sorry for being late.' }] },
+	{ id: 'seed-ko-bye', target: '안녕히 가세요', reading: 'annyeonghi gaseyo', meaning: 'goodbye (to someone leaving)', kind: 'phrase', tags: ['greeting', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '안녕히 가세요, 내일 봐요.', reading: 'annyeonghi gaseyo, naeil bwayo.', meaning: 'Goodbye, see you tomorrow.' }] },
+	{ id: 'seed-ko-okay', target: '괜찮아요', reading: 'gwaenchanayo', meaning: 'it’s okay / it’s fine', kind: 'phrase', tags: ['daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '괜찮아요, 걱정하지 마세요.', reading: 'gwaenchanayo, geokjeonghaji maseyo.', meaning: 'It’s okay, don’t worry.' }] },
+	{ id: 'seed-ko-please-give', target: '주세요', reading: 'juseyo', meaning: 'please give me', kind: 'phrase', tags: ['daily', 'shopping', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '메뉴 주세요.', reading: 'menyu juseyo.', meaning: 'The menu, please.' }] },
+
+	// — people —
+	{ id: 'seed-ko-i', target: '저', reading: 'jeo', meaning: 'I / me (humble)', tags: ['pronoun', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '저는 학생이에요.', reading: 'jeoneun haksaengieyo.', meaning: 'I am a student.' }] },
+	{ id: 'seed-ko-name', target: '이름', reading: 'ireum', meaning: 'name', tags: ['people', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '이름이 뭐예요?', reading: 'ireumi mwoyeyo?', meaning: 'What is your name?' }] },
+	{ id: 'seed-ko-friend', target: '친구', reading: 'chingu', meaning: 'friend', tags: ['people', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '친구를 만나요.', reading: 'chingureul mannayo.', meaning: 'I meet a friend.' }] },
+	{ id: 'seed-ko-person', target: '사람', reading: 'saram', meaning: 'person', tags: ['people', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '한국 사람이에요?', reading: 'hanguk saramieyo?', meaning: 'Are you Korean?' }] },
+	{ id: 'seed-ko-student', target: '학생', reading: 'haksaeng', meaning: 'student', tags: ['people', 'school', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '저는 대학생이에요.', reading: 'jeoneun daehaksaengieyo.', meaning: 'I am a university student.' }] },
+	{ id: 'seed-ko-teacher', target: '선생님', reading: 'seonsaengnim', meaning: 'teacher', tags: ['people', 'school', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '선생님, 질문이 있어요.', reading: 'seonsaengnim, jilmuni isseoyo.', meaning: 'Teacher, I have a question.' }] },
+	{ id: 'seed-ko-korean', target: '한국어', reading: 'hangugeo', meaning: 'Korean (language)', tags: ['school', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '한국어를 공부해요.', reading: 'hangugeoreul gongbuhaeyo.', meaning: 'I study Korean.' }] },
+	{ id: 'seed-ko-study', target: '공부하다', reading: 'gongbuhada', meaning: 'to study', tags: ['verb', 'school', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '매일 한국어를 공부해요.', reading: 'maeil hangugeoreul gongbuhaeyo.', meaning: 'I study Korean every day.' }] },
+
+	// — numbers (native + Sino-Korean) —
+	{ id: 'seed-ko-num-hana', target: '하나', reading: 'hana', meaning: 'one (native)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '커피 하나 주세요.', reading: 'keopi hana juseyo.', meaning: 'One coffee, please.' }] },
+	{ id: 'seed-ko-num-dul', target: '둘', reading: 'dul', meaning: 'two (native)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '둘 다 좋아요.', reading: 'dul da joayo.', meaning: 'Both are good.' }] },
+	{ id: 'seed-ko-num-set', target: '셋', reading: 'set', meaning: 'three (native)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '셋이서 같이 가요.', reading: 'sesiseo gachi gayo.', meaning: 'The three of us go together.' }] },
+	{ id: 'seed-ko-num-il', target: '일', reading: 'il', meaning: 'one (Sino-Korean)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '일 학년이에요.', reading: 'il hangnyeonieyo.', meaning: 'I am in the first year.' }] },
+	{ id: 'seed-ko-num-i', target: '이', reading: 'i', meaning: 'two (Sino-Korean)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '이 층에 있어요.', reading: 'i cheunge isseoyo.', meaning: 'It is on the second floor.' }] },
+	{ id: 'seed-ko-num-sam', target: '삼', reading: 'sam', meaning: 'three (Sino-Korean)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '삼 분만 기다리세요.', reading: 'sam bunman gidariseyo.', meaning: 'Please wait just three minutes.' }] },
+	{ id: 'seed-ko-num-sip', target: '십', reading: 'sip', meaning: 'ten (Sino-Korean)', tags: ['number', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '십 분 후에 봐요.', reading: 'sip bun hue bwayo.', meaning: 'See you in ten minutes.' }] },
+
+	// — time —
+	{ id: 'seed-ko-today', target: '오늘', reading: 'oneul', meaning: 'today', tags: ['time', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '오늘 날씨가 좋아요.', reading: 'oneul nalssiga joayo.', meaning: 'The weather is nice today.' }] },
+	{ id: 'seed-ko-tomorrow', target: '내일', reading: 'naeil', meaning: 'tomorrow', tags: ['time', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '내일 시간 있어요?', reading: 'naeil sigan isseoyo?', meaning: 'Do you have time tomorrow?' }] },
+	{ id: 'seed-ko-yesterday', target: '어제', reading: 'eoje', meaning: 'yesterday', tags: ['time', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '어제 영화를 봤어요.', reading: 'eoje yeonghwareul bwasseoyo.', meaning: 'I watched a movie yesterday.' }] },
+	{ id: 'seed-ko-now', target: '지금', reading: 'jigeum', meaning: 'now', tags: ['time', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '지금 몇 시예요?', reading: 'jigeum myeot siyeyo?', meaning: 'What time is it now?' }] },
+	{ id: 'seed-ko-time', target: '시간', reading: 'sigan', meaning: 'time; hour', tags: ['time', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '시간이 없어요.', reading: 'sigani eopseoyo.', meaning: 'I don’t have time.' }] },
+	{ id: 'seed-ko-morning', target: '아침', reading: 'achim', meaning: 'morning; breakfast', tags: ['time', 'food', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '아침에 커피를 마셔요.', reading: 'achime keopireul masyeoyo.', meaning: 'I drink coffee in the morning.' }] },
+
+	// — food —
+	{ id: 'seed-ko-water', target: '물', reading: 'mul', meaning: 'water', tags: ['food', 'noun', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '물 좀 주세요.', reading: 'mul jom juseyo.', meaning: 'Some water, please.' }] },
+	{ id: 'seed-ko-rice', target: '밥', reading: 'bap', meaning: 'rice; a meal', tags: ['food', 'noun', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '밥 먹었어요?', reading: 'bap meogeosseoyo?', meaning: 'Have you eaten?' }] },
+	{ id: 'seed-ko-eat', target: '먹다', reading: 'meokda', meaning: 'to eat', tags: ['verb', 'food', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '김치를 먹어요.', reading: 'gimchireul meogeoyo.', meaning: 'I eat kimchi.' }] },
+	{ id: 'seed-ko-drink', target: '마시다', reading: 'masida', meaning: 'to drink', tags: ['verb', 'food', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '차를 마셔요.', reading: 'chareul masyeoyo.', meaning: 'I drink tea.' }] },
+	{ id: 'seed-ko-coffee', target: '커피', reading: 'keopi', meaning: 'coffee', tags: ['food', 'noun', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '커피 한 잔 주세요.', reading: 'keopi han jan juseyo.', meaning: 'One cup of coffee, please.' }] },
+	{ id: 'seed-ko-delicious', target: '맛있다', reading: 'masitda', meaning: 'to be delicious', tags: ['adjective', 'food', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '이 음식은 정말 맛있어요.', reading: 'i eumsigeun jeongmal masisseoyo.', meaning: 'This food is really delicious.' }] },
+	{ id: 'seed-ko-restaurant', target: '식당', reading: 'sikdang', meaning: 'restaurant', tags: ['food', 'place', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '식당에서 점심을 먹어요.', reading: 'sikdangeseo jeomsimeul meogeoyo.', meaning: 'I eat lunch at a restaurant.' }] },
+
+	// — places & everyday verbs —
+	{ id: 'seed-ko-home', target: '집', reading: 'jip', meaning: 'house; home', tags: ['place', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '집에 가요.', reading: 'jibe gayo.', meaning: 'I’m going home.' }] },
+	{ id: 'seed-ko-school', target: '학교', reading: 'hakgyo', meaning: 'school', tags: ['place', 'school', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '학교에 가요.', reading: 'hakgyoe gayo.', meaning: 'I go to school.' }] },
+	{ id: 'seed-ko-go', target: '가다', reading: 'gada', meaning: 'to go', tags: ['verb', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '어디에 가요?', reading: 'eodie gayo?', meaning: 'Where are you going?' }] },
+	{ id: 'seed-ko-come', target: '오다', reading: 'oda', meaning: 'to come', tags: ['verb', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '친구가 집에 와요.', reading: 'chinguga jibe wayo.', meaning: 'A friend is coming to my house.' }] },
+	{ id: 'seed-ko-see', target: '보다', reading: 'boda', meaning: 'to see; to watch', tags: ['verb', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '텔레비전을 봐요.', reading: 'tellebijeoneul bwayo.', meaning: 'I watch television.' }] },
+	{ id: 'seed-ko-exist', target: '있다', reading: 'itda', meaning: 'to exist; to have', tags: ['verb', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '시간이 있어요.', reading: 'sigani isseoyo.', meaning: 'I have time.' }] },
+	{ id: 'seed-ko-not-exist', target: '없다', reading: 'eopda', meaning: 'to not exist; to not have', tags: ['verb', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '돈이 없어요.', reading: 'doni eopseoyo.', meaning: 'I have no money.' }] },
+	{ id: 'seed-ko-good', target: '좋다', reading: 'jota', meaning: 'to be good', tags: ['adjective', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '날씨가 좋아요.', reading: 'nalssiga joayo.', meaning: 'The weather is good.' }] },
+	{ id: 'seed-ko-big', target: '크다', reading: 'keuda', meaning: 'to be big', tags: ['adjective', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '집이 커요.', reading: 'jibi keoyo.', meaning: 'The house is big.' }] },
+	{ id: 'seed-ko-small', target: '작다', reading: 'jakda', meaning: 'to be small', tags: ['adjective', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '가방이 작아요.', reading: 'gabangi jagayo.', meaning: 'The bag is small.' }] },
+	{ id: 'seed-ko-love', target: '사랑하다', reading: 'saranghada', meaning: 'to love', tags: ['verb', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '가족을 사랑해요.', reading: 'gajogeul saranghaeyo.', meaning: 'I love my family.' }] },
+	{ id: 'seed-ko-money', target: '돈', reading: 'don', meaning: 'money', tags: ['noun', 'shopping', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '돈이 조금 있어요.', reading: 'doni jogeum isseoyo.', meaning: 'I have a little money.' }] },
+	{ id: 'seed-ko-weather', target: '날씨', reading: 'nalssi', meaning: 'weather', tags: ['noun', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '오늘 날씨가 추워요.', reading: 'oneul nalssiga chuwoyo.', meaning: 'The weather is cold today.' }] },
+
+	// — question words —
+	{ id: 'seed-ko-where', target: '어디', reading: 'eodi', meaning: 'where', tags: ['question', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '화장실이 어디예요?', reading: 'hwajangsiri eodiyeyo?', meaning: 'Where is the bathroom?' }] },
+	{ id: 'seed-ko-what', target: '뭐', reading: 'mwo', meaning: 'what', tags: ['question', 'daily', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '이게 뭐예요?', reading: 'ige mwoyeyo?', meaning: 'What is this?' }] },
+	{ id: 'seed-ko-how-much', target: '얼마', reading: 'eolma', meaning: 'how much', tags: ['question', 'shopping', 'TOPIK1'], level: 'A1',
+		examples: [{ target: '이거 얼마예요?', reading: 'igeo eolmayeyo?', meaning: 'How much is this?' }] }
+];
+
+const SEED: Record<Language, SeedSpec[]> = { zh: ZH, ja: JA, ko: KO, he: HE };
 
 /**
  * Which seed items still need applying to a document — those whose id isn't yet
@@ -1110,7 +1235,41 @@ const HE_PASSAGES: PassageSpec[] = [
 	}
 ];
 
-const PASSAGE_SEED: Record<Language, PassageSpec[]> = { zh: ZH_PASSAGES, ja: JA_PASSAGES, he: HE_PASSAGES };
+const KO_PASSAGES: PassageSpec[] = [
+	{
+		id: 'pass-ko-cafe',
+		kind: 'conversation',
+		title: '카페에서 — At a café',
+		level: 'A1',
+		tags: ['daily', 'food', 'shopping'],
+		intro: 'Ordering a coffee — the polite -요 forms you hear everywhere.',
+		lines: [
+			{ speaker: '손님', target: '안녕하세요. 아메리카노 한 잔 주세요.', reading: 'annyeonghaseyo. amerikano han jan juseyo.', meaning: 'Hello. One Americano, please.' },
+			{ speaker: '직원', target: '네, 따뜻한 거요, 차가운 거요?', reading: 'ne, ttatteutan geoyo, chagaun geoyo?', meaning: 'Sure — hot or iced?' },
+			{ speaker: '손님', target: '차가운 거요.', reading: 'chagaun geoyo.', meaning: 'Iced, please.' },
+			{ speaker: '직원', target: '사천오백 원입니다.', reading: 'sacheonobaek wonimnida.', meaning: 'That’s 4,500 won.' },
+			{ speaker: '손님', target: '여기요. 감사합니다.', reading: 'yeogiyo. gamsahamnida.', meaning: 'Here you go. Thank you.' },
+			{ speaker: '직원', target: '감사합니다. 안녕히 가세요.', reading: 'gamsahamnida. annyeonghi gaseyo.', meaning: 'Thank you. Goodbye.' }
+		]
+	},
+	{
+		id: 'pass-ko-day',
+		kind: 'text',
+		title: '나의 하루 — My day',
+		level: 'A1',
+		tags: ['daily', 'routine'],
+		intro: 'A simple daily routine in the present tense.',
+		lines: [
+			{ target: '저는 아침 일곱 시에 일어나요.', reading: 'jeoneun achim ilgop sie ireonayo.', meaning: 'I get up at seven in the morning.' },
+			{ target: '커피를 마시고 학교에 가요.', reading: 'keopireul masigo hakgyoe gayo.', meaning: 'I drink coffee and go to school.' },
+			{ target: '학교에서 한국어를 공부해요.', reading: 'hakgyoeseo hangugeoreul gongbuhaeyo.', meaning: 'At school I study Korean.' },
+			{ target: '점심에는 친구하고 밥을 먹어요.', reading: 'jeomsimeneun chinguhago babeul meogeoyo.', meaning: 'At lunch I eat with a friend.' },
+			{ target: '저녁에는 집에서 텔레비전을 봐요.', reading: 'jeonyeogeneun jibeseo tellebijeoneul bwayo.', meaning: 'In the evening I watch TV at home.' }
+		]
+	}
+];
+
+const PASSAGE_SEED: Record<Language, PassageSpec[]> = { zh: ZH_PASSAGES, ja: JA_PASSAGES, ko: KO_PASSAGES, he: HE_PASSAGES };
 
 /** All seed passages as fully-formed `Passage`s with stable ids. */
 export function seedPassages(now: number = Date.now()): Passage[] {

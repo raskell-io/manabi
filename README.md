@@ -10,7 +10,7 @@
 ---
 
 Manabi (学び, *"learning"* in Japanese) is a personal, local-first PWA for learning
-to **read and speak** Chinese, Japanese, and Hebrew — not to handwrite them. It trains
+to **read and speak** Chinese, Japanese, Korean, and Hebrew — not to handwrite them. It trains
 five skills independently (recognition, pronunciation, listening, context, recall) with
 a multi-dimensional spaced-repetition engine, synthesizes pronunciation on-device, lets
 you record-and-compare, and grows its content through an AI workbench with a
@@ -110,7 +110,7 @@ The **Scripts** page's full kanji/hanzi sets are generated from open data via
 **Audio** is fully prerecorded (so playback needs no in-browser TTS) by
 `tools/dump-audio-texts.mjs` (collects _every_ spoken text — seed content, the full
 vocab word lists, and the Scripts-page glyphs, ~20k unique) →
-`tools/gen-audio.py` (synthesizes via **edge-tts**: zh-CN / ja-JP / he-IL neural
+`tools/gen-audio.py` (synthesizes via **edge-tts**: zh-CN / ja-JP / ko-KR / he-IL neural
 voices). Cloudflare Pages caps a deployment at 20k files, so clips are **bundled into
 Opus sprite packs** (`static/audio/packs/*.webm`, ~350 files, ~70 MB) rather than one
 file each; per-language manifests (`static/audio/manifest-{zh,ja,he}.json`) map text →

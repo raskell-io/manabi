@@ -1,7 +1,7 @@
 # Manabi documentation
 
 Manabi (学び, "learning") is a local-first, reading-first language-learning PWA for
-**Chinese (zh)**, **Japanese (ja)**, and **Hebrew (he)**. It trains recognition,
+**Chinese (zh)**, **Japanese (ja)**, **Korean (ko)**, and **Hebrew (he)**. It trains recognition,
 pronunciation, listening, reading, and recall — explicitly **no handwriting drills**.
 Everything runs in the browser: all state lives in IndexedDB, there is no backend
 database, and the whole app installs to your home screen and works offline.
