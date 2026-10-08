@@ -91,7 +91,36 @@
 	}
 
 	const LABEL: Record<SelfRating, string> = { bad: 'Bad', okay: 'Okay', good: 'Good' };
+
+	// Keyboard: Space (or R) records / stops, P plays your take, 1 / 2 / 3 rate,
+	// Enter accepts the suggested rating. The parent's handler ignores
+	// record-compare cards, so there is no overlap.
+	function handleKey(e: KeyboardEvent) {
+		const tag = (e.target as HTMLElement)?.tagName;
+		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		const k = e.key;
+		if (k === ' ' || k === 'r' || k === 'R') {
+			if (recording) stop();
+			else void start();
+		} else if ((k === 'p' || k === 'P') && recordedRef) {
+			playRecording();
+		} else if (recordedRef && !recording && k === '1') {
+			rate('bad');
+		} else if (recordedRef && !recording && k === '2') {
+			rate('okay');
+		} else if (recordedRef && !recording && k === '3') {
+			rate('good');
+		} else if (recordedRef && !recording && k === 'Enter' && asr) {
+			rate(asr.suggested);
+		} else {
+			return;
+		}
+		e.preventDefault();
+	}
 </script>
+
+<svelte:window onkeydown={handleKey} />
 
 <div class="recorder">
 	<div class="prompt">
@@ -109,16 +138,16 @@
 			<span class="hint">You</span>
 			{#if !recording}
 				<button class="rec" onclick={start} aria-label="Record">
-					<Mic size={18} /> Record
+					<Mic size={18} /> Record <kbd>␣</kbd>
 				</button>
 			{:else}
 				<button class="rec stop" onclick={stop} aria-label="Stop">
-					<Square size={16} /> Stop
+					<Square size={16} /> Stop <kbd>␣</kbd>
 				</button>
 			{/if}
 			{#if recordedRef}
 				<button class="play" onclick={playRecording} aria-label="Play your recording">
-					<Play size={16} /> Playback
+					<Play size={16} /> Playback <kbd>P</kbd>
 				</button>
 			{/if}
 		</div>
@@ -144,11 +173,11 @@
 
 	{#if recordedRef}
 		<div class="rate">
-			<p class="hint">{asr ? `Suggested: ${LABEL[asr.suggested]} — confirm or adjust` : 'How close were you?'}</p>
+			<p class="hint">{asr ? `Suggested: ${LABEL[asr.suggested]} — Enter to confirm, or adjust` : 'How close were you?'}</p>
 			<div class="rate-row">
-				<button class="bad" class:suggested={asr?.suggested === 'bad'} onclick={() => rate('bad')}>Bad</button>
-				<button class="okay" class:suggested={asr?.suggested === 'okay'} onclick={() => rate('okay')}>Okay</button>
-				<button class="good" class:suggested={asr?.suggested === 'good'} onclick={() => rate('good')}>Good</button>
+				<button class="bad" class:suggested={asr?.suggested === 'bad'} onclick={() => rate('bad')}>Bad <kbd>1</kbd></button>
+				<button class="okay" class:suggested={asr?.suggested === 'okay'} onclick={() => rate('okay')}>Okay <kbd>2</kbd></button>
+				<button class="good" class:suggested={asr?.suggested === 'good'} onclick={() => rate('good')}>Good <kbd>3</kbd></button>
 			</div>
 		</div>
 	{/if}
@@ -285,5 +314,14 @@
 	.error {
 		color: var(--color-danger);
 		font-size: 0.85rem;
+	}
+	kbd {
+		font-size: 0.7rem;
+		opacity: 0.6;
+		border: 1px solid currentColor;
+		border-radius: 0.25rem;
+		padding: 0 0.3rem;
+		margin-left: 0.2rem;
+		font-family: inherit;
 	}
 </style>

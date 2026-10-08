@@ -143,6 +143,14 @@ function updateDoc(changeFn: (doc: ManabiDocument) => void): void {
 Persistence is **fire-and-forget**: the UI updates from the in-memory doc immediately;
 the IndexedDB write happens in the background. This keeps interactions instant.
 
+The one gap that leaves — a change made a moment before the tab closes or navigates, whose
+write has not landed — is covered by a **page-hide stash**: `saveDoc` numbers its writes, and
+on `pagehide` / `visibilitychange → hidden` with a write still in flight the whole document
+is written to `localStorage` (`manabi-doc-pending`, synchronous). On the next `initDB` that
+snapshot is `Automerge.merge`d into the stored document — safe because it shares the same
+history (the opposite of the backup situation in [Backup & merge](#backup--merge)) — and
+cleared once the merged document is saved.
+
 ### Derived stores
 
 Reads are exposed as derived Svelte stores so components stay declarative:

@@ -117,16 +117,20 @@ gives the Lessons page its per-lesson `{ dueReviews, newItems, total }` badges.
 | Mode | What it serves | Driven by |
 | --- | --- | --- |
 | Reading | recognition, recall, context (text-only) | the **SRS queue** (`snapshotQueue()`) — due-scheduled, unlock-gated |
-| Listening | listening (hear → choose) | **every active word that has a clip** — no unlock, no due gating |
-| Speaking | pronunciation (record & compare) | **every active word that has a clip** — no unlock, no due gating |
+| Listening | listening (hear → choose) | **every active word that has a clip** — no unlock, no due gating; capped + ranked by need |
+| Speaking | pronunciation (record & compare) | **every active word that has a clip** — no unlock, no due gating; capped + ranked by need |
 | Everything | all of the above | Reading queue + the audio practice pools |
 
 **Reading** is the spaced-repetition core: it filters `snapshotQueue().tasks` (so it honors
 the [unlock rules](#unlock-rules--isunlockeddim-srs) and due dates). **Listening and
-Speaking** are deliberately *not* gated — they are simple practice over `audioPool` (active
-items whose `target` is in the audio manifest, via `hasPrerecorded`), un-introduced words
-first. This keeps them from mysteriously showing "0 cards" just because a word has not been
-reviewed for recognition yet. Grading still advances each skill's SM-2 state, so progress
+Speaking** are deliberately *not* gated — they are practice over `audioPool` (active items
+whose `target` is in the audio manifest, via `hasPrerecorded`). This keeps them from
+mysteriously showing "0 cards" just because a word has not been reviewed for recognition
+yet. Each session is still bounded and ordered by
+[`srs/practice.ts`](../src/lib/srs/practice.ts) — `rankAudioPractice(items, dim, doc, cap)`:
+never-practiced words first, then by *need* (Speaking: the latest speech-recognition score
+when there is one; otherwise the skill's SM-2 ease mapped to 0–100), stalest first among
+equals, capped at `reviewCap`; the picker shows "20 of 84 cards". Grading still advances each skill's SM-2 state, so progress
 and the dashboard stay accurate. The page loads the active language's manifest on mount
 ([audio](./audio.md)).
 

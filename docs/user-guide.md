@@ -59,12 +59,17 @@ repetition, so you review exactly what you are about to forget.
 - **Review (`/review`)** — the core loop. Pick a mode and answer cards:
   - **Reading** — text-only recognition, recall, and context (cloze) exercises, scheduled
     by spaced repetition (what's due).
-  - **Listening** — hear a word and choose it. Simple practice over **any** of your words
-    that have audio — always available, no need to study them first.
+  - **Listening** — hear a word and choose it. Practice over **any** of your words that have
+    audio — always available, no need to study them first. A session is capped at your
+    review cap ("20 of 84 cards") and ordered by need: words you have never practiced first,
+    then the weakest.
   - **Speaking** — record yourself and self-rate against the native clip. Also available for
     any of your words that have audio. With an OpenAI key set, speech recognition transcribes
     your take and shows what it heard and how closely it matched, with a suggested rating that
-    you confirm or adjust (turn this off under Settings → Pronunciation).
+    you confirm or adjust (turn this off under Settings → Pronunciation). Sessions are
+    capped like Listening, with your lowest-scoring words first. Keyboard: **Space**
+    records and stops, **P** plays your take, **1 / 2 / 3** rate it, **Enter** accepts the
+    suggestion.
   - **Everything** — all of the above together.
   Grading buttons (Hard / Good / Easy) are optional; you can keep them off and just mark
   right/wrong. Keyboard shortcuts work throughout.

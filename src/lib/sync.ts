@@ -16,6 +16,7 @@
 
 import { get, writable } from 'svelte/store';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
+import { fromBase64, toBase64 } from '$lib/base64';
 import { emptySummary, fingerprint, type MergeSummary } from '$lib/db/merge';
 import { exportBackup, getDoc, loadBackup, mergeBackup, settings } from '$lib/db/store';
 import type { ManabiDocument, ManabiSettings } from '$lib/db/types';
@@ -118,20 +119,7 @@ export async function runSync(io: SyncIO): Promise<SyncResult> {
 
 // --- GitHub Contents API adapter -------------------------------------------
 
-export function toBase64(bytes: Uint8Array): string {
-	let s = '';
-	for (let i = 0; i < bytes.length; i += 0x8000) {
-		s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-	}
-	return btoa(s);
-}
-
-export function fromBase64(b64: string): Uint8Array {
-	const bin = atob(b64.replace(/\s+/g, ''));
-	const out = new Uint8Array(bin.length);
-	for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-	return out;
-}
+export { fromBase64, toBase64 };
 
 function headers(token: string): Record<string, string> {
 	return {

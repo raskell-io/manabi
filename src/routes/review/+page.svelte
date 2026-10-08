@@ -10,21 +10,23 @@
 		getDoc,
 		gradeItem,
 		getItem,
-		getSkillMemory,
 		recordPronunciationAttempt,
+		settings,
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
 	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
 	import { parseMode, resolveScope, type Mode, type ReviewScope } from '$lib/srs/scope';
+	import { rankAudioPractice, type AudioDimension, type RankedPractice } from '$lib/srs/practice';
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 	import { maybeAutoSync } from '$lib/sync';
 
 	// Reading is the spaced-repetition core (text-only skills, due-scheduled).
-	// Listening & Speaking are dead-simple practice over ANY of your words that
-	// have a recorded clip — always available, no unlock and no due-date gating.
+	// Listening & Speaking are practice over ANY of your words that have a
+	// recorded clip — no unlock and no due-date gating — but each session is
+	// bounded (the review cap) and ordered by need (srs/practice.ts).
 	const READING_DIMS = new Set<Dimension>(['recognition', 'recall', 'context']);
 
 	// Optional scope (`?lesson=<id>` or `?items=…&title=…`, see srs/scope.ts):
@@ -50,29 +52,37 @@
 		pool.filter((it) => hasPrerecorded(manifests[it.language] ?? {}, it.target))
 	);
 
-	function isNew(itemId: string, dim: Dimension): boolean {
-		return !getSkillMemory(itemId)?.dims[dim]?.introduced;
-	}
 	function readingTasks(): QueueTask[] {
 		return allTasks.filter((t) => READING_DIMS.has(t.dimension));
 	}
-	// Audio practice over every clip-having word, un-introduced ones first.
-	function audioTasks(dim: Dimension): QueueTask[] {
-		return audioPool
-			.map((it) => ({ itemId: it.id, dimension: dim, isNew: isNew(it.id, dim) }))
-			.sort((a, b) => Number(b.isNew) - Number(a.isNew));
+	// The ranking reads the live document; `epoch` re-ranks after each session.
+	let epoch = $state(0);
+	function rank(dim: AudioDimension): RankedPractice {
+		const doc = getDoc();
+		return doc ? rankAudioPractice(audioPool, dim, doc, $settings.reviewCap) : { tasks: [], total: 0 };
 	}
+	const listening = $derived.by(() => {
+		void epoch;
+		return rank('listening');
+	});
+	const speaking = $derived.by(() => {
+		void epoch;
+		return rank('pronunciation');
+	});
 	function tasksFor(m: Mode): QueueTask[] {
 		if (m === 'reading') return readingTasks();
-		if (m === 'listening') return audioTasks('listening');
-		if (m === 'speaking') return audioTasks('pronunciation');
-		return [...readingTasks(), ...audioTasks('listening'), ...audioTasks('pronunciation')];
+		if (m === 'listening') return listening.tasks;
+		if (m === 'speaking') return speaking.tasks;
+		return [...readingTasks(), ...listening.tasks, ...speaking.tasks];
 	}
 
 	const readingCount = $derived(readingTasks().length);
-	const listeningCount = $derived(audioPool.length);
-	const speakingCount = $derived(audioPool.length);
+	const listeningCount = $derived(listening.tasks.length);
+	const speakingCount = $derived(speaking.tasks.length);
 	const everythingCount = $derived(readingCount + listeningCount + speakingCount);
+	function countLabel(n: number, total: number): string {
+		return total > n ? `${n} of ${total} cards` : `${n} ${n === 1 ? 'card' : 'cards'}`;
+	}
 
 	let current = $derived(tasks[index]);
 	let item = $derived<LearningItem | undefined>(current ? getItem(current.itemId) : undefined);
@@ -98,6 +108,7 @@
 		mode = null;
 		done = false;
 		allTasks = snapshotQueue(scope ?? undefined).tasks;
+		epoch += 1;
 	}
 
 	async function loadSession(query: string) {
@@ -121,6 +132,7 @@
 					.filter((it): it is LearningItem => !!it && it.status === 'published')
 			: get(activeItems);
 		allTasks = snapshotQueue(scope ?? undefined).tasks;
+		epoch += 1;
 		// Load the language's audio index so Listening/Speaking know which words
 		// are playable (the pool is all one language).
 		const lang = scope?.language ?? get(activeLanguage);
@@ -194,14 +206,14 @@
 				<button class="mode-card" onclick={() => start('listening')} disabled={listeningCount === 0}>
 					<Headphones size={22} />
 					<span class="m-title">Listening</span>
-					<span class="m-desc">Hear the word and choose it.</span>
-					<span class="m-count">{listeningCount} {listeningCount === 1 ? 'card' : 'cards'}</span>
+					<span class="m-desc">Hear the word and choose it. New and weakest words first.</span>
+					<span class="m-count">{countLabel(listeningCount, listening.total)}</span>
 				</button>
 				<button class="mode-card" onclick={() => start('speaking')} disabled={speakingCount === 0}>
 					<Mic size={22} />
 					<span class="m-title">Speaking</span>
-					<span class="m-desc">Record &amp; compare your pronunciation.</span>
-					<span class="m-count">{speakingCount} {speakingCount === 1 ? 'card' : 'cards'}</span>
+					<span class="m-desc">Record &amp; compare your pronunciation. New and lowest-scoring words first.</span>
+					<span class="m-count">{countLabel(speakingCount, speaking.total)}</span>
 				</button>
 				<button class="mode-card" onclick={() => start('everything')} disabled={everythingCount === 0}>
 					<Layers size={22} />

@@ -10,6 +10,7 @@
 import * as Automerge from '@automerge/automerge';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 import { derived, writable, type Readable } from 'svelte/store';
+import { fromBase64, toBase64 } from '$lib/base64';
 import { deleteBlob } from './blob-store';
 import { emptySummary, isManabiDocument, mergeInto, plain, type MergeSummary } from './merge';
 import { passagesToApply, seedsToApply } from './seed';
@@ -44,6 +45,8 @@ import {
 } from './types';
 
 const STORAGE_KEY = 'manabi-doc';
+/** localStorage stash of a document whose IndexedDB write may not have landed (see `flushOnHide`). */
+const PENDING_KEY = 'manabi-doc-pending';
 
 let doc: Automerge.Doc<ManabiDocument>;
 const docStore = writable<Automerge.Doc<ManabiDocument> | null>(null);
@@ -195,12 +198,21 @@ export function snapshotQueue(scope?: { itemIds: string[]; language: Language })
 export async function initDB(): Promise<void> {
 	try {
 		const saved = await idbGet<Uint8Array>(STORAGE_KEY);
+		const pending = readPendingSnapshot();
 		doc = saved
 			? migrate(Automerge.load<ManabiDocument>(saved))
-			: Automerge.from<ManabiDocument>(createEmptyDocument());
+			: pending
+				? migrate(Automerge.load<ManabiDocument>(pending))
+				: Automerge.from<ManabiDocument>(createEmptyDocument());
+		// A snapshot stashed on page-hide shares this document's history, so a
+		// real Automerge merge is safe here (unlike backups — see merge.ts).
+		if (saved && pending) {
+			doc = Automerge.merge(doc, migrate(Automerge.load<ManabiDocument>(pending)));
+		}
 		applyNewSeeds();
 		docStore.set(doc);
 		await saveDoc();
+		clearPendingSnapshot();
 	} catch (err) {
 		console.error('Failed to initialize Manabi database:', err);
 		doc = Automerge.from<ManabiDocument>(createEmptyDocument());
@@ -208,6 +220,7 @@ export async function initDB(): Promise<void> {
 		docStore.set(doc);
 		await saveDoc();
 	}
+	armFlushOnHide();
 }
 
 /** Forward-only migrations — idempotently ensure every collection exists. */
@@ -252,8 +265,56 @@ function applyNewSeeds(): void {
 	});
 }
 
+let saveSeq = 0; // writes started
+let savedSeq = 0; // writes completed (IndexedDB serializes them, so completion is in order)
+
 async function saveDoc(d: Automerge.Doc<ManabiDocument> = doc): Promise<void> {
+	const seq = ++saveSeq;
 	await idbSet(STORAGE_KEY, Automerge.save(d));
+	savedSeq = Math.max(savedSeq, seq);
+	if (saveSeq === savedSeq) clearPendingSnapshot();
+}
+
+/**
+ * IndexedDB writes are asynchronous, so a grade made a moment before the tab
+ * closes or navigates away could be lost. When the page is hidden while a
+ * write is still in flight, stash the whole document in localStorage
+ * (synchronous); `initDB` merges it back on the next start.
+ */
+function flushOnHide(): void {
+	if (!doc || saveSeq === savedSeq) return;
+	try {
+		localStorage.setItem(PENDING_KEY, toBase64(Automerge.save(doc)));
+	} catch {
+		/* quota exceeded or storage unavailable — nothing more we can do */
+	}
+}
+
+let flushArmed = false;
+function armFlushOnHide(): void {
+	if (flushArmed || typeof window === 'undefined') return;
+	flushArmed = true;
+	window.addEventListener('pagehide', flushOnHide);
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'hidden') flushOnHide();
+	});
+}
+
+function readPendingSnapshot(): Uint8Array | null {
+	try {
+		const b64 = localStorage.getItem(PENDING_KEY);
+		return b64 ? fromBase64(b64) : null;
+	} catch {
+		return null;
+	}
+}
+
+function clearPendingSnapshot(): void {
+	try {
+		localStorage.removeItem(PENDING_KEY);
+	} catch {
+		/* ignore */
+	}
 }
 
 /**

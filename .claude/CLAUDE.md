@@ -18,8 +18,9 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
   Collections: `learningItems`, `lessons`, `srsStates` (keyed by itemId),
   `exerciseAttempts`, `pronunciationAttempts`, `contentDrafts`, `settings`.
 - Persistence pattern (from kurumi): `Automerge.change` → `docStore.set` →
-  fire-and-forget `saveDoc`. **Automerge rejects `undefined`** — all inserts go
-  through `stripUndefined()`.
+  fire-and-forget `saveDoc`; a page-hide stash in localStorage covers a write still
+  in flight (merged back by `initDB` — same history, so `Automerge.merge` is safe
+  there). **Automerge rejects `undefined`** — all inserts go through `stripUndefined()`.
 - Audio blobs (synthesized + recordings) live in a separate raw-IDB blob store.
 - Backup: `exportBackup()` = history-free Automerge snapshot (API key blanked);
   `importBackup()` merges **semantically** via `db/merge.ts` (union by id, newest
@@ -30,7 +31,7 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 ```
 src/lib/
   db/         types.ts · store.ts (doc + CRUD + SRS ops) · merge.ts (backup merge) · blob-store.ts · seed.ts
-  srs/        schedule.ts (SM-2 gradeDimension) · queue.ts (buildQueue, unlock rules) · scope.ts (?lesson= / ?items= review scopes)
+  srs/        schedule.ts (SM-2 gradeDimension) · queue.ts (buildQueue, unlock rules) · scope.ts (?lesson= / ?items= review scopes) · practice.ts (capped, need-ranked Listening/Speaking)
   exercises/  templates.ts (Exercise shape) · generate.ts (buildExercise + distractors)
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
