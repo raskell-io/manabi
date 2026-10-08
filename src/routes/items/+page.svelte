@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Plus, Search } from 'lucide-svelte';
+	import { GraduationCap, Plus, Search } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import { allItems, createItem, settings } from '$lib/db/store';
 	import { LANGUAGES, needsNiqqud } from '$lib/db/types';
+	import { MAX_SCOPE_ITEMS, scopeHref } from '$lib/srs/scope';
 
 	let query = $state('');
 	let onlyActive = $state(true);
@@ -22,6 +23,12 @@
 			);
 		})
 	);
+
+	// "Review these": the current list, restricted to what a session can use.
+	const reviewable = $derived(
+		filtered.filter((it) => it.language === $settings.activeLanguage && it.status === 'published')
+	);
+	const reviewTitle = $derived(query.trim() ? `Items matching “${query.trim()}”` : 'All items');
 
 	function newItem() {
 		const id = createItem({
@@ -56,6 +63,11 @@
 		<input type="checkbox" bind:checked={onlyActive} />
 		Active language only
 	</label>
+	{#if reviewable.length > 0}
+		<a class="review-these" href={scopeHref(reviewable.map((it) => it.id), reviewTitle)}>
+			<GraduationCap size={15} /> Review these {reviewable.length > MAX_SCOPE_ITEMS ? `(first ${MAX_SCOPE_ITEMS})` : reviewable.length}
+		</a>
+	{/if}
 </div>
 
 <p class="count">{filtered.length} items</p>
@@ -111,9 +123,22 @@
 	}
 	.controls {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 1rem;
 		align-items: center;
 		margin: 1.25rem 0 0.5rem;
+	}
+	.review-these {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-left: auto;
+		padding: 0.45rem 0.85rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-accent);
+		color: var(--color-accent);
+		font-size: 0.88rem;
+		font-weight: 600;
 	}
 	.search {
 		display: flex;

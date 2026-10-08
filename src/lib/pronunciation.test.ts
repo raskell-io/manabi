@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { levenshtein, normalizeForCompare, scorePronunciation, similarity, suggestRating } from './pronunciation';
+import { levenshtein, normalizeForCompare, scorePronunciation, similarity, suggestRating, summarizePronunciation } from './pronunciation';
+import type { PronunciationAttempt } from '$lib/db/types';
 
 describe('normalizeForCompare', () => {
 	it('drops punctuation/space, folds case and width, strips niqqud, unifies kana', () => {
@@ -43,6 +44,33 @@ describe('scorePronunciation', () => {
 		expect(scorePronunciation('שלום', item).score).toBe(100);
 		expect(scorePronunciation('שלום!', item).score).toBe(100);
 		expect(scorePronunciation('תודה', item).score).toBeLessThan(50);
+	});
+});
+
+describe('summarizePronunciation', () => {
+	const take = (id: string, itemId: string, at: number, score?: number, transcript?: string): PronunciationAttempt => ({
+		id, itemId, audioRef: 'r', selfRating: 'okay', at, ...(score === undefined ? {} : { score, transcript })
+	});
+	const lang = (itemId: string) => (itemId.startsWith('ja') ? 'ja' : itemId === 'ghost' ? undefined : 'zh');
+
+	it('counts takes, scored takes, average, and each item\'s latest scored take, weakest first', () => {
+		const s = summarizePronunciation(
+			[take('1', 'a', 1, 40, 'x'), take('2', 'a', 5, 90, 'y'), take('3', 'b', 2, 55, 'z'), take('4', 'c', 3), take('5', 'ja1', 4, 10), take('6', 'ghost', 9, 0)],
+			lang,
+			'zh'
+		);
+		expect(s.takes).toBe(4);
+		expect(s.scored).toBe(3);
+		expect(s.avgScore).toBe(62); // (40+90+55)/3
+		expect(s.weakest.map((w) => [w.itemId, w.score, w.transcript])).toEqual([['b', 55, 'z'], ['a', 90, 'y']]);
+	});
+	it('handles no takes and unscored takes', () => {
+		expect(summarizePronunciation([], lang, 'zh')).toEqual({ takes: 0, scored: 0, avgScore: null, weakest: [] });
+		expect(summarizePronunciation([take('1', 'a', 1)], lang, 'zh')).toEqual({ takes: 1, scored: 0, avgScore: null, weakest: [] });
+	});
+	it('respects the limit', () => {
+		const many = Array.from({ length: 12 }, (_, i) => take(String(i), 'i' + i, i, i * 5));
+		expect(summarizePronunciation(many, () => 'zh', 'zh', 3).weakest.map((w) => w.score)).toEqual([0, 5, 10]);
 	});
 });
 

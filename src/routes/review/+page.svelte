@@ -2,12 +2,12 @@
 	import { untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import { page } from '$app/stores';
-	import { Check, X, BookOpen, Mic, Headphones, Layers, LayoutGrid } from 'lucide-svelte';
+	import { Check, X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter } from 'lucide-svelte';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
 		activeLanguage,
-		getLesson,
+		getDoc,
 		gradeItem,
 		getItem,
 		getSkillMemory,
@@ -15,24 +15,23 @@
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSION_LABELS, type Dimension, type LearningItem, type Lesson } from '$lib/db/types';
+	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
+	import { parseMode, resolveScope, type Mode, type ReviewScope } from '$lib/srs/scope';
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 	import { maybeAutoSync } from '$lib/sync';
-
-	type Mode = 'reading' | 'listening' | 'speaking' | 'everything';
 
 	// Reading is the spaced-repetition core (text-only skills, due-scheduled).
 	// Listening & Speaking are dead-simple practice over ANY of your words that
 	// have a recorded clip — always available, no unlock and no due-date gating.
 	const READING_DIMS = new Set<Dimension>(['recognition', 'recall', 'context']);
 
-	// Optional lesson scope (`/review?lesson=<id>`): every mode is restricted to
-	// that lesson's items and the daily caps are lifted — the lesson is the bound.
-	const lessonId = $derived($page.url.searchParams.get('lesson'));
-	let lesson = $state.raw<Lesson | undefined>(undefined);
-	let lessonMissing = $state(false);
+	// Optional scope (`?lesson=<id>` or `?items=…&title=…`, see srs/scope.ts):
+	// every mode is restricted to those items and the daily caps are lifted.
+	const search = $derived($page.url.search);
+	let scope = $state.raw<ReviewScope | null>(null);
+	let scopeError = $state<'lesson-missing' | 'no-items' | null>(null);
 
 	let mode = $state<Mode | null>(null); // null → show the picker
 	let allTasks = $state<QueueTask[]>([]);
@@ -98,36 +97,44 @@
 	function backToModes() {
 		mode = null;
 		done = false;
-		allTasks = snapshotQueue(lesson).tasks;
+		allTasks = snapshotQueue(scope ?? undefined).tasks;
 	}
 
-	async function loadSession(lid: string | null) {
+	async function loadSession(query: string) {
 		mode = null;
 		done = false;
-		lesson = lid ? getLesson(lid) : undefined;
-		lessonMissing = lid !== null && !lesson;
-		if (lessonMissing) {
+		scopeError = null;
+		const params = new URLSearchParams(query);
+		const doc = getDoc();
+		const res = doc ? resolveScope(doc, params, get(activeLanguage)) : { ok: true as const, scope: null };
+		if (!res.ok) {
+			scopeError = res.reason;
+			scope = null;
 			pool = [];
 			allTasks = [];
 			return;
 		}
-		pool = lesson
-			? lesson.itemIds
+		scope = res.scope;
+		pool = scope
+			? scope.itemIds
 					.map((id) => getItem(id))
 					.filter((it): it is LearningItem => !!it && it.status === 'published')
 			: get(activeItems);
-		allTasks = snapshotQueue(lesson).tasks;
+		allTasks = snapshotQueue(scope ?? undefined).tasks;
 		// Load the language's audio index so Listening/Speaking know which words
 		// are playable (the pool is all one language).
-		const lang = lesson?.language ?? get(activeLanguage);
+		const lang = scope?.language ?? get(activeLanguage);
 		manifests = { [lang]: await loadAudioManifest(lang) };
+		// `?mode=` jumps straight into a mode (e.g. "Practice these" → Speaking).
+		const m = parseMode(params);
+		if (m && tasksFor(m).length > 0) start(m);
 	}
 
-	// (Re)load whenever the scope changes: SvelteKit keeps this component
-	// mounted across `/review` ↔ `/review?lesson=…` navigations.
+	// (Re)load whenever the query changes: SvelteKit keeps this component
+	// mounted across `/review` ↔ `/review?lesson=…` ↔ `/review?items=…` navigations.
 	$effect(() => {
-		const lid = lessonId;
-		untrack(() => void loadSession(lid));
+		const q = search;
+		untrack(() => void loadSession(q));
 	});
 
 	function advance() {
@@ -157,18 +164,20 @@
 {#if !started}
 	<div class="picker">
 		<h1>Review</h1>
-		{#if lesson}
+		{#if scope}
 			<p class="scope">
-				<LayoutGrid size={14} />
-				<span>Lesson · <strong>{lesson.title}</strong> · {pool.length} {pool.length === 1 ? 'item' : 'items'}</span>
+				{#if scope.kind === 'lesson'}<LayoutGrid size={14} />{:else}<ListFilter size={14} />{/if}
+				<span>{scope.kind === 'lesson' ? 'Lesson' : 'Selection'} · <strong>{scope.title}</strong> · {pool.length} {pool.length === 1 ? 'item' : 'items'}</span>
 				<a href="/review">Review everything instead</a>
 			</p>
 		{/if}
-		{#if lessonMissing}
+		{#if scopeError === 'lesson-missing'}
 			<p class="muted">That lesson no longer exists. <a href="/lessons">Back to lessons</a> or
 				<a href="/review">review everything</a>.</p>
-		{:else if everythingCount === 0 && lesson}
-			<p class="muted">Nothing to practice in this lesson right now — nothing is due, and none of
+		{:else if scopeError === 'no-items'}
+			<p class="muted">None of those items exist any more. <a href="/review">Review everything instead</a>.</p>
+		{:else if everythingCount === 0 && scope}
+			<p class="muted">Nothing to practice in this {scope.kind === 'lesson' ? 'lesson' : 'selection'} right now — nothing is due, and none of
 				its words have audio. <a href="/review">Review everything instead</a>.</p>
 		{:else if everythingCount === 0}
 			<p class="muted">Nothing to practice yet. Add items in <a href="/items">Items</a>, browse
@@ -214,7 +223,7 @@
 			<p class="muted">Nothing was due for this mode.</p>
 		{/if}
 		<div class="actions">
-			<a class="btn" href={lesson ? '/lessons' : '/'}>{lesson ? 'Lessons' : 'Home'}</a>
+			<a class="btn" href={scope?.kind === 'lesson' ? '/lessons' : scope ? '/dashboard' : '/'}>{scope?.kind === 'lesson' ? 'Lessons' : scope ? 'Progress' : 'Home'}</a>
 			<button class="btn primary" onclick={backToModes}>Choose mode</button>
 		</div>
 	</div>
@@ -225,7 +234,7 @@
 	<div class="meta">
 		<span>{index + 1} / {tasks.length}</span>
 		<span class="meta-right">
-			{#if lesson}<span class="scope-tag">{lesson.title}</span>{/if}
+			{#if scope}<span class="scope-tag">{scope.title}</span>{/if}
 			<span class="dim">{DIMENSION_LABELS[current.dimension]}{current.isNew ? ' · new' : ''}</span>
 		</span>
 	</div>

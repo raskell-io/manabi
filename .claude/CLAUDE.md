@@ -30,13 +30,13 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 ```
 src/lib/
   db/         types.ts · store.ts (doc + CRUD + SRS ops) · merge.ts (backup merge) · blob-store.ts · seed.ts
-  srs/        schedule.ts (SM-2 gradeDimension) · queue.ts (buildQueue, unlock rules)
+  srs/        schedule.ts (SM-2 gradeDimension) · queue.ts (buildQueue, unlock rules) · scope.ts (?lesson= / ?items= review scopes)
   exercises/  templates.ts (Exercise shape) · generate.ts (buildExercise + distractors)
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
   sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO)
   components/ ScriptText · AudioButton · Recorder · ExerciseRunner
-src/routes/   / · review[?lesson=id] · items[/[id]] · lessons · dashboard · workbench · settings
+src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · items[/[id]] · lessons · dashboard · workbench · settings
 ```
 
 ## Key modules
@@ -51,7 +51,7 @@ src/routes/   / · review[?lesson=id] · items[/[id]] · lessons · dashboard ·
   transcription (`lib/pronunciation.ts` scores it; learner confirms) are OpenAI-only.
 - `db/store.ts` — `gradeItem`, `recordPronunciationAttempt`, `approveDraft`, derived
   stores (`activeItems`, `reviewSummary`, `lessonCounts`, `skillMemories`, …),
-  `snapshotQueue(lesson?)` for a stable per-session review order.
+  `snapshotQueue(scope?)` for a stable per-session review order.
 
 ## Conventions
 - Svelte 5 runes (`$state`, `$derived`, `$props`, `$effect`). SPA: `ssr=false` in

@@ -78,13 +78,17 @@ repetition, so you review exactly what you are about to forget.
 - **Vocab (`/vocab`)** — browse the full official word lists (HSK for Chinese, JLPT for
   Japanese). Search or browse by level; the reading sits above each word; tap **＋ Add** to
   start studying it, or add an entire level.
-- **Items (`/items`)** — every item you are studying. Filter by level/tag/status, edit, or
-  delete. Each item has a play button for its audio.
+- **Items (`/items`)** — every item you are studying. Search, edit, or delete. Each item has
+  a play button for its audio, and **Review these** runs a session over exactly the items
+  currently listed (e.g. everything matching "HSK2"). An item's page also lists your recent
+  recordings of it, with what speech recognition heard and the score.
 - **Lessons (`/lessons`)** — group items into named bundles. Each card shows what's new
   and due inside it, and its **Review** button runs any review mode over just that lesson's
   items. Daily limits don't apply inside a lesson — you get all of it.
-- **Progress (`/dashboard`)** — your weak spots: per-skill scores and the items that need
-  the most work.
+- **Progress (`/dashboard`)** — your weak spots, made actionable: per-skill accuracy, the
+  items with the most lapses with a **Drill these** button, and a **Pronunciation** section
+  (takes, average match score, the words you pronounced worst) with **Practice these**,
+  which opens Speaking over just those words.
 - **Workbench (`/workbench`)** — generate new vocabulary or reading passages with AI (see
   below) into a review queue you approve before anything is added.
 - **Settings (`/settings`)** — active language, daily limits, theme, the Hebrew
@@ -117,8 +121,9 @@ In settings you control **new items per day** and the **review cap**. New items 
 introduced gradually so you do not get buried; reviews are capped so a backlog never makes
 a session unbounded. The most-overdue reviews always come first.
 
-Reviewing a single lesson from the Lessons page ignores both limits: a lesson is a bounded
-set you chose deliberately, so it is never "too much".
+Reviewing a single lesson from the Lessons page, or any explicit selection (**Drill these**,
+**Practice these**, **Review these**), ignores both limits: a bounded set you chose
+deliberately is never "too much".
 
 ## Privacy & your data
 

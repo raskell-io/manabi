@@ -115,6 +115,12 @@ export const exerciseAttempts: Readable<ExerciseAttempt[]> = derived(docStore, (
 	return Object.values($doc.exerciseAttempts).sort((a, b) => b.at - a.at);
 });
 
+/** Recordings, newest first (with transcript + score when they were ASR-scored). */
+export const pronunciationAttempts: Readable<PronunciationAttempt[]> = derived(docStore, ($doc) => {
+	if (!$doc) return [];
+	return Object.values($doc.pronunciationAttempts).sort((a, b) => b.at - a.at);
+});
+
 export const skillMemories: Readable<SkillMemory[]> = derived(docStore, ($doc) => {
 	if (!$doc) return [];
 	return Object.values($doc.srsStates);
@@ -169,17 +175,18 @@ export const lessonCounts: Readable<Record<string, LessonCount>> = derived(docSt
 
 /**
  * Build a stable queue snapshot for a review session (call once at start).
- * With a `lesson`, the queue is scoped to that lesson's items (in its language)
- * and the daily caps are lifted — see `buildQueue`.
+ * With a `scope` (a lesson or any explicit item set — see `srs/scope.ts`), the
+ * queue is restricted to those items, in that language, and the daily caps
+ * are lifted — see `buildQueue`.
  */
-export function snapshotQueue(lesson?: Lesson): QueueSummary {
+export function snapshotQueue(scope?: { itemIds: string[]; language: Language }): QueueSummary {
 	if (!doc) return { dueReviews: 0, newItems: 0, tasks: [] };
-	if (!lesson) return buildQueue(doc, doc.settings);
+	if (!scope) return buildQueue(doc, doc.settings);
 	return buildQueue(
 		doc,
-		{ ...doc.settings, activeLanguage: lesson.language },
+		{ ...doc.settings, activeLanguage: scope.language },
 		undefined,
-		{ scope: new Set(lesson.itemIds) }
+		{ scope: new Set(scope.itemIds) }
 	);
 }
 

@@ -130,12 +130,15 @@ reviewed for recognition yet. Grading still advances each skill's SM-2 state, so
 and the dashboard stay accurate. The page loads the active language's manifest on mount
 ([audio](./audio.md)).
 
-**Lesson scope.** Opening `/review?lesson=<id>` (the **Review** button on a lesson card)
-restricts every mode to that lesson: the Reading queue comes from `snapshotQueue(lesson)`
-(scoped, caps lifted — see above) and the Listening/Speaking pools are the lesson's published
-items that have a clip. A chip under the title names the lesson and links back to the
-whole-collection review; the query param is read reactively, so switching between the two
-never needs a reload.
+**Scopes.** `/review?lesson=<id>` (a lesson card's **Review**) or
+`/review?items=<id,…>&title=<label>` (**Drill these** on Progress, **Practice these** for
+pronunciation, **Review these** on Items) restricts every mode to that set — resolved by
+[`srs/scope.ts`](../src/lib/srs/scope.ts) (`resolveScope`, `scopeHref`, capped at 300 ids).
+The Reading queue comes from `snapshotQueue(scope)` (caps lifted — see above) and the
+Listening/Speaking pools are the scope's published items that have a clip. `&mode=speaking`
+(or any mode) starts that mode immediately. A chip under the title names the scope and links
+back to the whole-collection review; the query is read reactively, so switching never needs
+a reload.
 
 ## Exercises
 

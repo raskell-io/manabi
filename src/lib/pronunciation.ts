@@ -5,7 +5,7 @@
  * learner confirms it, so an imperfect transcription is never a silent grade.
  */
 
-import { stripNiqqud, type Language, type SelfRating } from '$lib/db/types';
+import { stripNiqqud, type Language, type PronunciationAttempt, type SelfRating } from '$lib/db/types';
 
 /** What speech recognition heard, and how close it was. Stored on the attempt. */
 export interface AsrResult {
@@ -83,4 +83,42 @@ export function suggestRating(score: number): SelfRating {
 	if (score >= 85) return 'good';
 	if (score >= 60) return 'okay';
 	return 'bad';
+}
+
+export interface WeakTake {
+	itemId: string;
+	score: number;
+	transcript: string;
+	at: number;
+}
+
+export interface PronunciationSummary {
+	takes: number; // recordings in this language
+	scored: number; // …of which had speech-recognition scores
+	avgScore: number | null; // mean score over scored takes
+	weakest: WeakTake[]; // each item's latest scored take, lowest scores first
+}
+
+/** Roll up a language's pronunciation attempts for the Progress page. */
+export function summarizePronunciation(
+	attempts: PronunciationAttempt[],
+	languageOf: (itemId: string) => Language | undefined,
+	language: Language,
+	limit = 8
+): PronunciationSummary {
+	const mine = attempts.filter((a) => languageOf(a.itemId) === language);
+	const scored = mine.filter((a) => typeof a.score === 'number');
+	const avgScore = scored.length
+		? Math.round(scored.reduce((n, a) => n + (a.score as number), 0) / scored.length)
+		: null;
+	const latest = new Map<string, PronunciationAttempt>();
+	for (const a of scored) {
+		const prev = latest.get(a.itemId);
+		if (!prev || a.at > prev.at) latest.set(a.itemId, a);
+	}
+	const weakest = [...latest.values()]
+		.sort((x, y) => (x.score as number) - (y.score as number) || y.at - x.at)
+		.slice(0, limit)
+		.map((a) => ({ itemId: a.itemId, score: a.score as number, transcript: a.transcript ?? '', at: a.at }));
+	return { takes: mine.length, scored: scored.length, avgScore, weakest };
 }

@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Trash2, Plus, Sparkles } from 'lucide-svelte';
+	import { ArrowLeft, Trash2, Plus, Sparkles, Play } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
-	import { deleteItem, getItem, settings, updateItem } from '$lib/db/store';
+	import { deleteItem, getItem, pronunciationAttempts, settings, updateItem } from '$lib/db/store';
+	import { playRef } from '$lib/audio';
+	import { suggestRating } from '$lib/pronunciation';
 	import { LANGUAGES, needsNiqqud, type ExampleSentence, type ItemKind, type ItemStatus, type Language, type LearningItem } from '$lib/db/types';
 	import { canDiacritize } from '$lib/inference/router';
 	import { diacritizeItem } from '$lib/hebrew';
@@ -82,6 +84,9 @@
 			vowelBusy = false;
 		}
 	}
+
+	// The last few recordings of this word (playable here only if the blob is on this device).
+	const takes = $derived($pronunciationAttempts.filter((a) => a.itemId === id).slice(0, 5));
 
 	const KINDS: ItemKind[] = ['word', 'phrase', 'sentence', 'grammar', 'character'];
 	const STATUSES: ItemStatus[] = ['published', 'draft'];
@@ -174,6 +179,25 @@
 			<p class="muted">No examples yet.</p>
 		{/each}
 	</section>
+
+	{#if takes.length > 0}
+		<section class="takes">
+			<h2>Recent takes</h2>
+			<ul>
+				{#each takes as a (a.id)}
+					<li>
+						<button class="play-take" onclick={() => void playRef(a.audioRef)} aria-label="Play this take"><Play size={14} /></button>
+						<span class="take-date">{new Date(a.at).toLocaleDateString()}</span>
+						<span class="take-rating {a.selfRating}">{a.selfRating}</span>
+						{#if typeof a.score === 'number'}
+							<span class="take-score {suggestRating(a.score)}">{a.score}%</span>
+							{#if a.transcript}<span class="take-heard">heard <ScriptText text={a.transcript} language={form.language as Language} size="sm" /></span>{/if}
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
 
 	<div class="save-bar">
 		<button class="save" onclick={save}>Save</button>
@@ -312,5 +336,70 @@
 	}
 	.vowel:disabled {
 		opacity: 0.6;
+	}
+	.takes {
+		margin: 1.5rem 0 0;
+	}
+	.takes h2 {
+		font-size: 1.05rem;
+		margin: 0 0 0.6rem;
+	}
+	.takes ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+	.takes li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: 0.5rem;
+		padding: 0.45rem 0.75rem;
+		background: var(--color-bg-secondary);
+		font-size: 0.9rem;
+	}
+	.play-take {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.9rem;
+		height: 1.9rem;
+		border-radius: 0.45rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-accent);
+	}
+	.take-date {
+		color: var(--color-text-muted);
+	}
+	.take-rating {
+		text-transform: capitalize;
+		font-weight: 600;
+	}
+	.take-rating.good,
+	.take-score.good {
+		color: var(--color-success);
+	}
+	.take-rating.okay,
+	.take-score.okay {
+		color: var(--color-warning);
+	}
+	.take-rating.bad,
+	.take-score.bad {
+		color: var(--color-danger);
+	}
+	.take-score {
+		font-weight: 700;
+	}
+	.take-heard {
+		color: var(--color-text-muted);
+		display: inline-flex;
+		gap: 0.3rem;
+		align-items: baseline;
 	}
 </style>
