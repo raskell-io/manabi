@@ -5,6 +5,9 @@
  * can theme without touching component markup. Mirrors kurumi's approach.
  * ------------------------------------------------------------------------ */
 :root {
+	/* Phone bottom tab bar height (excluding the home-indicator safe area). */
+	--tabbar-h: 3.6rem;
+
 	--font-sans:
 		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	--font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;

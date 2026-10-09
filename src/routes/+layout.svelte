@@ -2,29 +2,15 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import {
-		Home, GraduationCap, BookOpen, Table2, BookA, Library, LayoutGrid, BarChart3,
-		Sparkles, Settings as SettingsIcon, Menu, X, Sun, Moon
-	} from 'lucide-svelte';
+	import { Settings as SettingsIcon, Sun, Moon } from 'lucide-svelte';
 	import { initDB, settings, updateSettings } from '$lib/db/store';
+	import { LANGUAGES } from '$lib/db/types';
 	import { startAutoSync } from '$lib/sync';
+	import { isNavActive, LIBRARY, PRIMARY } from '$lib/nav';
+	import { immersive } from '$lib/ui';
 
 	let { children } = $props();
 	let ready = $state(false);
-	let drawerOpen = $state(false);
-
-	const NAV = [
-		{ href: '/', label: 'Home', icon: Home },
-		{ href: '/review', label: 'Review', icon: GraduationCap },
-		{ href: '/read', label: 'Read', icon: BookOpen },
-		{ href: '/scripts', label: 'Scripts', icon: Table2 },
-		{ href: '/vocab', label: 'Vocab', icon: BookA },
-		{ href: '/items', label: 'Items', icon: Library },
-		{ href: '/lessons', label: 'Lessons', icon: LayoutGrid },
-		{ href: '/dashboard', label: 'Progress', icon: BarChart3 },
-		{ href: '/workbench', label: 'Workbench', icon: Sparkles },
-		{ href: '/settings', label: 'Settings', icon: SettingsIcon }
-	];
 
 	function applyTheme(theme: string) {
 		const root = document.documentElement;
@@ -44,15 +30,9 @@
 	}
 
 	const activePath = $derived($page.url.pathname);
-	function isActive(href: string): boolean {
-		return href === '/' ? activePath === '/' : activePath.startsWith(href);
-	}
-
-	// Close the mobile drawer whenever the route changes.
-	$effect(() => {
-		activePath;
-		drawerOpen = false;
-	});
+	const langNative = $derived(LANGUAGES.find((l) => l.code === $settings.activeLanguage)?.native ?? '');
+	const sidebarPrimary = PRIMARY.filter((p) => p.href !== '/library');
+	const settingsActive = $derived(isNavActive({ href: '/settings' }, activePath));
 
 	onMount(async () => {
 		await initDB();
@@ -71,45 +51,67 @@
 {#if !ready}
 	<div class="boot">Loading Manabi…</div>
 {:else}
-	<!-- Mobile top bar -->
-	<header class="topbar">
-		<button class="icon-btn" onclick={() => (drawerOpen = !drawerOpen)} aria-label="Menu" aria-expanded={drawerOpen}>
-			{#if drawerOpen}<X size={20} />{:else}<Menu size={20} />{/if}
-		</button>
-		<a href="/" class="tb-brand"><span class="logo">学</span><span class="name">Manabi</span></a>
-		<button class="icon-btn" onclick={toggleTheme} aria-label="Toggle light/dark theme">
-			{#if isDark}<Sun size={18} />{:else}<Moon size={18} />{/if}
-		</button>
-	</header>
+	<div class="app" class:immersive={$immersive}>
+		<!-- Phone top bar: brand, active language, settings. -->
+		<header class="topbar">
+			<a href="/" class="tb-brand"><span class="logo">学</span><span class="name">Manabi</span></a>
+			<a href="/" class="lang-chip" title="Switch language">{langNative}</a>
+			<a href="/settings" class="icon-btn" class:active={settingsActive} aria-label="Settings">
+				<SettingsIcon size={20} />
+			</a>
+		</header>
 
-	<div class="shell">
-		<aside class="sidebar" class:open={drawerOpen}>
-			<div class="brand">
-				<span class="logo">学</span>
-				<span class="name">Manabi</span>
-			</div>
+		<div class="shell">
+			<!-- Desktop sidebar -->
+			<aside class="sidebar">
+				<div class="brand">
+					<span class="logo">学</span>
+					<span class="name">Manabi</span>
+				</div>
 
-			<nav>
-				{#each NAV as item (item.href)}
-					<a href={item.href} class="nav-link" class:active={isActive(item.href)}>
-						<item.icon size={18} />
-						<span>{item.label}</span>
+				<nav class="side-nav" aria-label="Main">
+					{#each sidebarPrimary as item (item.href)}
+						<a href={item.href} class="nav-link" class:active={isNavActive(item, activePath)}>
+							<item.icon size={18} />
+							<span>{item.label}</span>
+						</a>
+					{/each}
+
+					<a href="/library" class="nav-head" class:active={activePath === '/library'}>Library</a>
+					{#each LIBRARY as item (item.href)}
+						<a href={item.href} class="nav-link sub" class:active={isNavActive(item, activePath)}>
+							<item.icon size={16} />
+							<span>{item.label}</span>
+						</a>
+					{/each}
+				</nav>
+
+				<div class="side-foot">
+					<a href="/settings" class="nav-link" class:active={settingsActive}>
+						<SettingsIcon size={18} />
+						<span>Settings</span>
 					</a>
-				{/each}
-			</nav>
+					<button class="theme-row" onclick={toggleTheme}>
+						{#if isDark}<Sun size={16} /> Light mode{:else}<Moon size={16} /> Dark mode{/if}
+					</button>
+				</div>
+			</aside>
 
-			<button class="theme-row" onclick={toggleTheme}>
-				{#if isDark}<Sun size={16} /> Light mode{:else}<Moon size={16} /> Dark mode{/if}
-			</button>
-		</aside>
+			<main class="content">
+				{@render children?.()}
+			</main>
+		</div>
 
-		{#if drawerOpen}
-			<button class="backdrop" onclick={() => (drawerOpen = false)} aria-label="Close menu"></button>
-		{/if}
-
-		<main class="content">
-			{@render children?.()}
-		</main>
+		<!-- Phone bottom tab bar -->
+		<nav class="tabbar" aria-label="Main">
+			{#each PRIMARY as item (item.href)}
+				{@const on = isNavActive(item, activePath)}
+				<a href={item.href} class="tab" class:active={on} aria-current={on ? 'page' : undefined}>
+					<span class="ic"><item.icon size={22} /></span>
+					<span class="tab-label">{item.label}</span>
+				</a>
+			{/each}
+		</nav>
 	</div>
 {/if}
 
@@ -155,7 +157,7 @@
 		font-weight: 700;
 		font-size: 1.15rem;
 	}
-	nav {
+	.side-nav {
 		display: flex;
 		flex-direction: column;
 		gap: 0.15rem;
@@ -169,6 +171,10 @@
 		color: var(--color-text-muted);
 		font-size: 0.95rem;
 	}
+	.nav-link.sub {
+		padding: 0.45rem 0.75rem 0.45rem 1rem;
+		font-size: 0.9rem;
+	}
 	.nav-link:hover {
 		background: var(--color-bg-elevated);
 		color: var(--color-text);
@@ -178,8 +184,26 @@
 		color: var(--color-accent);
 		font-weight: 600;
 	}
-	.theme-row {
+	.nav-head {
+		margin: 0.9rem 0 0.2rem;
+		padding: 0 0.75rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--color-text-muted);
+	}
+	.nav-head:hover,
+	.nav-head.active {
+		color: var(--color-accent);
+	}
+	.side-foot {
 		margin-top: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.theme-row {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -200,19 +224,10 @@
 		width: 100%;
 	}
 
-	/* Top bar + icon buttons — hidden on desktop. */
-	.topbar {
+	/* Phone chrome — hidden on desktop. */
+	.topbar,
+	.tabbar {
 		display: none;
-		align-items: center;
-		gap: 0.5rem;
-		/* Respect the notch / status bar when installed as a PWA. */
-		padding: calc(0.5rem + env(safe-area-inset-top)) calc(0.75rem + env(safe-area-inset-right))
-			0.5rem calc(0.75rem + env(safe-area-inset-left));
-		border-bottom: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
-		position: sticky;
-		top: 0;
-		z-index: 30;
 	}
 	.icon-btn {
 		display: inline-flex;
@@ -221,25 +236,40 @@
 		width: 2.4rem;
 		height: 2.4rem;
 		border-radius: 0.5rem;
-		border: 1px solid transparent;
-		background: transparent;
 		color: var(--color-text);
 		flex-shrink: 0;
 	}
-	.icon-btn:hover {
+	.icon-btn.active {
+		color: var(--color-accent);
 		background: var(--color-bg-elevated);
 	}
-	.backdrop {
-		display: none;
+	.lang-chip {
+		font-family: var(--font-script);
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-accent);
+		padding: 0.25rem 0.6rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
 	}
 
 	@media (max-width: 820px) {
 		.topbar {
 			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			/* Respect the notch / status bar when installed as a PWA. */
+			padding: calc(0.4rem + env(safe-area-inset-top)) calc(0.6rem + env(safe-area-inset-right))
+				0.4rem calc(0.9rem + env(safe-area-inset-left));
+			border-bottom: 1px solid var(--color-border);
+			background: var(--color-bg-secondary);
+			position: sticky;
+			top: 0;
+			z-index: 30;
 		}
 		.tb-brand {
 			flex: 1;
-			padding-left: 0.25rem;
+			padding-left: 0;
 		}
 		.tb-brand .name {
 			font-size: 1.05rem;
@@ -250,44 +280,60 @@
 			min-height: auto;
 		}
 		.sidebar {
-			position: fixed;
-			top: 0;
-			left: 0;
-			bottom: 0;
-			width: 15rem;
-			height: 100dvh;
-			z-index: 40;
-			transform: translateX(-100%);
-			transition: transform 0.2s ease;
-			box-shadow: 0 0 2rem rgba(0, 0, 0, 0.3);
-			/* Keep drawer nav clear of the notch / home indicator. */
-			padding-top: calc(1.25rem + env(safe-area-inset-top));
-			padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
-			padding-left: calc(0.85rem + env(safe-area-inset-left));
-		}
-		.sidebar.open {
-			transform: none;
-		}
-		/* In the mobile drawer the brand and theme toggle live in the top bar instead. */
-		.sidebar .brand,
-		.sidebar .theme-row {
 			display: none;
-		}
-		.sidebar nav {
-			margin-top: 0.5rem;
-		}
-		.backdrop {
-			display: block;
-			position: fixed;
-			inset: 0;
-			z-index: 35;
-			border: none;
-			background: rgba(0, 0, 0, 0.4);
 		}
 		.content {
 			padding: 1.25rem calc(1rem + env(safe-area-inset-right))
-				calc(1.25rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
+				calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 1.5rem) calc(1rem + env(safe-area-inset-left));
 			max-width: 100%;
+		}
+
+		.tabbar {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+			padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+			background: var(--color-bg-secondary);
+			border-top: 1px solid var(--color-border);
+			z-index: 30;
+		}
+		.tab {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 0.2rem;
+			color: var(--color-text-muted);
+			font-size: 0.68rem;
+			font-weight: 500;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.tab .ic {
+			display: inline-flex;
+			padding: 0.2rem 0.9rem;
+			border-radius: 999px;
+			transition: background 0.15s ease;
+		}
+		.tab.active {
+			color: var(--color-accent);
+			font-weight: 700;
+		}
+		.tab.active .ic {
+			background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+		}
+
+		/* Focus mode: a running review session owns the whole screen. */
+		.immersive .topbar,
+		.immersive .tabbar {
+			display: none;
+		}
+		.immersive .content {
+			padding-top: calc(0.75rem + env(safe-area-inset-top));
+			padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
 		}
 	}
 </style>

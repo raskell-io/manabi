@@ -52,6 +52,16 @@ and listening open up once you have seen it, and context and recall unlock after
 of successful recognition reviews. Each skill is scheduled independently with spaced
 repetition, so you review exactly what you are about to forget.
 
+## Getting around
+
+On a phone (and when installed as an app) the **bottom bar** switches between the five
+places you use most — **Home · Review · Read · Library · Progress** — with Settings behind
+the gear at the top right. **Library** gathers Scripts, Vocab, Items, Lessons and the
+Workbench; its tab stays lit while you are inside any of them. A running review session
+takes over the screen: the bars disappear and the **✕** at the top left quits back to the
+mode picker (progress is saved after every card, so quitting loses nothing). On a desktop
+the same destinations sit in the sidebar.
+
 ## The screens
 
 - **Home (`/`)** — today's plan: how many new items and reviews are due, with a "Start

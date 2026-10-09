@@ -39,7 +39,9 @@ src/lib/
   audio.ts    synthesize → blob cache → play
   sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO)
   components/ ScriptText · AudioButton · Recorder · ExerciseRunner
-src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · items[/[id]] · lessons · dashboard · workbench · settings
+src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · vocab · items[/[id]] · lessons · dashboard · workbench · settings
+  nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
+  ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
 ```
 
 ## Key modules

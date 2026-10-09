@@ -22,6 +22,7 @@
 	import type { QueueTask } from '$lib/srs/queue';
 	import type { Exercise } from '$lib/exercises/templates';
 	import { maybeAutoSync } from '$lib/sync';
+	import { immersive } from '$lib/ui';
 
 	// Reading is the spaced-repetition core (text-only skills, due-scheduled).
 	// Listening & Speaking are practice over ANY of your words that have a
@@ -46,6 +47,12 @@
 	let done = $state(false);
 
 	const started = $derived(mode !== null);
+
+	// A running session takes over the phone screen (the shell hides its bars).
+	$effect(() => {
+		immersive.set(started && !done);
+		return () => immersive.set(false);
+	});
 
 	// Your words that have a prerecorded clip — the pool for audio practice.
 	const audioPool = $derived(
@@ -240,8 +247,11 @@
 		</div>
 	</div>
 {:else if current && item && exercise}
-	<div class="progress">
-		<div class="bar" style="width: {(index / tasks.length) * 100}%"></div>
+	<div class="session-head">
+		<button class="quit" onclick={backToModes} aria-label="Quit session" title="Quit session"><X size={18} /></button>
+		<div class="progress">
+			<div class="bar" style="width: {(index / tasks.length) * 100}%"></div>
+		</div>
 	</div>
 	<div class="meta">
 		<span>{index + 1} / {tasks.length}</span>
@@ -261,12 +271,34 @@
 {/if}
 
 <style>
+	.session-head {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+	}
+	.quit {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-secondary);
+		color: var(--color-text-muted);
+		flex-shrink: 0;
+	}
+	.quit:hover {
+		color: var(--color-text);
+		border-color: var(--color-text-muted);
+	}
 	.progress {
+		flex: 1;
 		height: 6px;
 		background: var(--color-bg-elevated);
 		border-radius: 999px;
 		overflow: hidden;
-		margin-bottom: 0.75rem;
 	}
 	.bar {
 		height: 100%;
