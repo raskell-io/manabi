@@ -42,6 +42,7 @@ src/lib/
 src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
+  install.ts  PWA install hint: captured beforeinstallprompt (Chromium) or iOS Share-sheet steps; Home only, ≥5 attempts, dismiss once
 ```
 
 ## Key modules

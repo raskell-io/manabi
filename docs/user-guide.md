@@ -10,6 +10,10 @@ There are no accounts, no sign-up, and no data leaves your device (see
 
 ## Installing it on your phone (PWA)
 
+After your first review session, Home shows a one-line hint above the tab bar: on Android
+and desktop Chrome it has an **Install** button; on iPhone and iPad it explains the two
+Share-sheet steps, since Safari has no install prompt. Dismiss it once and it stays gone.
+
 Manabi is a Progressive Web App, so it installs like a native app and works offline.
 
 **iPhone / iPad (Safari):**
