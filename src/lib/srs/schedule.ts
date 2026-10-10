@@ -24,6 +24,7 @@ export const MIN_EASE = 1.3;
 export function gradeDimension(prev: DimState, quality: number): DimState {
 	const q = Math.max(0, Math.min(5, Math.round(quality)));
 	const next: DimState = { ...prev, introduced: true, lastReviewed: todayIso() };
+	if (!prev.introduced) next.introducedOn = next.lastReviewed as string;
 
 	if (q < 3) {
 		// Lapse — relearn from the start, due tomorrow.

@@ -87,6 +87,12 @@ export function buildQueue(
 	const language = settings.activeLanguage;
 	const scope = opts.scope;
 	let items = publishedItemsFor(doc, language);
+	// "New per day" means per day: items whose recognition was first studied
+	// today already count against the cap, so finishing a batch does not
+	// immediately offer the next one.
+	const introducedToday = items.filter(
+		(it) => doc.srsStates[it.id]?.dims.recognition.introducedOn === onIso
+	).length;
 	if (scope) {
 		const order = new Map([...scope].map((id, i) => [id, i] as const));
 		items = items
@@ -95,7 +101,7 @@ export function buildQueue(
 	}
 	// A scope is its own bound; the daily caps only apply to the whole collection.
 	const reviewLimit = scope ? Infinity : settings.reviewCap;
-	const newLimit = scope ? Infinity : settings.newPerDay;
+	const newLimit = scope ? Infinity : Math.max(0, settings.newPerDay - introducedToday);
 
 	const reviewTasks: { task: QueueTask; due: string }[] = [];
 	const newItemIds: string[] = [];

@@ -3,6 +3,14 @@ import { gradeDimension, isPass, isDue, MIN_EASE } from './schedule';
 import { freshDimState, isoDatePlus, todayIso, type DimState } from '$lib/db/types';
 
 describe('gradeDimension', () => {
+	it('stamps the date a skill was first studied, once', () => {
+		const first = gradeDimension(freshDimState(), 4);
+		expect(first.introduced).toBe(true);
+		expect(first.introducedOn).toBe(todayIso());
+		const later = gradeDimension({ ...first, introducedOn: '2026-01-01' }, 2);
+		expect(later.introducedOn).toBe('2026-01-01');
+	});
+
 	it('introduces and schedules a fresh dimension on a good grade', () => {
 		const next = gradeDimension(freshDimState(), 4);
 		expect(next.introduced).toBe(true);

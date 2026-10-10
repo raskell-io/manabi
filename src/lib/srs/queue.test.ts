@@ -44,6 +44,24 @@ describe('buildQueue', () => {
 		expect(q.tasks.every((t) => t.isNew)).toBe(true);
 	});
 
+	it('counts items already introduced today against newPerDay', () => {
+		const doc = docWith([makeItem('a'), makeItem('b'), makeItem('c'), makeItem('d')]);
+		const settings = { ...defaultSettings(), newPerDay: 2 };
+		// a and b were first studied today (and are scheduled ahead → not due).
+		for (const id of ['a', 'b']) {
+			const srs = freshSkillMemory(id);
+			srs.dims.recognition = { ...srs.dims.recognition, introduced: true, introducedOn: todayIso(), repetitions: 1, nextReview: isoDatePlus(1) };
+			for (const dim of ['pronunciation', 'listening'] as const) srs.dims[dim] = { ...srs.dims[dim], introduced: true, nextReview: isoDatePlus(3) };
+			doc.srsStates[id] = srs;
+		}
+		expect(buildQueue(doc, settings).newItems).toBe(0);
+		// Yesterday's introductions do not count.
+		doc.srsStates['a'].dims.recognition.introducedOn = isoDatePlus(-1);
+		expect(buildQueue(doc, settings).newItems).toBe(1);
+		// A scope lifts the cap regardless.
+		expect(buildQueue(doc, settings, todayIso(), { scope: new Set(['c', 'd']) }).newItems).toBe(2);
+	});
+
 	it('only counts items in the active language', () => {
 		const doc = docWith([makeItem('a', 'zh'), makeItem('b', 'ja')]);
 		const settings = { ...defaultSettings(), activeLanguage: 'zh' as const, newPerDay: 5 };

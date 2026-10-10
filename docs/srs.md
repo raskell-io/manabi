@@ -91,7 +91,10 @@ A task is `{ itemId, dimension, isNew }`. The algorithm:
    *and* **due** (`nextReview <= today`).
 4. Sort review tasks **most-overdue first**.
 5. Cap reviews at `settings.reviewCap`.
-6. Introduce up to `settings.newPerDay` brand-new items, each via its `recognition` skill.
+6. Introduce brand-new items, each via its `recognition` skill, up to `settings.newPerDay`
+   **minus the items first studied today** (`DimState.introducedOn`, stamped by
+   `gradeDimension` the first time a skill is graded) — so finishing today's batch does not
+   immediately offer the next one.
 7. Order the session **new items first, then reviews** (start by learning, then reinforce).
 
 `reviewSummary` (a derived store) and `queueCounts` give the home screen its counts without

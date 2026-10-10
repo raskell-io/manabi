@@ -96,6 +96,7 @@ interface DimState {
   lastReviewed: string | null;
   lapses: number;          // total times forgotten
   introduced: boolean;     // has this skill been studied at all?
+  introducedOn?: string;   // ISO date it was first studied — counts against newPerDay
 }
 ```
 

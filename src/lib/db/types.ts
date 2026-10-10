@@ -180,6 +180,7 @@ export interface DimState {
 	lastReviewed: string | null; // ISO YYYY-MM-DD
 	lapses: number; // total times forgotten
 	introduced: boolean; // has this dimension been studied yet?
+	introducedOn?: string; // ISO date it was first studied (set when `introduced` flips)
 	[key: string]: unknown;
 }
 
