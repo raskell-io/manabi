@@ -68,8 +68,10 @@ the same destinations sit in the sidebar.
 
 ## The screens
 
-- **Home (`/`)** — today's plan: how many new items and reviews are due, with a "Start
-  review" button.
+- **Home (`/`)** — today in one tap: a **Continue** card that opens the right session
+  (Reading when anything is new or due, otherwise Listening, then Speaking), the other
+  modes with their counts underneath, today's numbers, and any lessons with something due.
+  The language chips at the top switch languages.
 - **Review (`/review`)** — the core loop. Pick a mode and answer cards:
   - **Reading** — text-only recognition, recall, and context (cloze) exercises, scheduled
     by spaced repetition (what's due).
@@ -86,7 +88,9 @@ the same destinations sit in the sidebar.
     suggestion.
   - **Everything** — all of the above together.
   Grading buttons (Hard / Good / Easy) are optional; you can keep them off and just mark
-  right/wrong. Keyboard shortcuts work throughout.
+  right/wrong. Keyboard shortcuts work throughout. A finished session shows cards,
+  accuracy, time and a per-skill breakdown, plus **Next up**: drill what you missed, or go
+  straight into another mode.
 - **Read (`/read`)** — graded reading material: natural conversations and short
   non-fiction texts. Tap any line to hear it, toggle readings (pinyin/furigana/vowels) and
   translations, and **mine** a sentence — turning it into a review item — with one tap.

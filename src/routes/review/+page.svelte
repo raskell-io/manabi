@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import { get } from 'svelte/store';
 	import { page } from '$app/stores';
-	import { Check, X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter } from 'lucide-svelte';
+	import { X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter, RotateCcw } from 'lucide-svelte';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
@@ -15,8 +16,9 @@
 		snapshotQueue
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
-	import { parseMode, resolveScope, type Mode, type ReviewScope } from '$lib/srs/scope';
+	import { DIMENSIONS, DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
+	import { parseMode, resolveScope, scopeHref, type Mode, type ReviewScope } from '$lib/srs/scope';
+	import { formatDuration } from '$lib/today';
 	import { rankAudioPractice, type AudioDimension, type RankedPractice } from '$lib/srs/practice';
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
@@ -45,6 +47,14 @@
 	let correct = $state(0);
 	let wrong = $state(0);
 	let done = $state(false);
+
+	// What happened in this session, for the summary screen.
+	type Result = { dimension: Dimension; itemId: string; correct: boolean | null };
+	let results = $state<Result[]>([]);
+	let sessionStart = 0;
+	let elapsedMs = $state(0);
+	const reducedMotion =
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	const started = $derived(mode !== null);
 
@@ -91,6 +101,30 @@
 		return total > n ? `${n} of ${total} cards` : `${n} ${n === 1 ? 'card' : 'cards'}`;
 	}
 
+	// Session summary.
+	const MODE_LABEL: Record<Mode, string> = { reading: 'Reading', listening: 'Listening', speaking: 'Speaking', everything: 'Everything' };
+	const answered = $derived(results.filter((r) => r.correct !== null));
+	const accuracy = $derived(
+		answered.length ? Math.round((100 * answered.filter((r) => r.correct).length) / answered.length) : null
+	);
+	const bySkill = $derived(
+		DIMENSIONS.map((dim) => {
+			const rs = results.filter((r) => r.dimension === dim);
+			const a = rs.filter((r) => r.correct !== null);
+			return { dim, n: rs.length, answered: a.length, ok: a.filter((r) => r.correct).length };
+		}).filter((s) => s.n > 0)
+	);
+	const missedIds = $derived([...new Set(results.filter((r) => r.correct === false).map((r) => r.itemId))]);
+	// Other modes still worth doing right now (fresh counts — the queue is re-snapshotted when a session ends).
+	const nextModes = $derived(
+		done
+			? (['reading', 'listening', 'speaking'] as Mode[])
+					.filter((m) => m !== mode)
+					.map((m) => ({ m, n: tasksFor(m).length }))
+					.filter((x) => x.n > 0)
+			: []
+	);
+
 	let current = $derived(tasks[index]);
 	let item = $derived<LearningItem | undefined>(current ? getItem(current.itemId) : undefined);
 	// Listening (hear→word) and pronunciation (record-compare) use audio; the
@@ -107,6 +141,9 @@
 		index = 0;
 		correct = 0;
 		wrong = 0;
+		results = [];
+		sessionStart = Date.now();
+		elapsedMs = 0;
 		tasks = tasksFor(m);
 		done = tasks.length === 0;
 	}
@@ -159,6 +196,10 @@
 	function advance() {
 		if (index + 1 >= tasks.length) {
 			done = true;
+			elapsedMs = Date.now() - sessionStart;
+			// Fresh counts for "Next up" (what this session cleared is gone now).
+			allTasks = snapshotQueue(scope ?? undefined).tasks;
+			epoch += 1;
 			void maybeAutoSync(); // push this session's progress (no-op unless configured)
 		} else {
 			index += 1;
@@ -167,6 +208,21 @@
 
 	function onComplete(result: CompleteResult) {
 		if (!current || !item || !exercise) return;
+		results = [
+			...results,
+			{
+				dimension: current.dimension,
+				itemId: item.id,
+				correct:
+					result.kind === 'mcq'
+						? result.quality >= 3
+						: result.rating === 'good'
+							? true
+							: result.rating === 'bad'
+								? false
+								: null
+			}
+		];
 		if (result.kind === 'mcq') {
 			if (result.quality >= 3) correct += 1;
 			else wrong += 1;
@@ -233,17 +289,51 @@
 	</div>
 {:else if done}
 	<div class="summary">
-		<h1>Session complete</h1>
-		<div class="tally">
-			<span class="ok"><Check size={20} /> {correct}</span>
-			<span class="no"><X size={20} /> {wrong}</span>
-		</div>
-		{#if tasks.length === 0}
+		<h1>{results.length === 0 ? 'Nothing to do' : 'Session complete'}</h1>
+		{#if scope}<p class="muted scope-line">{scope.title}</p>{/if}
+		{#if results.length === 0}
 			<p class="muted">Nothing was due for this mode.</p>
+		{:else}
+			<div class="sum-grid">
+				<div class="sum"><span class="num">{results.length}</span><span class="lbl">{results.length === 1 ? 'card' : 'cards'}</span></div>
+				<div class="sum"><span class="num">{accuracy === null ? '—' : `${accuracy}%`}</span><span class="lbl">accuracy</span></div>
+				<div class="sum"><span class="num">{formatDuration(elapsedMs)}</span><span class="lbl">time</span></div>
+			</div>
+			<ul class="skills">
+				{#each bySkill as s (s.dim)}
+					{@const pct = s.answered ? Math.round((100 * s.ok) / s.answered) : 0}
+					<li>
+						<span class="sk-name">{DIMENSION_LABELS[s.dim]}</span>
+						<span class="sk-bar"><span class="sk-fill" class:low={s.answered && pct < 60} style="width: {s.answered ? pct : 100}%"></span></span>
+						<span class="sk-count">{s.answered ? `${s.ok}/${s.answered}` : `${s.n}`}</span>
+					</li>
+				{/each}
+			</ul>
 		{/if}
+
+		<section class="nextup">
+			<h2>Next up</h2>
+			<div class="chips">
+				{#if missedIds.length > 0}
+					<a class="chip warn" href={scopeHref(missedIds, 'Missed this session', mode === 'speaking' ? 'speaking' : undefined)}>
+						<RotateCcw size={15} /> Drill the {missedIds.length} missed
+					</a>
+				{/if}
+				{#each nextModes as x (x.m)}
+					<button class="chip" onclick={() => start(x.m)}>
+						{#if x.m === 'reading'}<BookOpen size={15} />{:else if x.m === 'listening'}<Headphones size={15} />{:else}<Mic size={15} />{/if}
+						{MODE_LABEL[x.m]} · {x.n}
+					</button>
+				{/each}
+				{#if missedIds.length === 0 && nextModes.length === 0}
+					<span class="muted">All caught up for now.</span>
+				{/if}
+			</div>
+		</section>
+
 		<div class="actions">
-			<a class="btn" href={scope?.kind === 'lesson' ? '/lessons' : scope ? '/dashboard' : '/'}>{scope?.kind === 'lesson' ? 'Lessons' : scope ? 'Progress' : 'Home'}</a>
-			<button class="btn primary" onclick={backToModes}>Choose mode</button>
+			<a class="btn primary" href={scope?.kind === 'lesson' ? '/lessons' : scope ? '/dashboard' : '/'}>Done</a>
+			<button class="btn" onclick={backToModes}>Choose mode</button>
 		</div>
 	</div>
 {:else if current && item && exercise}
@@ -262,7 +352,7 @@
 	</div>
 
 	{#key index}
-		<div class="card">
+		<div class="card" in:fly={{ x: 48, duration: reducedMotion ? 0 : 180 }}>
 			<ExerciseRunner {exercise} {item} {onComplete} />
 		</div>
 	{/key}
@@ -338,26 +428,107 @@
 	}
 	.summary h1 {
 		font-size: 1.6rem;
+		margin-bottom: 0.25rem;
 	}
-	.tally {
+	.scope-line {
+		margin: 0 0 0.5rem;
+	}
+	.sum-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0.75rem;
+		margin: 1.25rem 0 1rem;
+	}
+	.sum {
 		display: flex;
-		gap: 2rem;
-		justify-content: center;
-		font-size: 1.5rem;
+		flex-direction: column;
+		gap: 0.1rem;
+		padding: 0.8rem 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: 0.75rem;
+		background: var(--color-bg-secondary);
+	}
+	.sum .num {
+		font-size: 1.6rem;
 		font-weight: 700;
-		margin: 1.5rem 0;
+		color: var(--color-accent);
+		line-height: 1.1;
 	}
-	.tally .ok {
-		color: var(--color-success);
-		display: inline-flex;
-		gap: 0.4rem;
-		align-items: center;
+	.sum .lbl {
+		font-size: 0.78rem;
+		color: var(--color-text-muted);
 	}
-	.tally .no {
-		color: var(--color-danger);
-		display: inline-flex;
+	.skills {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 1.5rem;
+		display: flex;
+		flex-direction: column;
 		gap: 0.4rem;
+		text-align: left;
+	}
+	.skills li {
+		display: grid;
+		grid-template-columns: 7rem 1fr 3rem;
 		align-items: center;
+		gap: 0.6rem;
+		font-size: 0.85rem;
+	}
+	.sk-name {
+		color: var(--color-text-muted);
+	}
+	.sk-bar {
+		height: 8px;
+		background: var(--color-bg-elevated);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+	.sk-fill {
+		display: block;
+		height: 100%;
+		background: var(--color-success);
+		border-radius: 999px;
+	}
+	.sk-fill.low {
+		background: var(--color-warning);
+	}
+	.sk-count {
+		text-align: right;
+		font-weight: 600;
+	}
+	.nextup {
+		margin: 0 0 1.5rem;
+	}
+	.nextup h2 {
+		font-size: 1rem;
+		margin: 0 0 0.6rem;
+	}
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.5rem 0.9rem;
+		border-radius: 999px;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-secondary);
+		color: var(--color-text);
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+	.chip:hover {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+	}
+	.chip.warn {
+		border-color: var(--color-warning);
+		color: var(--color-warning);
 	}
 	.muted {
 		color: var(--color-text-muted);

@@ -7,6 +7,7 @@
 	import { settings } from '$lib/db/store';
 	import { playPrerecorded } from '$lib/audio';
 	import { playCorrect, playWrong } from '$lib/sounds';
+	import { tapCorrect, tapWrong } from '$lib/haptics';
 	import type { Exercise, Choice } from '$lib/exercises/templates';
 	import { languageDir, stripNiqqud, type LearningItem, type SelfRating } from '$lib/db/types';
 	import type { AsrResult } from '$lib/pronunciation';
@@ -61,8 +62,13 @@
 	function choose(c: Choice) {
 		if (answered) return;
 		selected = c;
-		if (c.correct) playCorrect();
-		else playWrong();
+		if (c.correct) {
+			playCorrect();
+			tapCorrect();
+		} else {
+			playWrong();
+			tapWrong();
+		}
 		// Cloze: play the full sentence once answered (after the chime rings).
 		if (exercise.type === 'cloze' && exercise.clozeFull) {
 			const lang = exercise.language;

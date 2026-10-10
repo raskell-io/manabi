@@ -5,6 +5,7 @@
 	import { settings } from '$lib/db/store';
 	import { canTranscribe, transcribe } from '$lib/inference/router';
 	import { scorePronunciation, suggestRating, type AsrResult } from '$lib/pronunciation';
+	import { tapCorrect, tapWrong } from '$lib/haptics';
 	import AudioButton from './AudioButton.svelte';
 	import ScriptText from './ScriptText.svelte';
 	import type { Language, SelfRating } from '$lib/db/types';
@@ -87,6 +88,8 @@
 
 	function rate(r: SelfRating) {
 		if (!recordedRef) return;
+		if (r === 'good') tapCorrect();
+		else if (r === 'bad') tapWrong();
 		onRate(r, recordedRef, asr ? { transcript: asr.transcript, score: asr.score } : undefined);
 	}
 

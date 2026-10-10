@@ -27,3 +27,6 @@ tools/.audio-cache/
 tools/.gen-audio.log
 tools/.seed.mjs
 tools/.scripts.mjs
+
+# local headless smoke-test harness (playwright-core + screenshots)
+.smoke/

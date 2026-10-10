@@ -42,12 +42,15 @@ src/lib/
 src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
+  today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
+  haptics.ts  tapCorrect / tapWrong (navigator.vibrate; Android only, iOS ignores)
   install.ts  PWA install hint: captured beforeinstallprompt (Chromium) or iOS Share-sheet steps; Home only, ≥5 attempts, dismiss once
 ```
 
 ## Key modules
 - `srs/schedule.ts` — `gradeDimension(state, quality 0-5)` SM-2; <3 is a lapse.
-- `srs/queue.ts` — `buildQueue` (new items gated by `newPerDay`, reviews by `reviewCap`;
+- `srs/queue.ts` — `buildQueue` (new items gated by `newPerDay` minus those with
+  `recognition.introducedOn === today`, reviews by `reviewCap`;
   `{ scope }` = a lesson's item-id set → scope order, both caps lifted);
   `isUnlocked` gates context behind 1 recognition rep, recall behind 2.
 - `exercises/generate.ts` — `buildExercise(item, dimension, pool, {audio, rng})`;

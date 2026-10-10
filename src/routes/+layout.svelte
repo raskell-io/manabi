@@ -14,10 +14,17 @@
 	let { children } = $props();
 	let ready = $state(false);
 
+	const THEME_COLOR = { light: '#f5f5f5', dark: '#1e1e2e' } as const;
 	function applyTheme(theme: string) {
 		const root = document.documentElement;
 		root.classList.remove('light', 'dark');
 		if (theme === 'light' || theme === 'dark') root.classList.add(theme);
+		// The status-bar tint (PWA / mobile chrome) must follow a forced theme, not
+		// just the system scheme the two <meta theme-color> tags are keyed on.
+		document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => {
+			const own = m.media.includes('dark') ? 'dark' : 'light';
+			m.content = theme === 'light' || theme === 'dark' ? THEME_COLOR[theme] : THEME_COLOR[own];
+		});
 	}
 	$effect(() => {
 		if (ready) applyTheme($settings.theme);
