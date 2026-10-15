@@ -6,9 +6,11 @@
 	 */
 	import { ArrowRight, Check } from 'lucide-svelte';
 	import { pathData, settings } from '$lib/db/store';
-	import { pathState } from '$lib/path';
+	import { isPathId, pathState, suggestedPath } from '$lib/path';
 
-	const trail = $derived(pathState($settings.activeLanguage, $pathData));
+	const lang = $derived($settings.activeLanguage);
+	const chosen = $derived($settings.pathChoice?.[lang]);
+	const trail = $derived(pathState(lang, $pathData, isPathId(chosen) ? chosen : suggestedPath(lang, $pathData)));
 	const allDone = $derived(trail.doneCount === trail.countable);
 	const cur = $derived(trail.stages[trail.current]);
 	const curP = $derived(trail.progress[trail.current]);
@@ -16,7 +18,7 @@
 
 <a class="strip" href="/path">
 	<span class="top">
-		<span class="kicker">Your path</span>
+		<span class="kicker">Your path · {trail.path.title}</span>
 		<span class="go">See it all <ArrowRight size={16} strokeWidth={3} /></span>
 	</span>
 	<span class="dots" aria-hidden="true">

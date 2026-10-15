@@ -428,6 +428,14 @@ export function updateSettings(patch: Partial<ManabiSettings>): void {
 	});
 }
 
+/** Remember which learning path (beginner / refresher) the learner follows in a language. */
+export function choosePath(language: Language, pathId: string): void {
+	updateDoc((d) => {
+		if (!d.settings.pathChoice) d.settings.pathChoice = {};
+		d.settings.pathChoice[language] = pathId;
+	});
+}
+
 export function setActiveLanguage(language: Language): void {
 	updateSettings({ activeLanguage: language });
 }

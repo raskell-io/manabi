@@ -1,24 +1,45 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { tick } from 'svelte';
 	import { ArrowRight, Brain, Check, Compass, Crown, Headphones, Mic, BookOpen } from 'lucide-svelte';
 	import HowItWorks from '$lib/components/HowItWorks.svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
-	import { pathData, setActiveLanguage, settings, studyItems } from '$lib/db/store';
+	import { choosePath, pathData, setActiveLanguage, settings, studyItems } from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
-	import { pathState, stageItemIds, stagePreview, type PathStage, type StageProgress } from '$lib/path';
+	import { isPathId, pathsFor, pathState, stageItemIds, stagePreview, suggestedPath, type PathId, type PathStage, type StageProgress } from '$lib/path';
 	import { scopeHref } from '$lib/srs/scope';
 
 	const lang = $derived<Language>($settings.activeLanguage);
 	const langName = $derived(LANGUAGES.find((l) => l.code === lang)?.name ?? '');
-	const trail = $derived(pathState(lang, $pathData));
+
+	// Which path: your pick for this language, else the suggestion (Refresher once Beginner is done).
+	const chosen = $derived($settings.pathChoice?.[lang]);
+	const pathId = $derived<PathId>(isPathId(chosen) ? chosen : suggestedPath(lang, $pathData));
+	const trail = $derived(pathState(lang, $pathData, pathId));
+	// Both paths' progress, for the picker.
+	const overview = $derived(pathsFor(lang).map((p) => ({ p, s: pathState(lang, $pathData, p.id) })));
+
+	// /path?path=refresher (the Beginner path's last stage) switches path.
+	$effect(() => {
+		const want = $page.url.searchParams.get('path');
+		if (isPathId(want)) {
+			choosePath(lang, want);
+			void goto('/path', { replaceState: true, noScroll: true });
+		}
+	});
+	function switchPath(id: PathId) {
+		choosePath(lang, id);
+		picked = null;
+	}
+
 	const allDone = $derived(trail.doneCount === trail.countable);
 
 	// The open stage card: the current stage unless you tap another.
-	let picked = $state<{ lang: Language; i: number } | null>(null);
-	const open = $derived(picked && picked.lang === lang ? picked.i : trail.current);
+	let picked = $state<{ key: string; i: number } | null>(null);
+	const open = $derived(picked && picked.key === `${lang}/${pathId}` ? picked.i : trail.current);
 	async function pick(i: number) {
-		picked = { lang, i: open === i ? -1 : i };
+		picked = { key: `${lang}/${pathId}`, i: open === i ? -1 : i };
 		await tick();
 		document.getElementById(`stage-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 	}
@@ -63,10 +84,11 @@
 		<div>
 			<h1>Your {langName} path</h1>
 			<p class="sub">
+				{trail.path.title} · {trail.path.level} ·
 				{#if allDone}
-					You’ve walked the whole path — keep reviewing and exploring!
+					all done — keep reviewing and exploring!
 				{:else}
-					Stage {trail.current + 1} of {trail.stages.length} · {trail.doneCount} done
+					stage {trail.current + 1} of {trail.stages.length}
 				{/if}
 			</p>
 		</div>
@@ -80,10 +102,24 @@
 	</div>
 </header>
 
+<div class="paths" role="tablist" aria-label="Path">
+	{#each overview as { p, s: st } (p.id)}
+		<button role="tab" class="path-card" class:on={p.id === pathId} aria-selected={p.id === pathId} onclick={() => switchPath(p.id)}>
+			<span class="pc-top">
+				<b>{p.title}</b>
+				<span class="pc-level">{p.level}</span>
+			</span>
+			<span class="pc-blurb">{p.blurb}</span>
+			<span class="pc-bar"><span style="width: {(st.doneCount / st.countable) * 100}%"></span></span>
+			<span class="pc-done">{st.doneCount} of {st.countable} stages done</span>
+		</button>
+	{/each}
+</div>
+
 <HowItWorks />
 
 <ol class="trail" aria-label="{langName} learning path">
-	{#each trail.stages as st, i (st.id)}
+	{#each trail.stages as st, i (`${pathId}/${st.id}`)}
 		{@const p = trail.progress[i]}
 		{@const x = off(i)}
 		{@const here = i === trail.current && !allDone}
@@ -169,10 +205,14 @@
 							<a class="btn3d" href="/read/{p.nextPassage.id}"><BookOpen size={18} /> Read “{p.nextPassage.title}”</a>
 						{/if}
 					{:else if st.id === 'ears'}
-						<a class="btn3d" href="/review?mode=listening"><Headphones size={18} /> Listen</a>
-						<a class="btn3d" href="/review?mode=speaking"><Mic size={18} /> Speak</a>
+						{#if trail.itemIds.length}
+							<a class="btn3d" href={scopeHref(trail.itemIds, `${trail.path.title}: listening`, 'listening')}><Headphones size={18} /> Listen</a>
+							<a class="btn3d" href={scopeHref(trail.itemIds, `${trail.path.title}: speaking`, 'speaking')}><Mic size={18} /> Speak</a>
+						{/if}
 					{:else if st.id === 'recall'}
-						<a class="btn3d" href="/review?mode=reading"><Brain size={18} /> Review</a>
+						{#if trail.itemIds.length}
+							<a class="btn3d" href={scopeHref(trail.itemIds, `${trail.path.title}: review`, 'reading')}><Brain size={18} /> Review</a>
+						{/if}
 					{/if}
 					{#each st.links as l (l.href)}
 						<a class="btn3d ghost" href={l.href}>{l.label}</a>
@@ -225,6 +265,81 @@
 		background: var(--color-bg);
 		color: var(--color-accent);
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+	}
+
+	/* --- Path picker ------------------------------------------------------- */
+	.paths {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.6rem;
+		margin-bottom: 1rem;
+	}
+	.path-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.8rem 0.95rem 0.85rem;
+		border: 2px solid var(--color-border);
+		border-bottom-width: 4px;
+		border-radius: 1.1rem;
+		background: var(--color-bg);
+		color: var(--color-text);
+		font: inherit;
+		text-align: left;
+	}
+	.path-card:hover {
+		border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+	}
+	.path-card.on {
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 7%, var(--color-bg));
+	}
+	.pc-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+	.pc-top b {
+		font-size: 1.05rem;
+		font-weight: 900;
+	}
+	.on .pc-top b {
+		color: var(--color-accent);
+	}
+	.pc-level {
+		padding: 0.05rem 0.5rem;
+		border-radius: 999px;
+		background: var(--color-bg-elevated);
+		color: var(--color-text-muted);
+		font-size: 0.72rem;
+		font-weight: 900;
+		white-space: nowrap;
+	}
+	.pc-blurb {
+		color: var(--color-text-muted);
+		font-size: 0.82rem;
+		font-weight: 600;
+		line-height: 1.35;
+	}
+	.pc-bar {
+		position: relative;
+		height: 0.45rem;
+		margin-top: auto;
+		border-radius: 999px;
+		background: var(--color-bg-elevated);
+		overflow: hidden;
+	}
+	.pc-bar span {
+		position: absolute;
+		inset: 0 auto 0 0;
+		border-radius: 999px;
+		background: var(--color-success);
+	}
+	.pc-done {
+		color: var(--color-text-muted);
+		font-size: 0.72rem;
+		font-weight: 800;
 	}
 
 	/* --- The trail --------------------------------------------------------- */

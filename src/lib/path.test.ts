@@ -1,5 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { DONE_AT, STEP, pathFor, pathState, stageItemIds, stagePreview, stageProgress, type PathData } from './path';
+import {
+	DONE_AT,
+	STEP,
+	isPathId,
+	pathFor,
+	pathsFor,
+	pathState,
+	stageItemIds,
+	stagePreview,
+	stageProgress,
+	suggestedPath,
+	type PathData
+} from './path';
 import { seedItems, seedPassages } from './db/seed';
 import { createEmptyDocument, freshSkillMemory, LANGUAGES, type Language, type LearningItem, type SkillMemory } from './db/types';
 import { mergeInto } from './db/merge';
@@ -23,54 +35,85 @@ function passed(ids: string[], extra: (keyof SkillMemory['dims'])[] = []): Recor
 	}
 	return out;
 }
+const stage = (lang: Language, path: 'beginner' | 'refresher', id: string) => pathFor(lang, path).stages.find((s) => s.id === id)!;
 
 describe('paths', () => {
-	it('gives every language an ordered path ending in an open-ended stage', () => {
+	it('gives every language a Beginner and a Refresher path', () => {
 		for (const { code } of LANGUAGES) {
-			const p = pathFor(code);
-			expect(p.length, code).toBeGreaterThanOrEqual(7);
-			expect(p.at(-1)!.kind).toBe('explore');
-			expect(new Set(p.map((s) => s.id)).size).toBe(p.length);
-			expect(p.map((s) => s.kind)).toContain('reading');
-		}
-	});
-	it('has content behind every stage of the built-in data', () => {
-		for (const { code } of LANGUAGES) {
-			const d = data(code);
-			for (const st of pathFor(code)) {
-				if (st.kind === 'explore' || st.kind === 'skills') continue;
-				expect(stageProgress(st, d).total, `${code}/${st.id}`).toBeGreaterThan(0);
+			const ps = pathsFor(code);
+			expect(ps.map((p) => p.id), code).toEqual(['beginner', 'refresher']);
+			for (const p of ps) {
+				expect(p.stages.length, `${code}/${p.id}`).toBeGreaterThanOrEqual(6);
+				expect(p.stages.at(-1)!.kind).toBe('explore');
+				expect(new Set(p.stages.map((s) => s.id)).size).toBe(p.stages.length);
+				expect(p.level).toBeTruthy();
 			}
 		}
 	});
-	it('builds the Chinese character stage from the characters of the first words', () => {
-		const chars = pathFor('zh').find((s) => s.id === 'chars')!;
-		const first = new Set(seedItems(0).filter((it) => it.language === 'zh' && it.tags.includes('HSK1')).flatMap((it) => [...it.target]));
-		expect(chars.entries!.length).toBeGreaterThan(20);
-		for (const e of chars.entries!) expect(first.has(e.target), e.target).toBe(true);
+	it('starts Beginners with the script and Refreshers without it', () => {
+		expect(pathFor('ja', 'beginner').stages.slice(0, 2).map((s) => s.id)).toEqual(['hiragana', 'katakana']);
+		expect(pathFor('he', 'beginner').stages[0].entries!.length).toBe(27);
+		expect(pathFor('ko', 'beginner').stages[0].entries!.length).toBe(40);
+		for (const { code } of LANGUAGES) {
+			const scripts = ['tones', 'hiragana', 'katakana', 'jamo', 'syllables', 'alefbet'];
+			expect(pathFor(code, 'refresher').stages.some((s) => scripts.includes(s.id)), code).toBe(false);
+		}
 	});
-	it('starts Japanese with kana and Hebrew with the alef-bet', () => {
-		expect(pathFor('ja').slice(0, 2).map((s) => s.id)).toEqual(['hiragana', 'katakana']);
-		expect(pathFor('he')[0].entries!.length).toBe(27);
-		expect(pathFor('ko')[0].entries!.length).toBe(40);
+	it('ends the Beginner path with a step up to the Refresher', () => {
+		for (const { code } of LANGUAGES) {
+			const last = pathFor(code, 'beginner').stages.at(-1)!;
+			expect(last.links.map((l) => l.href)).toContain('/path?path=refresher');
+		}
+	});
+	it('has content behind every stage of the built-in data', () => {
+		for (const { code } of LANGUAGES)
+			for (const p of pathsFor(code)) {
+				const d = data(code);
+				for (const st of p.stages) {
+					if (st.kind === 'explore' || st.kind === 'skills') continue;
+					expect(stageProgress(st, d).total, `${code}/${p.id}/${st.id}`).toBeGreaterThan(0);
+				}
+			}
+	});
+	it('splits Chinese characters between the paths without overlap', () => {
+		const c1 = stage('zh', 'beginner', 'chars1').entries!.map((e) => e.target);
+		const c2 = stage('zh', 'refresher', 'chars2').entries!.map((e) => e.target);
+		const first = new Set(seedItems(0).filter((it) => it.language === 'zh' && it.tags.includes('HSK1')).flatMap((it) => [...it.target]));
+		expect(c1.length).toBeGreaterThan(20);
+		expect(c2.length).toBeGreaterThan(10);
+		for (const c of c1) expect(first.has(c), c).toBe(true);
+		for (const c of c2) expect(c1).not.toContain(c);
+	});
+	it('gives Refreshers the places from the Names page', () => {
+		const places = stage('he', 'refresher', 'places');
+		expect(places.entries!.length).toBeGreaterThan(30);
+		expect(places.entries![0]).toMatchObject({ target: 'יִשְׂרָאֵל', meaning: 'Israel', tags: ['name', 'place', 'names-countries'] });
+	});
+	it('caps the Chinese beginner reading at a few texts', () => {
+		expect(stageProgress(stage('zh', 'beginner', 'taste'), data('zh')).total).toBe(3);
+		expect(stagePreview(stage('zh', 'beginner', 'taste'), data('zh'))).toHaveLength(3);
+	});
+	it('recognizes path ids', () => {
+		expect(isPathId('refresher')).toBe(true);
+		expect(isPathId('expert')).toBe(false);
+		expect(pathFor('zh', 'nope' as 'beginner').id).toBe('beginner');
 	});
 });
 
 describe('stageProgress', () => {
 	it('counts learned and started items, and is done at 80%', () => {
-		const st = pathFor('zh').find((s) => s.id === 'words1')!;
+		const st = stage('zh', 'beginner', 'words1');
 		const ids = stageItemIds(st, data('zh'));
 		const n = Math.ceil(ids.length * DONE_AT);
 		const srs = passed(ids.slice(0, n));
 		const started = freshSkillMemory(ids[n]);
 		started.dims.recognition.introduced = true;
 		srs[ids[n]] = started;
-		const p = stageProgress(st, data('zh', { srs }));
-		expect(p).toMatchObject({ total: ids.length, learned: n, started: 1, done: true });
+		expect(stageProgress(st, data('zh', { srs }))).toMatchObject({ total: ids.length, learned: n, started: 1, done: true });
 		expect(stageProgress(st, data('zh', { srs: passed(ids.slice(0, n - 1)) })).done).toBe(false);
 	});
 	it('offers the next step: started items first, then new ones, at most STEP', () => {
-		const st = pathFor('zh').find((s) => s.id === 'words1')!;
+		const st = stage('zh', 'beginner', 'words1');
 		const ids = stageItemIds(st, data('zh'));
 		const started = freshSkillMemory(ids[5]);
 		started.dims.recognition.introduced = true;
@@ -81,18 +124,17 @@ describe('stageProgress', () => {
 		expect(p.nextItems.create).toEqual([]);
 	});
 	it('creates script entries that are not items yet', () => {
-		const st = pathFor('ja')[0];
+		const st = pathFor('ja', 'beginner').stages[0];
 		const p = stageProgress(st, data('ja'));
 		expect(p.nextItems.create.map((e) => e.target)).toEqual(st.entries!.slice(0, STEP).map((e) => e.target));
 		expect(p.nextItems.create[0]).toMatchObject({ kind: 'character', tags: ['script', 'path-hiragana'] });
-		// An existing item for a glyph counts toward the stage.
 		const a: LearningItem = { ...seedItems(0)[0], id: 'x-a', language: 'ja', target: 'あ' };
 		const q = stageProgress(st, data('ja', { items: [a], srs: passed(['x-a']) }));
 		expect(q.learned).toBe(1);
 		expect(q.nextItems.create[0].target).not.toBe('あ');
 	});
 	it('tracks reading by passages read, and points at the next one', () => {
-		const st = pathFor('ko').find((s) => s.id === 'read1')!;
+		const st = stage('ko', 'beginner', 'read1');
 		const d = data('ko');
 		const ps = d.passages.filter((p) => p.level === 'A1');
 		const p0 = stageProgress(st, d);
@@ -102,27 +144,45 @@ describe('stageProgress', () => {
 		expect(p1.learned).toBe(1);
 		expect(p1.nextPassage?.id).toBe(ps[1].id);
 	});
-	it('measures skills over the words you have started', () => {
-		const ears = pathFor('he').find((s) => s.id === 'ears')!;
-		const ids = data('he').items.slice(0, 4).map((it) => it.id);
-		const srs = { ...passed(ids.slice(0, 3)), ...passed(ids.slice(3), ['listening']) };
-		expect(stageProgress(ears, data('he', { srs }))).toMatchObject({ total: 4, learned: 1 });
-		expect(stageProgress(ears, data('he')).total).toBe(0);
+	it('measures skills over the path’s own words', () => {
+		const d0 = data('he');
+		const b = pathState('he', d0, 'beginner');
+		const ears = b.stages.find((s) => s.id === 'ears')!;
+		const inPath = b.itemIds.slice(0, 3);
+		const outside = d0.items.find((it) => it.level === 'A2' && !b.itemIds.includes(it.id))!.id;
+		const srs = { ...passed(inPath.slice(0, 2)), ...passed(inPath.slice(2), ['listening']), ...passed([outside], ['listening']) };
+		const s = pathState('he', data('he', { srs }), 'beginner');
+		expect(s.progress[s.stages.indexOf(ears)]).toMatchObject({ total: 3, learned: 1 });
+		expect(stageProgress(ears, data('he', { srs }))).toMatchObject({ total: 4, learned: 2 }); // unscoped
 	});
 });
 
 describe('pathState', () => {
 	it('puts you on the first unfinished stage', () => {
-		expect(pathState('ja', data('ja')).current).toBe(0);
-		const kana = pathFor('ja')[0].entries!.map((e, i) => ({ ...seedItems(0)[0], id: `k${i}`, language: 'ja' as const, target: e.target }));
+		expect(pathState('ja', data('ja'), 'beginner').current).toBe(0);
+		const kana = pathFor('ja', 'beginner').stages[0].entries!.map((e, i) => ({ ...seedItems(0)[0], id: `k${i}`, language: 'ja' as const, target: e.target }));
 		const d = data('ja', { items: [...data('ja').items, ...kana], srs: passed(kana.map((k) => k.id)) });
-		const s = pathState('ja', d);
+		const s = pathState('ja', d, 'beginner');
 		expect(s).toMatchObject({ current: 1, doneCount: 1 });
-		expect(s.countable).toBe(pathFor('ja').length - 1);
+		expect(s.countable).toBe(pathFor('ja', 'beginner').stages.length - 1);
+		expect(s.itemIds).toEqual(expect.arrayContaining(kana.map((k) => k.id)));
+	});
+	it('suggests the Refresher once the Beginner path is done', () => {
+		expect(suggestedPath('ko', data('ko'))).toBe('beginner');
+		const d0 = data('ko');
+		const b = pathFor('ko', 'beginner');
+		// Make every beginner item exist and pass every skill, and read every A1 text.
+		const created: LearningItem[] = b.stages.flatMap((st) =>
+			(st.entries ?? []).map((e, i) => ({ ...seedItems(0)[0], id: `${st.id}-${i}`, language: 'ko' as const, target: e.target }))
+		);
+		const items = [...d0.items, ...created];
+		const srs = passed(items.map((it) => it.id), ['listening', 'recall']);
+		const reads = Object.fromEntries(d0.passages.map((p) => [p.id, 1]));
+		expect(suggestedPath('ko', { ...d0, items, srs, reads })).toBe('refresher');
 	});
 	it('previews a stage', () => {
-		expect(stagePreview(pathFor('he')[0], data('he'), 3)).toEqual(['א', 'ב', 'ג']);
-		expect(stagePreview(pathFor('ko').find((s) => s.id === 'read1')!, data('ko'))).toHaveLength(4);
+		expect(stagePreview(pathFor('he', 'beginner').stages[0], data('he'), 3)).toEqual(['א', 'ב', 'ג']);
+		expect(stagePreview(stage('ko', 'beginner', 'read1'), data('ko'))).toHaveLength(4);
 	});
 });
 

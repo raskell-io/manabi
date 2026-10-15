@@ -308,6 +308,8 @@ export interface ManabiSettings {
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
 	theme: 'system' | 'light' | 'dark';
+	/** The learning path picked per language ('beginner' | 'refresher'); unset = suggested. */
+	pathChoice: Partial<Record<Language, string>>;
 	[key: string]: unknown;
 }
 
@@ -325,7 +327,8 @@ export function defaultSettings(): ManabiSettings {
 		asrScoring: true,
 		hideHebrewVowels: false,
 		gradeButtons: true,
-		theme: 'light'
+		theme: 'light',
+		pathChoice: {}
 	};
 }
 
