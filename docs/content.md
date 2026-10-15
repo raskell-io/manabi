@@ -114,6 +114,7 @@ All of these create published `LearningItem`s, which `buildQueue` then schedules
 | Task | How |
 | --- | --- |
 | Add a few curated items/passages | Edit `seed.ts`, add new stable ids, ship. |
+| Add place or people names | Edit `names-data.ts` by hand (same five sections per language), run the tests. |
 | Add Hebrew roots or root words | Edit `roots-data.ts` by hand (vowelled; seed words spelled exactly as in the seed), run the tests. |
 | Refresh kanji/hanzi tables | `node tools/gen-scripts-data.mjs`, commit `scripts-data.ts`. |
 | Refresh HSK/JLPT word lists | `node tools/gen-vocab-data.mjs`, commit `static/wordlists/`. |
@@ -144,6 +145,14 @@ one root per spelling, and that a word which is also a seed item is spelled exac
 adding it from `/roots` never creates a near-duplicate. `splitByRoot` highlights the root letters in a
 word (longest in-order match, allowing final ה → י and initial י → ו, ignoring a feminine final ה); no
 data tool is needed. Not native-proofread yet.
+
+### Names — `src/lib/names-data.ts` (hand-curated)
+
+Per language, five sections: countries, places where the language is spoken, world cities, family names
+and given names (each given name marked male / female / both), with an optional literal meaning
+(`北京` “northern capital”). Readings follow the seed: pinyin, kana + romaji, Revised Romanization,
+transliterated vowelled Hebrew. Added items are tagged `name`, `place`/`person` and `names-<section>`,
+and their meaning says the kind of name (“Wang (family name)”). `names.test.ts` checks the conventions.
 
 ### Stroke order — `tools/gen-stroke-data.mjs`
 

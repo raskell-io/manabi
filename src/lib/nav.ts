@@ -19,7 +19,8 @@ import {
 	Layers,
 	Sparkles,
 	Puzzle,
-	Sprout
+	Sprout,
+	Globe
 } from 'lucide-svelte';
 
 export interface NavItem {
@@ -37,6 +38,7 @@ export const LIBRARY: NavItem[] = [
 	{ href: '/scripts', label: 'Scripts', icon: Table2, description: 'Kana, kanji, hanzi, Hangul and the alef-bet — tap a glyph to study it.' },
 	{ href: '/radicals', label: 'Radicals', icon: Puzzle, description: 'The 214 building blocks of hanzi and kanji, and the characters built on each.' },
 	{ href: '/roots', label: 'Roots', icon: Sprout, description: 'Hebrew three-letter roots and the families of words that grow from them.' },
+	{ href: '/names', label: 'Names', icon: Globe, description: 'Countries, cities and people’s names — with readings and what they literally mean.' },
 	{ href: '/vocab', label: 'Vocab', icon: BookA, description: 'Full HSK and JLPT word lists, by level.' },
 	{ href: '/items', label: 'Items', icon: Library, description: 'Everything you are studying. Search, edit, review a selection.' },
 	{ href: '/lessons', label: 'Lessons', icon: Layers, description: 'Your own bundles of items, each reviewable on its own.' },
