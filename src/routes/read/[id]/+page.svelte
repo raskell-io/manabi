@@ -146,8 +146,8 @@
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.4rem 0.8rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text-muted);
 		font-size: 0.85rem;
@@ -176,8 +176,8 @@
 		font-weight: 600;
 	}
 	.bubble {
-		border: 1px solid var(--color-border);
-		border-radius: 0.65rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.9rem;
 		padding: 0.7rem 0.9rem;
 		background: var(--color-bg-secondary);
 	}
@@ -217,8 +217,8 @@
 	.study {
 		width: 2.25rem;
 		height: 2.25rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg);
 		color: var(--color-accent);
 		display: inline-flex;

@@ -38,7 +38,7 @@ src/lib/
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
   sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO)
-  components/ ScriptText · AudioButton · Recorder · ExerciseRunner
+  components/ ScriptText · AudioButton · Recorder · ExerciseRunner · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep) · Confetti
 src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
@@ -65,6 +65,10 @@ src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read 
 ## Conventions
 - Svelte 5 runes (`$state`, `$derived`, `$props`, `$effect`). SPA: `ssr=false` in
   root `+layout.ts`; dynamic routes use the 404.html fallback.
+- Look & feel: white light theme is the default (`theme: 'light'`), deep-indigo dark theme; all colours are
+  CSS vars in `app.css` (+ `--color-pink/sun/sky`, `--edge`). Chunky 3D controls via the global `.btn3d`
+  (`.success/.danger/.ghost`) — 2px borders, 4px bottom edge. Font: Nunito (self-hosted via @fontsource).
+  Don't name scoped classes after Tailwind utilities (`ring`, `shadow`, …) — Tailwind generates them.
 - Script text always rendered via `ScriptText` (sets `dir`/`lang` — RTL for Hebrew).
 - Optional fields (`transliteration`, `audioRef`) may be absent; never write `undefined`.
 - In `.svelte` `<script lang="ts">`, never declare optional *function parameters*

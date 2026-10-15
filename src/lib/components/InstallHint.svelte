@@ -56,7 +56,7 @@
 		align-items: center;
 		gap: 0.55rem;
 		padding: 0.3rem 0.4rem 0.3rem 0.7rem;
-		border: 1px solid var(--color-border);
+		border: 2px solid var(--color-border);
 		border-radius: 999px;
 		background: var(--color-bg-elevated);
 		color: var(--color-text);

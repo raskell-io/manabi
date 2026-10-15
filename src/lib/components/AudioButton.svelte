@@ -11,7 +11,8 @@
 		language,
 		audioRef = undefined,
 		itemId = undefined,
-		label = 'Play'
+		label = 'Play',
+		big = false
 	}: {
 		text: string;
 		language: Language;
@@ -20,6 +21,8 @@
 		/** When set, a freshly synthesized clip is persisted back onto the item. */
 		itemId?: string;
 		label?: string;
+		/** The large speaker button used as an exercise prompt. */
+		big?: boolean;
 	} = $props();
 
 	let busy = $state(false);
@@ -70,11 +73,11 @@
 	}
 </script>
 
-<button class="audio-btn" onclick={play} disabled={busy || !available} title={error || label} aria-label={label}>
+<button class="audio-btn" class:big class:busy onclick={play} disabled={busy || !available} title={error || label} aria-label={label}>
 	{#if busy}
-		<Loader2 size={18} class="spin" />
+		<Loader2 size={big ? 34 : 18} class="spin" />
 	{:else}
-		<Volume2 size={18} />
+		<Volume2 size={big ? 34 : 18} strokeWidth={big ? 2.6 : 2.2} />
 	{/if}
 </button>
 
@@ -83,15 +86,45 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
-		color: var(--color-accent);
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.8rem;
+		border: 2px solid var(--color-border);
+		border-bottom-width: 4px;
+		background: var(--color-bg);
+		color: var(--color-sky);
+		transition: transform 0.08s ease;
 	}
 	.audio-btn:hover:not(:disabled) {
-		border-color: var(--color-accent);
+		border-color: color-mix(in srgb, var(--color-sky) 55%, var(--color-border));
+	}
+	.audio-btn:active:not(:disabled) {
+		transform: translateY(2px);
+		border-bottom-width: 2px;
+		margin-top: 2px;
+	}
+	/* Big: the Duolingo-style blue speaker that *is* the listening prompt. */
+	.audio-btn.big {
+		width: 5.5rem;
+		height: 5.5rem;
+		border-radius: 1.4rem;
+		border: none;
+		background: var(--color-sky);
+		color: #fff;
+		box-shadow: 0 5px 0 color-mix(in srgb, var(--color-sky) 68%, #000);
+	}
+	.audio-btn.big:active:not(:disabled) {
+		transform: translateY(5px);
+		box-shadow: none;
+		margin-top: 0;
+	}
+	.audio-btn.big.busy {
+		animation: pulse 1s ease-in-out infinite;
+	}
+	@keyframes pulse {
+		50% {
+			transform: scale(1.06);
+		}
 	}
 	.audio-btn:disabled {
 		opacity: 0.4;

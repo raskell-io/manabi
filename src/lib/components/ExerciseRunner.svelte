@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Check, X } from 'lucide-svelte';
 	import AudioButton from './AudioButton.svelte';
+	import Mascot from './Mascot.svelte';
 	import Recorder from './Recorder.svelte';
 	import ScriptText from './ScriptText.svelte';
 	import { settings } from '$lib/db/store';
@@ -26,7 +27,8 @@
 		onComplete: (result: CompleteResult) => void;
 	} = $props();
 
-	let selected = $state<Choice | null>(null);
+	let selected = $state.raw<Choice | null>(null); // raw: compared by identity against `exercise.choices`
+	let cheer = $state('');
 	const answered = $derived(selected !== null);
 
 	// Respect the Hebrew "hide vowels" setting in text we render by hand (ScriptText
@@ -59,9 +61,14 @@
 		if (autoPlay) void playPrerecorded(item.language, item.target);
 	});
 
+	const PRAISE = ['Nice!', 'Great job!', 'Awesome!', 'You got it!', 'Excellent!', 'Spot on!', 'Perfect!'];
+	const COMFORT = ['Not quite', 'Almost!', 'So close', 'Keep going'];
+	const pick = (xs: string[]) => xs[Math.floor(Math.random() * xs.length)];
+
 	function choose(c: Choice) {
 		if (answered) return;
 		selected = c;
+		cheer = c.correct ? pick(PRAISE) : pick(COMFORT);
 		if (c.correct) {
 			playCorrect();
 			tapCorrect();
@@ -149,7 +156,7 @@
 			<div class="big-meaning">{exercise.promptMeaning}</div>
 		{:else if exercise.promptMode === 'audio'}
 			<div class="audio-prompt">
-				<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play audio" />
+				<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play audio" big />
 				<span class="hint">Tap to listen</span>
 			</div>
 		{:else if exercise.promptMode === 'cloze'}
@@ -195,38 +202,44 @@
 		</div>
 
 		{#if answered}
-			<div class="grade">
-				{#if selected?.correct}
-					<p class="feedback ok">Correct</p>
-				{:else}
-					<p class="feedback no">
-						Answer: <ScriptText text={exercise.answer} language={exercise.language} size="sm" />
-					</p>
-				{/if}
-
-				<!-- Listening: confirm what the word was by revealing its reading + meaning. -->
-				{#if exercise.type === 'audio-to-word'}
-					<p class="reveal">
-						{#if item.reading}<span class="reveal-reading">{item.reading}</span>{/if}
-						<span class="reveal-meaning">{item.meaning}</span>
-					</p>
-				{/if}
+			<div class="grade" class:ok={selected?.correct} class:no={!selected?.correct}>
+				<div class="fb-head">
+					<Mascot size={76} mood={selected?.correct ? 'cheer' : 'sad'} />
+					<div class="fb-text">
+						<p class="feedback">
+							{#if selected?.correct}<Check size={22} strokeWidth={3.2} />{:else}<X size={22} strokeWidth={3.2} />{/if}
+							{cheer}
+						</p>
+						{#if !selected?.correct}
+							<p class="answer-line">
+								Answer: <ScriptText text={exercise.answer} language={exercise.language} size="sm" />
+							</p>
+						{/if}
+						<!-- Listening: confirm what the word was by revealing its reading + meaning. -->
+						{#if exercise.type === 'audio-to-word'}
+							<p class="reveal">
+								{#if item.reading}<span class="reveal-reading">{item.reading}</span>{/if}
+								<span class="reveal-meaning">{item.meaning}</span>
+							</p>
+						{/if}
+					</div>
+				</div>
 
 				{#if selected?.correct}
 					{#if $settings.gradeButtons}
 						<div class="grade-row">
-							<button class="g hard" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
-							<button class="g good" onclick={() => finish(4)}>Good <kbd>2</kbd></button>
-							<button class="g easy" onclick={() => finish(5)}>Easy <kbd>3</kbd></button>
+							<button class="btn3d ghost g" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
+							<button class="btn3d success g" onclick={() => finish(4)}>Good <kbd>2</kbd></button>
+							<button class="btn3d easy g" onclick={() => finish(5)}>Easy <kbd>3</kbd></button>
 						</div>
 					{:else}
 						<div class="grade-row">
-							<button class="g good" onclick={() => finish(4)}>Next <kbd>↵</kbd></button>
+							<button class="btn3d success g wide" onclick={() => finish(4)}>Continue <kbd>↵</kbd></button>
 						</div>
 					{/if}
 				{:else}
 					<div class="grade-row">
-						<button class="g again" onclick={() => finish(0)}>Continue <kbd>↵</kbd></button>
+						<button class="btn3d danger g wide" onclick={() => finish(0)}>Got it <kbd>↵</kbd></button>
 					</div>
 				{/if}
 			</div>
@@ -245,8 +258,9 @@
 		margin: 0 auto;
 	}
 	.instruction {
-		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		align-self: flex-start;
+		font-size: 1.35rem;
+		font-weight: 900;
 		margin: 0;
 	}
 	.prompt {
@@ -263,7 +277,7 @@
 	.big-reading,
 	.big-meaning {
 		font-size: 2rem;
-		font-weight: 600;
+		font-weight: 800;
 	}
 	.audio-prompt {
 		display: flex;
@@ -285,52 +299,79 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.2rem;
 		align-items: flex-start;
-		padding: 0.85rem 1rem;
-		border-radius: 0.65rem;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
+		justify-content: center;
+		padding: 0.9rem 1.1rem;
+		border-radius: var(--radius);
+		border: 2px solid var(--color-border);
+		border-bottom-width: 4px;
+		background: var(--color-bg);
 		color: var(--color-text);
 		text-align: left;
-		min-height: 3.5rem;
+		min-height: 4rem;
+		font-weight: 700;
+		transition:
+			transform 0.08s ease,
+			border-color 0.15s ease,
+			background 0.15s ease;
+		-webkit-tap-highlight-color: transparent;
 	}
 	.choice:hover:not(:disabled) {
-		border-color: var(--color-accent);
+		border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg));
+	}
+	.choice:active:not(:disabled) {
+		transform: translateY(2px);
+		border-bottom-width: 2px;
+		margin-top: 2px;
+	}
+	.choice:disabled {
+		cursor: default;
 	}
 	.choice.correct {
 		border-color: var(--color-success);
-		background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-secondary));
+		background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg));
+		color: color-mix(in srgb, var(--color-success) 70%, var(--color-text));
+		animation: pop-in 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
 	}
 	.choice.wrong {
 		border-color: var(--color-danger);
-		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-bg-secondary));
+		background: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg));
+		color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text));
+		animation: shake 0.4s ease;
+	}
+	.choices:has(.correct) .choice:not(.correct):not(.wrong) {
+		opacity: 0.55;
 	}
 	.choice-main {
-		font-size: 1.05rem;
+		font-size: 1.1rem;
 	}
 	.choice-sub {
 		color: var(--color-text-muted);
 		font-size: 0.85rem;
+		font-weight: 600;
 	}
 	.choice .kbd {
 		position: absolute;
-		top: 0.5rem;
-		right: 0.5rem;
+		top: 0.45rem;
+		right: 0.55rem;
 		font-size: 0.7rem;
+		font-weight: 800;
 		color: var(--color-text-muted);
-		border: 1px solid var(--color-border);
-		border-radius: 0.3rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.4rem;
 		padding: 0 0.3rem;
 		line-height: 1.3;
 	}
 	.g kbd {
-		font-size: 0.7rem;
-		opacity: 0.6;
-		border: 1px solid currentColor;
-		border-radius: 0.25rem;
+		font-family: inherit;
+		font-size: 0.68rem;
+		opacity: 0.7;
+		border: 1.5px solid currentColor;
+		border-radius: 0.3rem;
 		padding: 0 0.25rem;
-		margin-left: 0.15rem;
+		margin-left: 0.2rem;
 	}
 	:global(.choice .ic) {
 		position: absolute;
@@ -343,36 +384,76 @@
 	:global(.choice .ic.no) {
 		color: var(--color-danger);
 	}
+
+	/* Feedback banner (sticks to the bottom of long cards). */
 	.grade {
-		text-align: center;
+		--fb: var(--color-success);
+		position: sticky;
+		bottom: 0.75rem;
 		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+		padding: 0.9rem 1rem 1rem;
+		border-radius: 1.25rem;
+		background: color-mix(in srgb, var(--fb) 13%, var(--color-bg));
+		border: 2px solid color-mix(in srgb, var(--fb) 35%, var(--color-bg));
+		animation: slide-up 0.3s cubic-bezier(0.3, 1.3, 0.5, 1);
+		z-index: 2;
+	}
+	.grade.no {
+		--fb: var(--color-danger);
+	}
+	@keyframes slide-up {
+		from {
+			transform: translateY(24px);
+			opacity: 0;
+		}
+	}
+	.fb-head {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-align: left;
+	}
+	.fb-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-width: 0;
 	}
 	.feedback {
-		font-weight: 600;
+		margin: 0;
 		display: flex;
-		gap: 0.4rem;
-		justify-content: center;
+		gap: 0.35rem;
 		align-items: center;
+		font-size: 1.35rem;
+		font-weight: 900;
+		color: var(--fb);
 	}
-	.feedback.ok {
-		color: var(--color-success);
-	}
-	.feedback.no {
-		color: var(--color-danger);
+	.answer-line {
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: baseline;
+		font-weight: 800;
+		color: var(--fb);
 	}
 	.reveal {
 		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-		align-items: center;
-		margin: 0.6rem 0 0;
+		flex-wrap: wrap;
+		gap: 0.1rem 0.6rem;
+		align-items: baseline;
+		margin: 0;
 	}
 	.reveal-reading {
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
+		font-weight: 700;
 	}
 	.reveal-meaning {
-		font-weight: 600;
+		font-weight: 800;
 		font-size: 1.05rem;
 	}
 	.cloze-sentence {
@@ -396,29 +477,22 @@
 	}
 	.grade-row {
 		display: flex;
-		gap: 0.75rem;
-		justify-content: center;
-		margin-top: 0.5rem;
+		gap: 0.6rem;
+		justify-content: stretch;
 	}
 	.g {
-		padding: 0.6rem 1.5rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
-		color: var(--color-text);
-		font-weight: 600;
+		flex: 1;
+		padding: 0.75rem 0.5rem;
 	}
-	.g.hard:hover {
-		border-color: var(--color-warning);
-		color: var(--color-warning);
+	.g.easy {
+		--b: var(--color-sky);
 	}
-	.g.good:hover,
-	.g.again:hover {
-		border-color: var(--color-accent);
-		color: var(--color-accent);
-	}
-	.g.easy:hover {
-		border-color: var(--color-success);
-		color: var(--color-success);
+	@media (max-width: 520px) {
+		.choices {
+			gap: 0.6rem;
+		}
+		.choice {
+			padding: 0.8rem 0.9rem;
+		}
 	}
 </style>

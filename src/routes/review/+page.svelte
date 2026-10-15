@@ -3,7 +3,9 @@
 	import { fly } from 'svelte/transition';
 	import { get } from 'svelte/store';
 	import { page } from '$app/stores';
-	import { X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter, RotateCcw } from 'lucide-svelte';
+	import { X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter, RotateCcw, Flame, Target, Timer, Zap } from 'lucide-svelte';
+	import Mascot from '$lib/components/Mascot.svelte';
+	import Confetti from '$lib/components/Confetti.svelte';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
@@ -47,6 +49,9 @@
 	let correct = $state(0);
 	let wrong = $state(0);
 	let done = $state(false);
+	// Consecutive correct answers (shown as a flame once it reaches 3).
+	let combo = $state(0);
+	let bestCombo = $state(0);
 
 	// What happened in this session, for the summary screen.
 	type Result = { dimension: Dimension; itemId: string; correct: boolean | null };
@@ -141,6 +146,8 @@
 		index = 0;
 		correct = 0;
 		wrong = 0;
+		combo = 0;
+		bestCombo = 0;
 		results = [];
 		sessionStart = Date.now();
 		elapsedMs = 0;
@@ -208,6 +215,9 @@
 
 	function onComplete(result: CompleteResult) {
 		if (!current || !item || !exercise) return;
+		const ok = result.kind === 'mcq' ? result.quality >= 3 : result.rating !== 'bad';
+		combo = ok ? combo + 1 : 0;
+		bestCombo = Math.max(bestCombo, combo);
 		results = [
 			...results,
 			{
@@ -238,7 +248,13 @@
 
 {#if !started}
 	<div class="picker">
-		<h1>Review</h1>
+		<div class="picker-head">
+			<Mascot size={72} mood={everythingCount === 0 ? 'sleep' : 'happy'} />
+			<div>
+				<h1>Review</h1>
+				<p class="muted sub">{everythingCount === 0 ? 'Nothing waiting right now.' : 'Pick a way to practice.'}</p>
+			</div>
+		</div>
 		{#if scope}
 			<p class="scope">
 				{#if scope.kind === 'lesson'}<LayoutGrid size={14} />{:else}<ListFilter size={14} />{/if}
@@ -258,28 +274,27 @@
 			<p class="muted">Nothing to practice yet. Add items in <a href="/items">Items</a>, browse
 				<a href="/vocab">Vocab</a>, or generate a batch in the <a href="/workbench">Workbench</a>.</p>
 		{:else}
-			<p class="muted">What do you want to practice?</p>
 			<div class="modes">
-				<button class="mode-card" onclick={() => start('reading')} disabled={readingCount === 0}>
-					<BookOpen size={22} />
+				<button class="mode-card" data-mode="reading" onclick={() => start('reading')} disabled={readingCount === 0}>
+					<span class="m-ic"><BookOpen size={24} strokeWidth={2.4} /></span>
 					<span class="m-title">Reading</span>
 					<span class="m-desc">Recognition, recall &amp; context — text only.</span>
 					<span class="m-count">{readingCount} {readingCount === 1 ? 'card' : 'cards'}</span>
 				</button>
-				<button class="mode-card" onclick={() => start('listening')} disabled={listeningCount === 0}>
-					<Headphones size={22} />
+				<button class="mode-card" data-mode="listening" onclick={() => start('listening')} disabled={listeningCount === 0}>
+					<span class="m-ic"><Headphones size={24} strokeWidth={2.4} /></span>
 					<span class="m-title">Listening</span>
 					<span class="m-desc">Hear the word and choose it. New and weakest words first.</span>
 					<span class="m-count">{countLabel(listeningCount, listening.total)}</span>
 				</button>
-				<button class="mode-card" onclick={() => start('speaking')} disabled={speakingCount === 0}>
-					<Mic size={22} />
+				<button class="mode-card" data-mode="speaking" onclick={() => start('speaking')} disabled={speakingCount === 0}>
+					<span class="m-ic"><Mic size={24} strokeWidth={2.4} /></span>
 					<span class="m-title">Speaking</span>
 					<span class="m-desc">Record &amp; compare your pronunciation. New and lowest-scoring words first.</span>
 					<span class="m-count">{countLabel(speakingCount, speaking.total)}</span>
 				</button>
-				<button class="mode-card" onclick={() => start('everything')} disabled={everythingCount === 0}>
-					<Layers size={22} />
+				<button class="mode-card" data-mode="everything" onclick={() => start('everything')} disabled={everythingCount === 0}>
+					<span class="m-ic"><Layers size={24} strokeWidth={2.4} /></span>
 					<span class="m-title">Everything</span>
 					<span class="m-desc">All of the above that's due.</span>
 					<span class="m-count">{everythingCount} {everythingCount === 1 ? 'card' : 'cards'}</span>
@@ -289,15 +304,24 @@
 	</div>
 {:else if done}
 	<div class="summary">
-		<h1>{results.length === 0 ? 'Nothing to do' : 'Session complete'}</h1>
+		{#if results.length > 0}<Confetti />{/if}
+		<div class="sum-mascot">
+			<Mascot
+				size={120}
+				mood={results.length === 0 ? 'sleep' : accuracy === null || accuracy >= 60 ? 'cheer' : 'happy'}
+			/>
+		</div>
+		<h1>
+			{#if results.length === 0}Nothing to do{:else if accuracy !== null && accuracy >= 90}Amazing work!{:else if accuracy !== null && accuracy < 60}Good effort!{:else}Session complete!{/if}
+		</h1>
 		{#if scope}<p class="muted scope-line">{scope.title}</p>{/if}
 		{#if results.length === 0}
 			<p class="muted">Nothing was due for this mode.</p>
 		{:else}
 			<div class="sum-grid">
-				<div class="sum"><span class="num">{results.length}</span><span class="lbl">{results.length === 1 ? 'card' : 'cards'}</span></div>
-				<div class="sum"><span class="num">{accuracy === null ? '—' : `${accuracy}%`}</span><span class="lbl">accuracy</span></div>
-				<div class="sum"><span class="num">{formatDuration(elapsedMs)}</span><span class="lbl">time</span></div>
+				<div class="sum s-cards"><span class="lbl"><Zap size={13} strokeWidth={3} /> {results.length === 1 ? 'card' : 'cards'}</span><span class="num">{results.length}</span></div>
+				<div class="sum s-acc"><span class="lbl"><Target size={13} strokeWidth={3} /> accuracy</span><span class="num">{accuracy === null ? '—' : `${accuracy}%`}</span></div>
+				<div class="sum s-time"><span class="lbl"><Timer size={13} strokeWidth={3} /> time</span><span class="num">{formatDuration(elapsedMs)}</span></div>
 			</div>
 			<ul class="skills">
 				{#each bySkill as s (s.dim)}
@@ -309,6 +333,9 @@
 					</li>
 				{/each}
 			</ul>
+			{#if bestCombo >= 3}
+				<p class="best-combo"><Flame size={16} /> Best run: {bestCombo} in a row</p>
+			{/if}
 		{/if}
 
 		<section class="nextup">
@@ -332,16 +359,21 @@
 		</section>
 
 		<div class="actions">
-			<a class="btn primary" href={scope?.kind === 'lesson' ? '/lessons' : scope ? '/dashboard' : '/'}>Done</a>
-			<button class="btn" onclick={backToModes}>Choose mode</button>
+			<button class="btn3d ghost" onclick={backToModes}>Choose mode</button>
+			<a class="btn3d" href={scope?.kind === 'lesson' ? '/lessons' : scope ? '/dashboard' : '/'}>Done</a>
 		</div>
 	</div>
 {:else if current && item && exercise}
 	<div class="session-head">
 		<button class="quit" onclick={backToModes} aria-label="Quit session" title="Quit session"><X size={18} /></button>
 		<div class="progress">
-			<div class="bar" style="width: {(index / tasks.length) * 100}%"></div>
+			<div class="bar" style="width: {Math.max(4, (index / tasks.length) * 100)}%"></div>
 		</div>
+		{#if combo >= 3}
+			{#key combo}
+				<span class="combo" title="{combo} correct in a row"><Flame size={18} strokeWidth={2.6} />{combo}</span>
+			{/key}
+		{/if}
 	</div>
 	<div class="meta">
 		<span>{index + 1} / {tasks.length}</span>
@@ -371,29 +403,50 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 2rem;
-		height: 2rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
+		width: 2.2rem;
+		height: 2.2rem;
+		border-radius: 0.7rem;
+		border: none;
+		background: transparent;
 		color: var(--color-text-muted);
 		flex-shrink: 0;
 	}
 	.quit:hover {
 		color: var(--color-text);
-		border-color: var(--color-text-muted);
+		background: var(--color-bg-elevated);
 	}
 	.progress {
 		flex: 1;
-		height: 6px;
+		height: 16px;
 		background: var(--color-bg-elevated);
 		border-radius: 999px;
 		overflow: hidden;
 	}
 	.bar {
+		position: relative;
 		height: 100%;
-		background: var(--color-accent);
-		transition: width 0.25s ease;
+		border-radius: 999px;
+		background: var(--color-success);
+		transition: width 0.45s cubic-bezier(0.3, 1.3, 0.5, 1);
+	}
+	.bar::after {
+		/* the glossy highlight stripe */
+		content: '';
+		position: absolute;
+		left: 8px;
+		right: 8px;
+		top: 4px;
+		height: 4px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.35);
+	}
+	.combo {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.15rem;
+		font-weight: 900;
+		color: var(--color-warning);
+		animation: pop-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
 	}
 	.meta {
 		display: flex;
@@ -424,11 +477,25 @@
 	.summary {
 		text-align: center;
 		max-width: 28rem;
-		margin: 4rem auto 0;
+		margin: 1.5rem auto 0;
+	}
+	.sum-mascot {
+		display: flex;
+		justify-content: center;
+		animation: pop-in 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both;
 	}
 	.summary h1 {
-		font-size: 1.6rem;
-		margin-bottom: 0.25rem;
+		font-size: 1.9rem;
+		margin: 0.5rem 0 0.25rem;
+		color: var(--color-accent);
+	}
+	.best-combo {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin: 0 0 1.25rem;
+		color: var(--color-warning);
+		font-weight: 800;
 	}
 	.scope-line {
 		margin: 0 0 0.5rem;
@@ -440,23 +507,43 @@
 		margin: 1.25rem 0 1rem;
 	}
 	.sum {
+		--c: var(--color-accent);
 		display: flex;
 		flex-direction: column;
-		gap: 0.1rem;
-		padding: 0.8rem 0.5rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
-		background: var(--color-bg-secondary);
+		overflow: hidden;
+		border: 2px solid var(--c);
+		border-radius: var(--radius);
+		background: var(--c);
+		animation: pop-in 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
 	}
-	.sum .num {
-		font-size: 1.6rem;
-		font-weight: 700;
-		color: var(--color-accent);
-		line-height: 1.1;
+	.sum.s-acc {
+		--c: var(--color-success);
+		animation-delay: 0.1s;
+	}
+	.sum.s-time {
+		--c: var(--color-sky);
+		animation-delay: 0.2s;
 	}
 	.sum .lbl {
-		font-size: 0.78rem;
-		color: var(--color-text-muted);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0;
+		font-size: 0.7rem;
+		font-weight: 900;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #fff;
+	}
+	.sum .num {
+		padding: 0.6rem 0.25rem;
+		font-size: 1.45rem;
+		font-weight: 900;
+		color: var(--c);
+		background: var(--color-bg);
+		border-radius: calc(var(--radius) - 4px) calc(var(--radius) - 4px) calc(var(--radius) - 2px) calc(var(--radius) - 2px);
+		line-height: 1.1;
 	}
 	.skills {
 		list-style: none;
@@ -478,7 +565,7 @@
 		color: var(--color-text-muted);
 	}
 	.sk-bar {
-		height: 8px;
+		height: 10px;
 		background: var(--color-bg-elevated);
 		border-radius: 999px;
 		overflow: hidden;
@@ -515,8 +602,9 @@
 		gap: 0.4rem;
 		padding: 0.5rem 0.9rem;
 		border-radius: 999px;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
+		border: 2px solid var(--color-border);
+		border-bottom-width: 4px;
+		background: var(--color-bg);
 		color: var(--color-text);
 		font: inherit;
 		font-size: 0.9rem;
@@ -527,7 +615,7 @@
 		color: var(--color-accent);
 	}
 	.chip.warn {
-		border-color: var(--color-warning);
+		border-color: color-mix(in srgb, var(--color-warning) 60%, var(--color-bg));
 		color: var(--color-warning);
 	}
 	.muted {
@@ -539,26 +627,26 @@
 		justify-content: center;
 		margin-top: 1.5rem;
 	}
-	.btn {
-		padding: 0.6rem 1.5rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
-		color: var(--color-text);
-	}
-	.btn.primary {
-		background: var(--color-accent);
-		color: #fff;
-		border-color: var(--color-accent);
-		font: inherit;
-		cursor: pointer;
+	.actions .btn3d {
+		flex: 1;
 	}
 
 	/* Mode picker */
 	.picker {
 		max-width: 44rem;
 	}
+	.picker-head {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		margin-bottom: 0.5rem;
+	}
 	.picker h1 {
-		margin: 0 0 0.25rem;
+		margin: 0;
+	}
+	.picker .sub {
+		margin: 0.1rem 0 0;
+		font-weight: 700;
 	}
 	.picker .muted a {
 		color: var(--color-accent);
@@ -570,7 +658,7 @@
 		gap: 0.5rem;
 		margin: 0.25rem 0 0.75rem;
 		padding: 0.4rem 0.8rem;
-		border: 1px solid var(--color-border);
+		border: 2px solid var(--color-border);
 		border-radius: 999px;
 		background: var(--color-bg-secondary);
 		color: var(--color-text-muted);
@@ -589,29 +677,64 @@
 		margin-top: 1.5rem;
 	}
 	.mode-card {
+		--c: var(--color-accent);
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		gap: 0.4rem;
-		padding: 1.25rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
-		background: var(--color-bg-secondary);
+		gap: 0.35rem;
+		padding: 1.15rem 1.25rem 1.25rem;
+		border: 2px solid var(--color-border);
+		border-bottom-width: 5px;
+		border-radius: 1.25rem;
+		background: var(--color-bg);
 		color: var(--color-text);
 		text-align: left;
+		transition:
+			transform 0.08s ease,
+			border-color 0.15s ease,
+			background 0.15s ease;
+	}
+	.mode-card[data-mode='listening'] {
+		--c: var(--color-sky);
+	}
+	.mode-card[data-mode='speaking'] {
+		--c: var(--color-pink);
+	}
+	.mode-card[data-mode='everything'] {
+		--c: var(--color-warning);
 	}
 	.mode-card:hover:not(:disabled) {
-		border-color: var(--color-accent);
-		color: var(--color-accent);
+		border-color: color-mix(in srgb, var(--c) 55%, var(--color-border));
+		background: color-mix(in srgb, var(--c) 5%, var(--color-bg));
+	}
+	.mode-card:hover:not(:disabled) .m-ic {
+		transform: rotate(-8deg) scale(1.08);
+	}
+	.mode-card:active:not(:disabled) {
+		transform: translateY(3px);
+		border-bottom-width: 2px;
+		margin-top: 3px;
+	}
+	.m-ic {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		height: 3rem;
+		border-radius: 0.9rem;
+		background: var(--c);
+		color: #fff;
+		box-shadow: 0 3px 0 color-mix(in srgb, var(--c) 68%, #000);
+		margin-bottom: 0.3rem;
+		transition: transform 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
 	}
 	.mode-card:disabled {
 		opacity: 0.45;
 		cursor: not-allowed;
 	}
 	.m-title {
-		font-weight: 700;
-		font-size: 1.05rem;
-		margin-top: 0.25rem;
+		font-weight: 900;
+		font-size: 1.15rem;
 	}
 	.m-desc {
 		color: var(--color-text-muted);
@@ -619,8 +742,11 @@
 	}
 	.m-count {
 		margin-top: 0.4rem;
-		font-size: 0.8rem;
-		color: var(--color-accent);
-		font-weight: 600;
+		padding: 0.15rem 0.6rem;
+		border-radius: 999px;
+		font-size: 0.78rem;
+		font-weight: 900;
+		color: var(--c);
+		background: color-mix(in srgb, var(--c) 13%, transparent);
 	}
 </style>

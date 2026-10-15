@@ -74,8 +74,8 @@
 		gap: 1rem;
 	}
 	.card {
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
 		padding: 1rem 1.1rem;
 		background: var(--color-bg-secondary);
 		display: flex;

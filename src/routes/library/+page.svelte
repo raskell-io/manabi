@@ -17,6 +17,15 @@
 		if (href === '/workbench') return pendingDrafts ? `${pendingDrafts} to review` : '';
 		return '';
 	}
+
+	// Each tool gets its own colour, like a set of crayons.
+	const TINT: Record<string, string> = {
+		'/scripts': 'var(--color-accent)',
+		'/vocab': 'var(--color-sky)',
+		'/items': 'var(--color-success)',
+		'/lessons': 'var(--color-warning)',
+		'/workbench': 'var(--color-pink)'
+	};
 </script>
 
 <h1>Library</h1>
@@ -25,8 +34,8 @@
 <section class="cards">
 	{#each LIBRARY as item (item.href)}
 		{@const b = badge(item.href)}
-		<a class="card" href={item.href}>
-			<span class="card-ic"><item.icon size={22} /></span>
+		<a class="card" href={item.href} style="--c: {TINT[item.href] ?? 'var(--color-accent)'}">
+			<span class="card-ic"><item.icon size={24} strokeWidth={2.4} /></span>
 			<span class="card-body">
 				<span class="card-title">{item.label}{#if b}<span class="card-badge">{b}</span>{/if}</span>
 				<span class="card-desc">{item.description}</span>
@@ -46,31 +55,46 @@
 	}
 	.cards {
 		display: grid;
-		gap: 0.75rem;
+		grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+		gap: 0.85rem;
 	}
 	.card {
 		display: flex;
 		align-items: center;
-		gap: 0.9rem;
-		padding: 0.9rem 1rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.85rem;
-		background: var(--color-bg-secondary);
+		gap: 0.95rem;
+		padding: 1rem 1.05rem;
+		border: 2px solid var(--color-border);
+		border-bottom-width: 5px;
+		border-radius: 1.2rem;
+		background: var(--color-bg);
 		color: var(--color-text);
+		transition:
+			transform 0.08s ease,
+			border-color 0.15s ease;
 	}
 	.card:hover {
-		border-color: var(--color-accent);
+		border-color: color-mix(in srgb, var(--c) 50%, var(--color-border));
+	}
+	.card:hover .card-ic {
+		transform: rotate(-8deg) scale(1.08);
+	}
+	.card:active {
+		transform: translateY(3px);
+		border-bottom-width: 2px;
+		margin-top: 3px;
 	}
 	.card-ic {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 2.6rem;
-		height: 2.6rem;
-		border-radius: 0.7rem;
-		background: color-mix(in srgb, var(--color-accent) 14%, transparent);
-		color: var(--color-accent);
+		width: 3rem;
+		height: 3rem;
+		border-radius: 0.95rem;
+		background: var(--c);
+		color: #fff;
+		box-shadow: 0 3px 0 color-mix(in srgb, var(--c) 68%, #000);
 		flex-shrink: 0;
+		transition: transform 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
 	}
 	.card-body {
 		display: flex;
@@ -80,7 +104,8 @@
 		min-width: 0;
 	}
 	.card-title {
-		font-weight: 700;
+		font-weight: 900;
+		font-size: 1.05rem;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -89,10 +114,11 @@
 	.card-badge {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: var(--color-accent);
+		font-weight: 800;
+		color: var(--c);
 		padding: 0.1rem 0.5rem;
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+		background: color-mix(in srgb, var(--c) 13%, transparent);
 	}
 	.card-desc {
 		color: var(--color-text-muted);

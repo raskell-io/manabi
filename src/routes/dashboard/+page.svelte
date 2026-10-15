@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GraduationCap, Mic } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
+	import Mascot from '$lib/components/Mascot.svelte';
 	import { exerciseAttempts, getItem, pronunciationAttempts, settings, skillMemories } from '$lib/db/store';
 	import { DIMENSIONS, DIMENSION_LABELS, type Dimension } from '$lib/db/types';
 	import { scopeHref } from '$lib/srs/scope';
@@ -57,8 +58,13 @@
 	}
 </script>
 
-<h1>Progress</h1>
-<p class="muted">Accuracy by skill for {$settings.activeLanguage.toUpperCase()}, across all attempts.</p>
+<div class="head">
+	<Mascot size={64} mood="think" />
+	<div>
+		<h1>Progress</h1>
+		<p class="muted">Accuracy by skill for {$settings.activeLanguage.toUpperCase()}, across all attempts.</p>
+	</div>
+</div>
 
 <section class="dims">
 	{#each byDimension as d (d.dim)}
@@ -132,6 +138,18 @@
 </section>
 
 <style>
+	.head {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		margin-bottom: 1rem;
+	}
+	.head h1 {
+		margin: 0;
+	}
+	.head .muted {
+		margin: 0.15rem 0 0;
+	}
 	h1 {
 		margin-bottom: 0.25rem;
 	}
@@ -145,8 +163,8 @@
 		margin: 1.5rem 0 2.5rem;
 	}
 	.dim-card {
-		border: 1px solid var(--color-border);
-		border-radius: 0.65rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.9rem;
 		padding: 1rem;
 		background: var(--color-bg-secondary);
 		display: flex;
@@ -195,7 +213,7 @@
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.4rem 0.8rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		background: var(--color-accent);
 		color: #fff;
 		font-size: 0.85rem;
@@ -243,8 +261,8 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		padding: 0.6rem 0.9rem;
 		background: var(--color-bg-secondary);
 	}

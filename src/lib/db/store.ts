@@ -124,6 +124,15 @@ export const pronunciationAttempts: Readable<PronunciationAttempt[]> = derived(d
 	return Object.values($doc.pronunciationAttempts).sort((a, b) => b.at - a.at);
 });
 
+/** When anything was practiced (any language): answers and recordings. Feeds the streak. */
+export const practiceTimes: Readable<number[]> = derived(docStore, ($doc) => {
+	if (!$doc) return [];
+	return [
+		...Object.values($doc.exerciseAttempts).map((a) => a.at),
+		...Object.values($doc.pronunciationAttempts).map((a) => a.at)
+	];
+});
+
 export const skillMemories: Readable<SkillMemory[]> = derived(docStore, ($doc) => {
 	if (!$doc) return [];
 	return Object.values($doc.srsStates);

@@ -2,10 +2,12 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { Settings as SettingsIcon, Sun, Moon, Download } from 'lucide-svelte';
+	import { Settings as SettingsIcon, Sun, Moon, Download, Flame } from 'lucide-svelte';
+	import Mascot from '$lib/components/Mascot.svelte';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 	import { armInstallCapture, installPrompt, promptInstall } from '$lib/install';
-	import { initDB, settings, updateSettings } from '$lib/db/store';
+	import { initDB, practiceTimes, settings, updateSettings } from '$lib/db/store';
+	import { computeStreak } from '$lib/today';
 	import { LANGUAGES } from '$lib/db/types';
 	import { startAutoSync } from '$lib/sync';
 	import { isNavActive, LIBRARY, PRIMARY } from '$lib/nav';
@@ -14,7 +16,7 @@
 	let { children } = $props();
 	let ready = $state(false);
 
-	const THEME_COLOR = { light: '#f5f5f5', dark: '#1e1e2e' } as const;
+	const THEME_COLOR = { light: '#ffffff', dark: '#13111f' } as const;
 	function applyTheme(theme: string) {
 		const root = document.documentElement;
 		root.classList.remove('light', 'dark');
@@ -42,6 +44,7 @@
 	const langNative = $derived(LANGUAGES.find((l) => l.code === $settings.activeLanguage)?.native ?? '');
 	const sidebarPrimary = PRIMARY.filter((p) => p.href !== '/library');
 	const settingsActive = $derived(isNavActive({ href: '/settings' }, activePath));
+	const streak = $derived(computeStreak($practiceTimes));
 
 	onMount(async () => {
 		await initDB();
@@ -59,13 +62,19 @@
 </script>
 
 {#if !ready}
-	<div class="boot">Loading Manabi…</div>
+	<div class="boot">
+		<Mascot size={110} mood="happy" />
+		<span class="wordmark">manabi</span>
+	</div>
 {:else}
 	<div class="app" class:immersive={$immersive}>
-		<!-- Phone top bar: brand, active language, settings. -->
+		<!-- Phone top bar: brand, active language, streak, settings. -->
 		<header class="topbar">
-			<a href="/" class="tb-brand"><span class="logo">学</span><span class="name">Manabi</span></a>
+			<a href="/" class="tb-brand"><Mascot size={34} /><span class="wordmark">manabi</span></a>
 			<a href="/" class="lang-chip" title="Switch language">{langNative}</a>
+			<span class="streak" class:lit={streak.today} title="{streak.days}-day streak">
+				<Flame size={18} />{streak.days}
+			</span>
 			<a href="/settings" class="icon-btn" class:active={settingsActive} aria-label="Settings">
 				<SettingsIcon size={20} />
 			</a>
@@ -74,15 +83,15 @@
 		<div class="shell">
 			<!-- Desktop sidebar -->
 			<aside class="sidebar">
-				<div class="brand">
-					<span class="logo">学</span>
-					<span class="name">Manabi</span>
-				</div>
+				<a href="/" class="brand">
+					<Mascot size={46} />
+					<span class="wordmark">manabi</span>
+				</a>
 
 				<nav class="side-nav" aria-label="Main">
 					{#each sidebarPrimary as item (item.href)}
 						<a href={item.href} class="nav-link" class:active={isNavActive(item, activePath)}>
-							<item.icon size={18} />
+							<span class="nl-ic"><item.icon size={20} /></span>
 							<span>{item.label}</span>
 						</a>
 					{/each}
@@ -90,21 +99,25 @@
 					<a href="/library" class="nav-head" class:active={activePath === '/library'}>Library</a>
 					{#each LIBRARY as item (item.href)}
 						<a href={item.href} class="nav-link sub" class:active={isNavActive(item, activePath)}>
-							<item.icon size={16} />
+							<span class="nl-ic"><item.icon size={18} /></span>
 							<span>{item.label}</span>
 						</a>
 					{/each}
 				</nav>
 
 				<div class="side-foot">
+					<div class="side-streak" class:lit={streak.today}>
+						<Flame size={20} />
+						<span><strong>{streak.days}</strong> day streak</span>
+					</div>
 					{#if $installPrompt}
 						<button class="nav-link install" onclick={() => void promptInstall($installPrompt!)}>
-							<Download size={18} />
+							<span class="nl-ic"><Download size={20} /></span>
 							<span>Install app</span>
 						</button>
 					{/if}
 					<a href="/settings" class="nav-link" class:active={settingsActive}>
-						<SettingsIcon size={18} />
+						<span class="nl-ic"><SettingsIcon size={20} /></span>
 						<span>Settings</span>
 					</a>
 					<button class="theme-row" onclick={toggleTheme}>
@@ -114,7 +127,11 @@
 			</aside>
 
 			<main class="content">
-				{@render children?.()}
+				{#key activePath}
+					<div class="page">
+						{@render children?.()}
+					</div>
+				{/key}
 			</main>
 		</div>
 
@@ -128,7 +145,7 @@
 			{#each PRIMARY as item (item.href)}
 				{@const on = isNavActive(item, activePath)}
 				<a href={item.href} class="tab" class:active={on} aria-current={on ? 'page' : undefined}>
-					<span class="ic"><item.icon size={22} /></span>
+					<span class="ic"><item.icon size={24} strokeWidth={on ? 2.5 : 2} /></span>
 					<span class="tab-label">{item.label}</span>
 				</a>
 			{/each}
@@ -139,110 +156,153 @@
 <style>
 	.boot {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		gap: 0.75rem;
 		height: 100vh;
-		color: var(--color-text-muted);
+	}
+	.wordmark {
+		font-weight: 900;
+		font-size: 1.6rem;
+		letter-spacing: -0.02em;
+		color: var(--color-accent);
 	}
 	.shell {
 		display: grid;
-		grid-template-columns: 15rem 1fr;
+		grid-template-columns: 16rem 1fr;
 		min-height: 100vh;
 	}
 	.sidebar {
-		border-right: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
-		padding: 1.25rem 0.85rem;
+		border-right: 2px solid var(--color-border);
+		background: var(--color-bg);
+		padding: 1.25rem 0.9rem;
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
 		position: sticky;
 		top: 0;
 		height: 100vh;
+		overflow-y: auto;
 	}
 	.brand,
 	.tb-brand {
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
-		padding: 0 0.5rem;
-		color: var(--color-text);
-	}
-	.logo {
-		font-family: var(--font-script);
-		font-size: 1.6rem;
-		font-weight: 700;
-		color: var(--color-accent);
-	}
-	.name {
-		font-weight: 700;
-		font-size: 1.15rem;
+		gap: 0.45rem;
+		padding: 0 0.4rem;
 	}
 	.side-nav {
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: 0.25rem;
 	}
 	.nav-link {
 		display: flex;
 		align-items: center;
-		gap: 0.7rem;
-		padding: 0.6rem 0.75rem;
-		border-radius: 0.5rem;
+		gap: 0.85rem;
+		padding: 0.55rem 0.75rem;
+		border-radius: var(--radius-sm);
+		border: 2px solid transparent;
 		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		font-size: 0.92rem;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		transition:
+			background 0.15s ease,
+			color 0.15s ease;
 	}
-	.nav-link.sub {
-		padding: 0.45rem 0.75rem 0.45rem 1rem;
-		font-size: 0.9rem;
+	.nl-ic {
+		display: inline-flex;
+		transition: transform 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
 	}
 	.nav-link:hover {
 		background: var(--color-bg-elevated);
 		color: var(--color-text);
 	}
+	.nav-link:hover .nl-ic {
+		transform: scale(1.15) rotate(-6deg);
+	}
+	.nav-link.sub {
+		padding: 0.42rem 0.75rem 0.42rem 0.9rem;
+		font-size: 0.8rem;
+	}
 	.nav-link.active {
-		background: var(--color-bg-elevated);
+		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+		border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-bg));
 		color: var(--color-accent);
-		font-weight: 600;
 	}
 	.nav-head {
 		margin: 0.9rem 0 0.2rem;
-		padding: 0 0.75rem;
+		padding: 0 0.85rem;
 		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
+		font-weight: 900;
+		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--color-text-muted);
+		opacity: 0.8;
 	}
 	.nav-head:hover,
 	.nav-head.active {
 		color: var(--color-accent);
+		opacity: 1;
 	}
 	.side-foot {
 		margin-top: auto;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.4rem;
+	}
+	.side-streak {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.7rem 0.85rem;
+		margin-bottom: 0.4rem;
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+	.side-streak strong {
+		font-weight: 900;
+		font-size: 1.05rem;
+	}
+	.side-streak.lit {
+		color: var(--color-warning);
+		border-color: color-mix(in srgb, var(--color-sun) 50%, var(--color-bg));
+		background: color-mix(in srgb, var(--color-sun) 10%, var(--color-bg));
 	}
 	.theme-row {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.6rem 0.75rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		padding: 0.6rem 0.85rem;
+		border-radius: var(--radius-sm);
+		border: 2px solid var(--color-border);
 		background: var(--color-bg);
 		color: var(--color-text-muted);
-		font-size: 0.9rem;
+		font-size: 0.88rem;
+		font-weight: 700;
 	}
 	.theme-row:hover {
 		color: var(--color-accent);
 		border-color: var(--color-accent);
 	}
 	.content {
-		padding: 2rem 2.5rem;
+		padding: 2rem 2.5rem 3rem;
 		max-width: 64rem;
 		width: 100%;
+	}
+	.page {
+		animation: page-in 0.28s ease both;
+	}
+	@keyframes page-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
 	}
 
 	/* Phone chrome — hidden on desktop. */
@@ -255,9 +315,9 @@
 		width: 100%;
 		text-align: left;
 		background: transparent;
-		border: none;
 		font: inherit;
-		font-size: 0.95rem;
+		font-size: 0.92rem;
+		font-weight: 800;
 	}
 	.icon-btn {
 		display: inline-flex;
@@ -265,22 +325,36 @@
 		justify-content: center;
 		width: 2.4rem;
 		height: 2.4rem;
-		border-radius: 0.5rem;
-		color: var(--color-text);
+		border-radius: var(--radius-sm);
+		color: var(--color-text-muted);
 		flex-shrink: 0;
 	}
 	.icon-btn.active {
 		color: var(--color-accent);
-		background: var(--color-bg-elevated);
+		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
 	}
 	.lang-chip {
 		font-family: var(--font-script);
 		font-size: 0.9rem;
-		font-weight: 600;
+		font-weight: 700;
 		color: var(--color-accent);
-		padding: 0.25rem 0.6rem;
+		padding: 0.25rem 0.7rem;
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+		border: 2px solid color-mix(in srgb, var(--color-accent) 30%, var(--color-bg));
+	}
+	.streak {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+		font-weight: 900;
+		font-size: 1rem;
+		color: var(--color-text-muted);
+		opacity: 0.7;
+		padding: 0 0.3rem;
+	}
+	.streak.lit {
+		color: var(--color-warning);
+		opacity: 1;
 	}
 
 	@media (max-width: 820px) {
@@ -289,10 +363,10 @@
 			align-items: center;
 			gap: 0.5rem;
 			/* Respect the notch / status bar when installed as a PWA. */
-			padding: calc(0.4rem + env(safe-area-inset-top)) calc(0.6rem + env(safe-area-inset-right))
-				0.4rem calc(0.9rem + env(safe-area-inset-left));
-			border-bottom: 1px solid var(--color-border);
-			background: var(--color-bg-secondary);
+			padding: calc(0.35rem + env(safe-area-inset-top)) calc(0.5rem + env(safe-area-inset-right))
+				0.35rem calc(0.6rem + env(safe-area-inset-left));
+			border-bottom: 2px solid var(--color-border);
+			background: var(--color-bg);
 			position: sticky;
 			top: 0;
 			z-index: 30;
@@ -300,9 +374,10 @@
 		.tb-brand {
 			flex: 1;
 			padding-left: 0;
+			gap: 0.3rem;
 		}
-		.tb-brand .name {
-			font-size: 1.05rem;
+		.tb-brand .wordmark {
+			font-size: 1.3rem;
 		}
 
 		.shell {
@@ -336,8 +411,8 @@
 			bottom: 0;
 			height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 			padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-			background: var(--color-bg-secondary);
-			border-top: 1px solid var(--color-border);
+			background: var(--color-bg);
+			border-top: 2px solid var(--color-border);
 			z-index: 30;
 		}
 		.tab {
@@ -345,24 +420,37 @@
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
-			gap: 0.2rem;
+			gap: 0.15rem;
 			color: var(--color-text-muted);
 			font-size: 0.68rem;
-			font-weight: 500;
+			font-weight: 800;
 			-webkit-tap-highlight-color: transparent;
 		}
 		.tab .ic {
 			display: inline-flex;
-			padding: 0.2rem 0.9rem;
+			padding: 0.25rem 0.9rem;
 			border-radius: 999px;
+			border: 2px solid transparent;
 			transition: background 0.15s ease;
+		}
+		.tab:active .ic {
+			transform: scale(0.9);
 		}
 		.tab.active {
 			color: var(--color-accent);
-			font-weight: 700;
 		}
 		.tab.active .ic {
-			background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+			background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
+			border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-bg));
+			animation: tab-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+		}
+		@keyframes tab-pop {
+			0% {
+				transform: scale(0.8);
+			}
+			100% {
+				transform: scale(1);
+			}
 		}
 
 		/* Focus mode: a running review session owns the whole screen. */

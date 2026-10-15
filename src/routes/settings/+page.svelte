@@ -107,9 +107,9 @@
 	}
 	const MODELS = ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini'];
 	const THEMES: { value: 'system' | 'light' | 'dark'; label: string }[] = [
-		{ value: 'system', label: 'System' },
 		{ value: 'light', label: 'Light' },
-		{ value: 'dark', label: 'Dark' }
+		{ value: 'dark', label: 'Dark' },
+		{ value: 'system', label: 'System' }
 	];
 </script>
 
@@ -245,8 +245,8 @@
 		margin-bottom: 1.5rem;
 	}
 	.group {
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
 		padding: 1.25rem;
 		margin-bottom: 1.25rem;
 		background: var(--color-bg-secondary);
@@ -290,8 +290,8 @@
 	input,
 	select {
 		padding: 0.55rem 0.7rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		background: var(--color-bg);
 		color: var(--color-text);
 		font-size: 0.95rem;
@@ -309,8 +309,8 @@
 		flex-direction: column;
 		gap: 0.2rem;
 		padding: 0.7rem 1.1rem;
-		border-radius: 0.6rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.8rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg);
 		color: var(--color-text);
 	}
@@ -328,8 +328,8 @@
 	}
 	.theme {
 		padding: 0.55rem 1.2rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg);
 		color: var(--color-text);
 	}
@@ -365,7 +365,7 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.55rem 1rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		border: 1px solid var(--color-accent);
 		background: var(--color-accent);
 		color: #fff;

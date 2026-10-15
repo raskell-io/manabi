@@ -231,8 +231,8 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.5rem 0.85rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: transparent;
 		color: var(--color-danger);
 	}
@@ -254,8 +254,8 @@
 	input,
 	select {
 		padding: 0.55rem 0.7rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		background: var(--color-bg-secondary);
 		color: var(--color-text);
 		font-size: 0.95rem;
@@ -281,8 +281,8 @@
 		align-items: center;
 		gap: 0.3rem;
 		padding: 0.35rem 0.7rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text);
 	}
@@ -294,10 +294,10 @@
 		align-items: center;
 	}
 	.ex-del {
-		border: 1px solid var(--color-border);
+		border: 2px solid var(--color-border);
 		background: transparent;
 		color: var(--color-danger);
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		padding: 0.5rem;
 	}
 	.save-bar {
@@ -309,7 +309,7 @@
 	}
 	.save {
 		padding: 0.65rem 2rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		background: var(--color-accent);
 		color: #fff;
 		border: none;
@@ -327,7 +327,7 @@
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.45rem 0.9rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		border: 1px solid var(--color-accent);
 		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
 		color: var(--color-accent);
@@ -357,8 +357,8 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.75rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		padding: 0.45rem 0.75rem;
 		background: var(--color-bg-secondary);
 		font-size: 0.9rem;
@@ -370,7 +370,7 @@
 		width: 1.9rem;
 		height: 1.9rem;
 		border-radius: 0.45rem;
-		border: 1px solid var(--color-border);
+		border: 2px solid var(--color-border);
 		background: var(--color-bg);
 		color: var(--color-accent);
 	}

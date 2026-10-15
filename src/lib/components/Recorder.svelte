@@ -220,8 +220,8 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.5rem 0.85rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text);
 	}
@@ -251,8 +251,8 @@
 		justify-content: center;
 		gap: 0.7rem;
 		padding: 0.5rem 1rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.6rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.8rem;
 		background: var(--color-bg-secondary);
 	}
 	.asr.good {
@@ -292,8 +292,8 @@
 	}
 	.rate-row button {
 		padding: 0.5rem 1.25rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text);
 		font-weight: 600;

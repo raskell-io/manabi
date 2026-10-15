@@ -325,7 +325,7 @@ export function defaultSettings(): ManabiSettings {
 		asrScoring: true,
 		hideHebrewVowels: false,
 		gradeButtons: true,
-		theme: 'system'
+		theme: 'light'
 	};
 }
 

@@ -1,6 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1e1e2e"/>
-  <text x="50%" y="52%" dominant-baseline="central" text-anchor="middle"
-        font-family="'Hiragino Sans','Noto Sans CJK JP',sans-serif" font-size="300"
-        font-weight="700" fill="#b4befe">学</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs>
+<linearGradient id="fore" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff7eb6"/><stop offset="1" stop-color="#ffc2dc"/></linearGradient>
+<linearGradient id="hind" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa36c"/><stop offset="1" stop-color="#ffe08a"/></linearGradient>
+<radialGradient id="bg" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ece6ff"/></radialGradient>
+</defs>
+<rect width="512" height="512" rx="116" fill="url(#bg)"/>
+<g transform="translate(22 25.9) scale(3.9)">
+<g><path d="M58 54 C 46 32, 26 14, 14 20 C 4 26, 8 44, 20 52 C 30 58, 44 60, 58 60 Z" fill="url(#fore)"/><path d="M58 63 C 44 62, 28 70, 26 84 C 25 96, 38 100, 46 92 C 53 85, 57 74, 58 66 Z" fill="url(#hind)"/>
+<path d="M52 55 C 42 40, 28 28, 20 30 C 14 33, 17 43, 25 49 C 33 54, 42 56, 52 56 Z" fill="#fff" opacity=".35"/>
+<path d="M52 66 C 42 67, 34 74, 33 82 C 33 89, 40 90, 44 85 C 48 80, 51 73, 52 68 Z" fill="#fff" opacity=".3"/></g><g transform="matrix(-1 0 0 1 120 0)"><path d="M58 54 C 46 32, 26 14, 14 20 C 4 26, 8 44, 20 52 C 30 58, 44 60, 58 60 Z" fill="url(#fore)"/><path d="M58 63 C 44 62, 28 70, 26 84 C 25 96, 38 100, 46 92 C 53 85, 57 74, 58 66 Z" fill="url(#hind)"/>
+<path d="M52 55 C 42 40, 28 28, 20 30 C 14 33, 17 43, 25 49 C 33 54, 42 56, 52 56 Z" fill="#fff" opacity=".35"/>
+<path d="M52 66 C 42 67, 34 74, 33 82 C 33 89, 40 90, 44 85 C 48 80, 51 73, 52 68 Z" fill="#fff" opacity=".3"/></g>
+<g fill="none" stroke="#5b3fd6" stroke-width="2" stroke-linecap="round"><path d="M57 33 C 54 24, 49 18, 43 15"/><path d="M63 33 C 66 24, 71 18, 77 15"/></g>
+<circle cx="43" cy="15" r="2.6" fill="#5b3fd6"/><circle cx="77" cy="15" r="2.6" fill="#5b3fd6"/>
+<path d="M60 50 C 64 50, 64.5 58, 63.5 70 C 62.5 84, 61 96, 60 99 C 59 96, 57.5 84, 56.5 70 C 55.5 58, 56 50, 60 50 Z" fill="#7c5cff"/>
+<circle cx="60" cy="42" r="10" fill="#8f74ff"/>
+<ellipse cx="56" cy="41" rx="1.9" ry="2.5" fill="#1f1a3d"/><ellipse cx="64" cy="41" rx="1.9" ry="2.5" fill="#1f1a3d"/>
+<circle cx="56.6" cy="40.2" r=".7" fill="#fff"/><circle cx="64.6" cy="40.2" r=".7" fill="#fff"/>
+<ellipse cx="52.8" cy="44.5" rx="2" ry="1.3" fill="#ff7eb6" opacity=".55"/><ellipse cx="67.2" cy="44.5" rx="2" ry="1.3" fill="#ff7eb6" opacity=".55"/>
+<path d="M57.6 45 Q60 47 62.4 45" fill="none" stroke="#1f1a3d" stroke-width="1.4" stroke-linecap="round"/></g></svg>

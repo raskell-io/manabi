@@ -1,76 +1,90 @@
 @import 'tailwindcss';
 
+@import '@fontsource-variable/nunito';
+
 /* ---------------------------------------------------------------------------
- * Theme — Catppuccin (Latte light / Mocha dark), CSS-variable driven so we
- * can theme without touching component markup. Mirrors kurumi's approach.
+ * Theme — "Nabi": a pure-white light theme (the default) and a deep-indigo
+ * dark theme. CSS-variable driven so components never hard-code colours.
+ * Surfaces stay white in light mode; cards are told apart by borders and the
+ * chunky 3D bottom edge (--edge), not by grey fills.
  * ------------------------------------------------------------------------ */
 :root {
 	/* Phone bottom tab bar height (excluding the home-indicator safe area). */
-	--tabbar-h: 3.6rem;
+	--tabbar-h: 4rem;
 
 	--font-sans:
-		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+		'Nunito Variable', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+		sans-serif;
 	--font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 	/* Script-heavy text: prefer native CJK/Hebrew system fonts. */
 	--font-script:
 		'Hiragino Sans', 'Apple SD Gothic Neo', 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Noto Sans CJK KR', 'Noto Sans KR', 'Noto Sans Hebrew',
 		'Microsoft YaHei', 'PingFang SC', sans-serif;
 
+	--radius: 1rem;
+	--radius-sm: 0.75rem;
+
+	color-scheme: light;
 	--color-bg: #ffffff;
-	--color-bg-secondary: #f5f5f5;
-	--color-bg-elevated: #eff1f5;
-	--color-text: #4c4f69;
-	--color-text-muted: #6c6f85;
-	--color-accent: #7287fd;
-	--color-accent-hover: #1e66f5;
-	--color-border: #ccd0da;
-	--color-success: #40a02b;
-	--color-warning: #df8e1d;
-	--color-danger: #d20f39;
+	--color-bg-secondary: #ffffff;
+	--color-bg-elevated: #f3f1fb;
+	--color-text: #25213f;
+	--color-text-muted: #6e6a88;
+	--color-accent: #6c4cf5;
+	--color-accent-hover: #5636e0;
+	--color-border: #e6e3f0;
+	--color-success: #2fb457;
+	--color-warning: #f08c00;
+	--color-danger: #f0435a;
+	/* Brand extras */
+	--color-pink: #ff5c9d;
+	--color-sun: #ffb800;
+	--color-sky: #1aa3f0;
+	/* The darker bottom edge under cards and chunky buttons. */
+	--edge: #e6e3f0;
+	--shadow-soft: 0 10px 30px rgba(54, 32, 140, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
 	:root:not(.light) {
-		--color-bg: #1e1e2e;
-		--color-bg-secondary: #181825;
-		--color-bg-elevated: #313244;
-		--color-text: #cdd6f4;
-		--color-text-muted: #a6adc8;
-		--color-accent: #b4befe;
-		--color-accent-hover: #89b4fa;
-		--color-border: #313244;
-		--color-success: #a6e3a1;
-		--color-warning: #f9e2af;
-		--color-danger: #f38ba8;
+		color-scheme: dark;
+		--color-bg: #13111f;
+		--color-bg-secondary: #1c1930;
+		--color-bg-elevated: #282442;
+		--color-text: #eeecf8;
+		--color-text-muted: #a29dbd;
+		--color-accent: #8a6dff;
+		--color-accent-hover: #b4a3ff;
+		--color-border: #302b4d;
+		--color-success: #3cc168;
+		--color-warning: #ffb23f;
+		--color-danger: #ff6b7f;
+		--color-pink: #ff7eb6;
+		--color-sun: #ffc93d;
+		--color-sky: #4cc0ff;
+		--edge: #0b0a14;
+		--shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
 	}
 }
 
 :root.dark {
-	--color-bg: #1e1e2e;
-	--color-bg-secondary: #181825;
-	--color-bg-elevated: #313244;
-	--color-text: #cdd6f4;
-	--color-text-muted: #a6adc8;
-	--color-accent: #b4befe;
-	--color-accent-hover: #89b4fa;
-	--color-border: #313244;
-	--color-success: #a6e3a1;
-	--color-warning: #f9e2af;
-	--color-danger: #f38ba8;
-}
-
-:root.light {
-	--color-bg: #ffffff;
-	--color-bg-secondary: #f5f5f5;
-	--color-bg-elevated: #eff1f5;
-	--color-text: #4c4f69;
-	--color-text-muted: #6c6f85;
-	--color-accent: #7287fd;
-	--color-accent-hover: #1e66f5;
-	--color-border: #ccd0da;
-	--color-success: #40a02b;
-	--color-warning: #df8e1d;
-	--color-danger: #d20f39;
+	color-scheme: dark;
+	--color-bg: #13111f;
+	--color-bg-secondary: #1c1930;
+	--color-bg-elevated: #282442;
+	--color-text: #eeecf8;
+	--color-text-muted: #a29dbd;
+	--color-accent: #8a6dff;
+	--color-accent-hover: #b4a3ff;
+	--color-border: #302b4d;
+	--color-success: #3cc168;
+	--color-warning: #ffb23f;
+	--color-danger: #ff6b7f;
+	--color-pink: #ff7eb6;
+	--color-sun: #ffc93d;
+	--color-sky: #4cc0ff;
+	--edge: #0b0a14;
+	--shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 html,
@@ -83,7 +97,136 @@ body {
 	background: var(--color-bg);
 	color: var(--color-text);
 	font-family: var(--font-sans);
+	font-weight: 500;
 	-webkit-font-smoothing: antialiased;
+}
+
+/* Tailwind's preflight flattens headings; give them a friendly scale back. */
+h1,
+h2,
+h3 {
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+}
+h1 {
+	font-size: 1.75rem;
+	font-weight: 900;
+}
+h2 {
+	font-size: 1.2rem;
+}
+h3 {
+	font-size: 1.05rem;
+}
+
+/* Inputs pick up the rounder, friendlier look everywhere. */
+input,
+select,
+textarea {
+	font-family: inherit;
+	border-radius: var(--radius-sm);
+}
+
+/* ---- Shared "chunky" primitives (Duolingo-style 3D press) ---------------- */
+.btn3d {
+	--b: var(--color-accent);
+	--b-edge: color-mix(in srgb, var(--b) 70%, #000);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.8rem 1.4rem;
+	border: none;
+	border-radius: var(--radius);
+	background: var(--b);
+	color: #fff;
+	font: inherit;
+	font-weight: 800;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	font-size: 0.92rem;
+	box-shadow: 0 4px 0 var(--b-edge);
+	transition:
+		transform 0.08s ease,
+		box-shadow 0.08s ease,
+		filter 0.15s ease;
+	-webkit-tap-highlight-color: transparent;
+}
+.btn3d:hover:not(:disabled) {
+	filter: brightness(1.06);
+}
+.btn3d:active:not(:disabled) {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--b-edge);
+}
+.btn3d:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.btn3d.success {
+	--b: var(--color-success);
+}
+.btn3d.danger {
+	--b: var(--color-danger);
+}
+.btn3d.ghost {
+	background: var(--color-bg);
+	color: var(--color-accent);
+	border: 2px solid var(--color-border);
+	box-shadow: 0 4px 0 var(--edge);
+}
+.btn3d.ghost:active:not(:disabled) {
+	box-shadow: 0 0 0 var(--edge);
+}
+
+/* A press-able white tile with a 3D bottom edge. */
+.tile3d {
+	border: 2px solid var(--color-border);
+	border-bottom-width: 4px;
+	border-radius: var(--radius);
+	background: var(--color-bg-secondary);
+	transition:
+		transform 0.08s ease,
+		border-color 0.15s ease,
+		background 0.15s ease;
+}
+
+@keyframes pop-in {
+	0% {
+		transform: scale(0.85);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.04);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+@keyframes shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	20%,
+	60% {
+		transform: translateX(-6px);
+	}
+	40%,
+	80% {
+		transform: translateX(6px);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+	}
 }
 
 * {

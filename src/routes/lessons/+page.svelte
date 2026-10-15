@@ -119,15 +119,15 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.55rem 1rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		background: var(--color-accent);
 		color: #fff;
 		border: none;
 		font-weight: 600;
 	}
 	.builder {
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
 		padding: 1.25rem;
 		margin: 1.25rem 0;
 		background: var(--color-bg-secondary);
@@ -136,8 +136,8 @@
 		width: 100%;
 		max-width: 24rem;
 		padding: 0.6rem 0.8rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		background: var(--color-bg);
 		color: var(--color-text);
 		font-size: 1rem;
@@ -160,8 +160,8 @@
 		align-items: flex-start;
 		gap: 0.15rem;
 		padding: 0.5rem 0.7rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		background: var(--color-bg);
 		color: var(--color-text);
 	}
@@ -181,14 +181,14 @@
 	}
 	.cancel {
 		padding: 0.55rem 1.2rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: transparent;
 		color: var(--color-text);
 	}
 	.save {
 		padding: 0.55rem 1.4rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		background: var(--color-accent);
 		color: #fff;
 		border: none;
@@ -204,8 +204,8 @@
 		margin-top: 1.5rem;
 	}
 	.lesson {
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
 		padding: 1rem 1.1rem;
 		background: var(--color-bg-secondary);
 	}
@@ -270,7 +270,7 @@
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.4rem 0.8rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		background: var(--color-accent);
 		color: #fff;
 		font-size: 0.85rem;

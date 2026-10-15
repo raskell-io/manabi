@@ -285,7 +285,7 @@
 	.warn,
 	.notice,
 	.error {
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		padding: 0.6rem 0.9rem;
 		margin: 1rem 0;
 		font-size: 0.9rem;
@@ -313,8 +313,8 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.5rem 1rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text-muted);
 		font-weight: 600;
@@ -324,8 +324,8 @@
 		color: var(--color-accent);
 	}
 	.gen {
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
 		padding: 1.25rem;
 		margin-bottom: 2rem;
 		background: var(--color-bg-secondary);
@@ -350,8 +350,8 @@
 	input,
 	select {
 		padding: 0.5rem 0.65rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
 		background: var(--color-bg);
 		color: var(--color-text);
 		font-family: inherit;
@@ -362,7 +362,7 @@
 		align-items: center;
 		gap: 0.45rem;
 		padding: 0.6rem 1.4rem;
-		border-radius: 0.5rem;
+		border-radius: 0.7rem;
 		background: var(--color-accent);
 		color: #fff;
 		border: none;
@@ -395,8 +395,8 @@
 		display: flex;
 		justify-content: space-between;
 		gap: 1rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.65rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.9rem;
 		padding: 0.9rem 1rem;
 		margin-bottom: 0.5rem;
 		background: var(--color-bg-secondary);
@@ -490,8 +490,8 @@
 	.d-actions button {
 		width: 2.1rem;
 		height: 2.1rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg);
 		display: inline-flex;
 		align-items: center;

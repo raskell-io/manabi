@@ -184,8 +184,8 @@
 		align-items: center;
 		gap: 0.3rem;
 		padding: 0.4rem 0.8rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
+		border-radius: 0.7rem;
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text-muted);
 		font-size: 0.82rem;
@@ -208,7 +208,7 @@
 		gap: 0.4rem;
 		padding: 0.35rem 0.8rem;
 		border-radius: 999px;
-		border: 1px solid var(--color-border);
+		border: 2px solid var(--color-border);
 		background: var(--color-bg-secondary);
 		color: var(--color-text-muted);
 		font-size: 0.85rem;
@@ -261,8 +261,8 @@
 		min-width: 4.25rem;
 		min-height: 4.25rem;
 		padding: 0.5rem 0.4rem;
-		border: 1px solid var(--color-border);
-		border-radius: 0.6rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.8rem;
 		background: var(--color-bg-secondary);
 		color: var(--color-text);
 	}
