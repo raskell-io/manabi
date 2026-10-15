@@ -72,6 +72,9 @@
 			<button class="btn3d" onclick={() => setActiveLanguage('zh')}>中文 Chinese</button>
 			<button class="btn3d" onclick={() => setActiveLanguage('ja')}>日本語 Japanese</button>
 		</div>
+		{#if lang === 'he'}
+			<p class="roots-hint">Hebrew builds words from roots instead — <a href="/roots">explore the roots</a>.</p>
+		{/if}
 	</div>
 {:else if selected}
 	{@const total = counts[selected.n - 1]}
@@ -481,5 +484,12 @@
 	.switch {
 		display: flex;
 		gap: 0.6rem;
+	}
+	.empty .roots-hint {
+		margin: 1rem 0 0;
+	}
+	.roots-hint a {
+		color: var(--color-teal);
+		font-weight: 800;
 	}
 </style>

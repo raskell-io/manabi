@@ -664,6 +664,66 @@ export function studyVocabWord(language: Language, w: VocabWord, level: string):
 }
 
 /**
+ * Add reference entries (Roots, Names pages) as published items in ONE
+ * document change. Skips any whose exact target is already present in that
+ * language. Returns the item ids, existing or new, in input order.
+ */
+export function studyItems(language: Language, items: (GeneratedItem & { kind?: ItemKind })[]): string[] {
+	const ids: string[] = [];
+	updateDoc((d) => {
+		const present = new Map(
+			Object.values(d.learningItems)
+				.filter((it) => it.language === language)
+				.map((it) => [it.target, it.id] as const)
+		);
+		const now = Date.now();
+		for (const g of items) {
+			const have = present.get(g.target);
+			if (have) {
+				ids.push(have);
+				continue;
+			}
+			const id = generateId();
+			d.learningItems[id] = stripUndefined({
+				id,
+				language,
+				kind: g.kind ?? 'word',
+				target: g.target,
+				reading: g.reading,
+				transliteration: g.transliteration,
+				meaning: g.meaning,
+				tags: [...g.tags],
+				level: g.level,
+				examples: [],
+				status: 'published' as const,
+				createdAt: now,
+				updatedAt: now
+			});
+			present.set(g.target, id);
+			ids.push(id);
+		}
+	});
+	return ids;
+}
+
+/** Add Hebrew root words (Roots page), tagged with their root. */
+export function studyRootWords(rootId: string, words: { t: string; r: string; m: string; pos: string }[]): string[] {
+	return studyItems(
+		'he',
+		words.map((w) => ({
+			kind: w.pos === 'phrase' ? ('phrase' as const) : ('word' as const),
+			target: w.t,
+			reading: w.r,
+			transliteration: w.r,
+			meaning: w.m,
+			tags: ['root', `root-${rootId}`],
+			level: 'A2',
+			examples: []
+		}))
+	);
+}
+
+/**
  * Bulk-add a whole level's vocab in a SINGLE document change (one save), so
  * adding hundreds/thousands of words doesn't fire a save per word. Skips words
  * already present. Returns how many were newly added.

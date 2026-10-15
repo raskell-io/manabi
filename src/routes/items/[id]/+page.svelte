@@ -7,6 +7,7 @@
 	import StrokePad from '$lib/components/StrokePad.svelte';
 	import { hanChars, strokeLang } from '$lib/strokes';
 	import { radicalOf } from '$lib/radicals';
+	import { rootLabel, rootOfWord, splitByRoot } from '$lib/roots';
 	import { deleteItem, getItem, pronunciationAttempts, settings, updateItem } from '$lib/db/store';
 	import { playRef } from '$lib/audio';
 	import { suggestRating } from '$lib/pronunciation';
@@ -33,6 +34,9 @@
 	let writeIdx = $state(0);
 	const writeChar = $derived(writeChars[Math.min(writeIdx, writeChars.length - 1)]);
 	const writeRadical = $derived(writeChar ? radicalOf(writeChar) : undefined);
+
+	// Hebrew: the root this word grows from, and its word family (Roots page).
+	const root = $derived(item?.language === 'he' ? rootOfWord(item.target) : undefined);
 
 	let tagsText = $state('');
 	$effect(() => {
@@ -150,6 +154,28 @@
 				{/if}
 			</div>
 			{#key writeChar}<StrokePad char={writeChar} lang={writeLang} size={220} />{/key}
+		</section>
+	{/if}
+
+	{#if root && item}
+		<section class="root">
+			<div class="write-head">
+				<h2>Root</h2>
+				<a class="root-chip" href="/roots?r={root.root.id}">
+					<span dir="rtl" lang="he">{rootLabel(root.root)}</span> · {root.root.meaning}
+				</a>
+			</div>
+			<p class="root-word" dir="rtl" lang="he">
+				{#each splitByRoot(item.target, root.root) as c, i (i)}<span class:hl={c.root}>{c.text}</span>{/each}
+			</p>
+			<div class="family">
+				{#each root.root.words.filter((w) => w !== root.word) as w (w.t)}
+					<a class="kin" href="/roots?r={root.root.id}" title={w.r}>
+						<span class="kin-t" dir="rtl" lang="he">{w.t}</span>
+						<span class="kin-m">{w.m}</span>
+					</a>
+				{/each}
+			</div>
 		</section>
 	{/if}
 
@@ -328,6 +354,64 @@
 		border-color: var(--color-accent);
 		color: var(--color-accent);
 		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+	}
+	.root {
+		margin: 0 0 1.5rem;
+		padding: 1rem 1rem 1.1rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1.25rem;
+	}
+	.root .write-head {
+		margin-bottom: 0.25rem;
+	}
+	.root-chip {
+		margin-left: auto;
+		padding: 0.15rem 0.7rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-teal) 12%, var(--color-bg));
+		color: var(--color-teal);
+		font-size: 0.85rem;
+		font-weight: 800;
+	}
+	.root-chip span {
+		font-family: var(--font-script);
+		font-size: 1.05rem;
+	}
+	.root-word {
+		margin: 0 0 0.6rem;
+		font-family: var(--font-script);
+		font-size: 2rem;
+		text-align: center;
+	}
+	.root-word .hl {
+		color: var(--color-pink);
+		font-weight: 700;
+	}
+	.family {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+	.kin {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.4rem;
+		padding: 0.2rem 0.65rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.8rem;
+		color: var(--color-text);
+	}
+	.kin:hover {
+		border-color: color-mix(in srgb, var(--color-teal) 55%, var(--color-border));
+	}
+	.kin-t {
+		font-family: var(--font-script);
+		font-size: 1.15rem;
+	}
+	.kin-m {
+		color: var(--color-text-muted);
+		font-size: 0.78rem;
+		font-weight: 700;
 	}
 	.write-radical {
 		margin-left: auto;

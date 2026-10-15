@@ -114,6 +114,7 @@ All of these create published `LearningItem`s, which `buildQueue` then schedules
 | Task | How |
 | --- | --- |
 | Add a few curated items/passages | Edit `seed.ts`, add new stable ids, ship. |
+| Add Hebrew roots or root words | Edit `roots-data.ts` by hand (vowelled; seed words spelled exactly as in the seed), run the tests. |
 | Refresh kanji/hanzi tables | `node tools/gen-scripts-data.mjs`, commit `scripts-data.ts`. |
 | Refresh HSK/JLPT word lists | `node tools/gen-vocab-data.mjs`, commit `static/wordlists/`. |
 | Add audio for new content | Re-run the [audio pipeline](./audio.md#regenerating). |
@@ -133,6 +134,16 @@ License v3); pinyin from makemeahanzi. Needs `unzip`. Powers `/radicals` and the
 ```
 node tools/gen-radicals-data.mjs
 ```
+
+### Hebrew roots — `src/lib/roots-data.ts` (hand-curated)
+
+About fifty common three-letter roots (שׁוֹרָשִׁים), each with three to seven everyday vowelled words and an
+optional teaching note. Roots are stored as regular letters (no final forms or shin/sin dots); verbs are
+present tense, masculine singular, like the seed. `roots.test.ts` enforces niqqud and shin/sin dots,
+one root per spelling, and that a word which is also a seed item is spelled exactly as in the seed, so
+adding it from `/roots` never creates a near-duplicate. `splitByRoot` highlights the root letters in a
+word (longest in-order match, allowing final ה → י and initial י → ו, ignoring a feminine final ה); no
+data tool is needed. Not native-proofread yet.
 
 ### Stroke order — `tools/gen-stroke-data.mjs`
 
