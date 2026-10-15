@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ArrowRight, BookOpen, Headphones, Mic, LayoutGrid, GraduationCap, Flame, Sparkles, Clock, BookA } from 'lucide-svelte';
 	import Mascot, { type MascotMood } from '$lib/components/Mascot.svelte';
+	import PathStrip from '$lib/components/PathStrip.svelte';
 	import {
 		activeItems,
 		getDoc,
@@ -141,6 +142,8 @@
 		<a href="/review" class="all"><GraduationCap size={14} /> All modes</a>
 	</p>
 {/if}
+
+<PathStrip />
 
 <div class="progress-row">
 	<div class="card ring-card">

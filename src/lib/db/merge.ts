@@ -101,7 +101,8 @@ export function contentOf(doc: ManabiDocument): Record<string, unknown> {
 		pronunciationAttempts: doc.pronunciationAttempts ?? {},
 		contentDrafts: map(doc.contentDrafts),
 		passageDrafts: map(doc.passageDrafts),
-		seededIds: doc.seededIds ?? {}
+		seededIds: doc.seededIds ?? {},
+		passageReads: doc.passageReads ?? {}
 	};
 }
 
@@ -153,8 +154,9 @@ const DRAFT_RANK = { pending: 0, rejected: 1, approved: 2 } as const;
  * Records that exist on both sides: items/passages → newer `updatedAt` wins
  * (only if the content actually differs); SRS → per skill, the more recently
  * reviewed state wins and `lapses` takes the max; lessons → item ids are
- * unioned; drafts → approved beats rejected beats pending; attempts
- * and `seededIds` are unioned. Settings are never touched.
+ * unioned; drafts → approved beats rejected beats pending; attempts,
+ * `seededIds` and `passageReads` (earliest time) are unioned. Settings are
+ * never touched.
  */
 export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSummary {
 	const s = emptySummary();
@@ -265,6 +267,13 @@ export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSu
 
 	if (!local.seededIds) local.seededIds = {};
 	for (const id of Object.keys(other.seededIds ?? {})) local.seededIds[id] = true;
+
+	// Passage reads: union, keeping the earliest first-read time.
+	for (const [id, at] of entries(other.passageReads)) {
+		if (!local.passageReads) local.passageReads = {};
+		const mine = local.passageReads[id];
+		if (mine === undefined || at < mine) local.passageReads[id] = at;
+	}
 
 	return s;
 }

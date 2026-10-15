@@ -20,7 +20,8 @@ import {
 	Sparkles,
 	Puzzle,
 	Sprout,
-	Globe
+	Globe,
+	Route
 } from 'lucide-svelte';
 
 export interface NavItem {
@@ -35,6 +36,7 @@ export interface NavItem {
 }
 
 export const LIBRARY: NavItem[] = [
+	{ href: '/path', label: 'Path', icon: Route, description: 'Your step-by-step route through the language — and how Manabi works.' },
 	{ href: '/scripts', label: 'Scripts', icon: Table2, description: 'Kana, kanji, hanzi, Hangul and the alef-bet — tap a glyph to study it.' },
 	{ href: '/radicals', label: 'Radicals', icon: Puzzle, description: 'The 214 building blocks of hanzi and kanji, and the characters built on each.' },
 	{ href: '/roots', label: 'Roots', icon: Sprout, description: 'Hebrew three-letter roots and the families of words that grow from them.' },

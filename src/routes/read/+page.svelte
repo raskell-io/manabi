@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { MessageSquare, FileText } from 'lucide-svelte';
-	import { passages, settings } from '$lib/db/store';
+	import { MessageSquare, FileText, Check } from 'lucide-svelte';
+	import { passageReads, passages, settings } from '$lib/db/store';
 	import { LANGUAGES, type Passage } from '$lib/db/types';
 
 	const conversations = $derived($passages.filter((p) => p.kind === 'conversation'));
@@ -17,7 +17,7 @@
 	<a class="card" href="/read/{p.id}">
 		<div class="card-top">
 			<span class="title">{p.title}</span>
-			<span class="level">{p.level}</span>
+			<span class="level">{#if $passageReads[p.id]}<span class="read-mark"><Check size={13} strokeWidth={3} /> Read</span>{/if}{p.level}</span>
 		</div>
 		{#if p.intro}<p class="intro">{p.intro}</p>{/if}
 		<div class="meta">
@@ -50,6 +50,14 @@
 </section>
 
 <style>
+	.read-mark {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.15rem;
+		margin-right: 0.45rem;
+		color: var(--color-success);
+		font-weight: 900;
+	}
 	.head {
 		margin-bottom: 1.5rem;
 	}

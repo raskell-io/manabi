@@ -93,6 +93,25 @@ export const passages: Readable<Passage[]> = derived([docStore, activeLanguage],
 		.sort((a, b) => b.createdAt - a.createdAt);
 });
 
+/** Passage id → when it was first read to the end. */
+export const passageReads: Readable<Record<string, number>> = derived(docStore, ($doc) => ({ ...($doc?.passageReads ?? {}) }));
+
+/**
+ * What the learning path needs for the active language: published items, SRS
+ * state, passages in seed/creation order, and which have been read.
+ */
+export const pathData: Readable<{
+	items: LearningItem[];
+	srs: Record<string, SkillMemory>;
+	passages: Passage[];
+	reads: Record<string, number>;
+}> = derived([docStore, activeLanguage], ([$doc, $lang]) => ({
+	items: Object.values($doc?.learningItems ?? {}).filter((it) => it.language === $lang && it.status === 'published'),
+	srs: $doc?.srsStates ?? {},
+	passages: Object.values($doc?.passages ?? {}).filter((p) => p.language === $lang),
+	reads: $doc?.passageReads ?? {}
+}));
+
 /** Pending drafts first, then decided ones (audit trail), newest first. */
 export const contentDrafts: Readable<ContentDraft[]> = derived(docStore, ($doc) => {
 	if (!$doc) return [];
@@ -603,6 +622,15 @@ export function createPassage(input: NewPassageInput): string {
 		});
 	});
 	return id;
+}
+
+/** Record that a passage was read to the end (first time only). */
+export function markPassageRead(id: string): void {
+	if (!doc || doc.passageReads?.[id]) return;
+	updateDoc((d) => {
+		if (!d.passageReads) d.passageReads = {};
+		d.passageReads[id] = Date.now();
+	});
 }
 
 export function deletePassage(id: string): void {

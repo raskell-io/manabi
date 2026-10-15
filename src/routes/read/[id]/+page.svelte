@@ -3,7 +3,7 @@
 	import { ArrowLeft, Plus, Check, Eye, Languages } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
-	import { getPassage, studyPassageLine } from '$lib/db/store';
+	import { getPassage, markPassageRead, studyPassageLine } from '$lib/db/store';
 	import { PASSAGE_KIND_LABELS, type Passage } from '$lib/db/types';
 
 	const id = $derived($page.params.id);
@@ -44,6 +44,22 @@
 		studyPassageLine(passage.language, passage.lines[i]);
 		mined = new Set(mined).add(i);
 	}
+
+	// Reaching the last line counts as having read the passage (learning path).
+	let end = $state<HTMLDivElement>();
+	$effect(() => {
+		const el = end;
+		const pid = passage?.id;
+		if (!el || !pid) return;
+		const io = new IntersectionObserver((es) => {
+			if (es.some((e) => e.isIntersecting)) {
+				markPassageRead(pid);
+				io.disconnect();
+			}
+		});
+		io.observe(el);
+		return () => io.disconnect();
+	});
 
 	function mineAll() {
 		if (!passage) return;
@@ -100,6 +116,7 @@
 			</div>
 		{/each}
 	</div>
+	<div bind:this={end} aria-hidden="true"></div>
 {/if}
 
 <style>

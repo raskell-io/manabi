@@ -19,7 +19,8 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 ## Architecture
 - One Automerge doc (`schemaVersion` 1) persisted to IndexedDB via idb-keyval.
   Collections: `learningItems`, `lessons`, `srsStates` (keyed by itemId),
-  `exerciseAttempts`, `pronunciationAttempts`, `contentDrafts`, `settings`.
+  `exerciseAttempts`, `pronunciationAttempts`, `contentDrafts`, `settings`,
+  optional `passageReads` (passage id → first read to the end; unioned on merge).
 - Persistence pattern (from kurumi): `Automerge.change` → `docStore.set` →
   fire-and-forget `saveDoc`; a page-hide stash in localStorage covers a write still
   in flight (merged back by `initDB` — same history, so `Automerge.merge` is safe
@@ -42,9 +43,10 @@ src/lib/
   strokes.ts  drawing-pad data: bundled static/strokes/{zh,ja}/<hex>.json (strokes-index.ts) else pinned jsDelivr CDN
   radicals.ts 214 Kangxi radicals + radicalOf / radicalMembers / searchRadicals over generated radicals-data.ts
   roots.ts    Hebrew roots: rootOfWord / searchRoots / splitByRoot (highlight) over hand-curated roots-data.ts
+  path.ts     learning path per language: ordered stages (script · words · reading · skills · explore) over existing content; progress derived (pathState / stageProgress), never stored
   names.ts    place & people names per language (countries · home · world · family · given) over hand-curated names-data.ts
-  components/ ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep) · Confetti
-src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
+  components/ PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep) · Confetti
+src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration

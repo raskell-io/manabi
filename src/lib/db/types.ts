@@ -345,6 +345,8 @@ export interface ManabiDocument {
 	passageDrafts: Record<string, PassageDraft>;
 	/** Seed ids already applied, so new seeds upsert without re-adding deleted ones. */
 	seededIds: Record<string, boolean>;
+	/** Passages read to the end: passage id → when first read (ms). Drives the learning path. */
+	passageReads?: Record<string, number>;
 	settings: ManabiSettings;
 	[key: string]: unknown;
 }
@@ -361,6 +363,7 @@ export function createEmptyDocument(): ManabiDocument {
 		contentDrafts: {},
 		passageDrafts: {},
 		seededIds: {},
+		passageReads: {},
 		settings: defaultSettings()
 	};
 }
