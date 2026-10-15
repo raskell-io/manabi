@@ -40,6 +40,7 @@
 	--color-pink: #ff5c9d;
 	--color-sun: #ffb800;
 	--color-sky: #1aa3f0;
+	--color-teal: #0fae9a;
 	/* The darker bottom edge under cards and chunky buttons. */
 	--edge: #e6e3f0;
 	--shadow-soft: 0 10px 30px rgba(54, 32, 140, 0.08);
@@ -62,6 +63,7 @@
 		--color-pink: #ff7eb6;
 		--color-sun: #ffc93d;
 		--color-sky: #4cc0ff;
+		--color-teal: #3fd6c1;
 		--edge: #0b0a14;
 		--shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
 	}
@@ -83,6 +85,7 @@
 	--color-pink: #ff7eb6;
 	--color-sun: #ffc93d;
 	--color-sky: #4cc0ff;
+	--color-teal: #3fd6c1;
 	--edge: #0b0a14;
 	--shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
 }

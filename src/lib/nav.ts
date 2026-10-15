@@ -17,7 +17,8 @@ import {
 	BookA,
 	Library,
 	Layers,
-	Sparkles
+	Sparkles,
+	Puzzle
 } from 'lucide-svelte';
 
 export interface NavItem {
@@ -33,6 +34,7 @@ export interface NavItem {
 
 export const LIBRARY: NavItem[] = [
 	{ href: '/scripts', label: 'Scripts', icon: Table2, description: 'Kana, kanji, hanzi, Hangul and the alef-bet — tap a glyph to study it.' },
+	{ href: '/radicals', label: 'Radicals', icon: Puzzle, description: 'The 214 building blocks of hanzi and kanji, and the characters built on each.' },
 	{ href: '/vocab', label: 'Vocab', icon: BookA, description: 'Full HSK and JLPT word lists, by level.' },
 	{ href: '/items', label: 'Items', icon: Library, description: 'Everything you are studying. Search, edit, review a selection.' },
 	{ href: '/lessons', label: 'Lessons', icon: Layers, description: 'Your own bundles of items, each reviewable on its own.' },

@@ -296,7 +296,9 @@
 		width: 100%;
 	}
 	.page {
-		animation: page-in 0.28s ease both;
+		/* backwards, not both: a transform left filled after the animation would make
+		   .page the containing block for position:fixed children (sheets, confetti). */
+		animation: page-in 0.28s ease backwards;
 	}
 	@keyframes page-in {
 		from {

@@ -121,3 +121,29 @@ All of these create published `LearningItem`s, which `buildQueue` then schedules
 
 After regenerating data, also regenerate audio if the new texts should be playable, since
 the audio packs are keyed by exact text. The generators are idempotent and safe to re-run.
+
+### Radicals — `tools/gen-radicals-data.mjs`
+
+Generates [`src/lib/radicals-data.ts`](../src/lib/radicals-data.ts): the 214 Kangxi radicals (ideograph,
+stroke count, meaning, pinyin, component/simplified variants such as 氵 讠) and, for every hanzi/kanji in
+the Scripts sets, the seed and the vocab word lists, the radical it is filed under with its residual
+stroke count. Sources: Unicode Unihan `kRSUnicode`, `CJKRadicals.txt` and `UnicodeData.txt` (Unicode
+License v3); pinyin from makemeahanzi. Needs `unzip`. Powers `/radicals` and the radical chip on glyphs.
+
+```
+node tools/gen-radicals-data.mjs
+```
+
+### Stroke order — `tools/gen-stroke-data.mjs`
+
+Downloads [Hanzi Writer](https://github.com/chanind/hanzi-writer) stroke data for every hanzi/kanji on
+the Scripts page, in the seed and in the radical table into `static/strokes/{zh,ja}/<code-point>.json`,
+and writes `src/lib/strokes-index.ts` (what is bundled). Chinese uses `hanzi-writer-data@2.0.1` (Make Me a
+Hanzi); Japanese uses `hanzi-writer-data-jp@0.0.1` (AnimCJK — Japanese glyph shapes and stroke order).
+Both are Arphic Public License (+ LGPL for AnimCJK); see `static/strokes/README.md`. Re-runs resume and
+skip files already present; run it after the radicals generator. Other characters load from the same
+pinned CDN at runtime; the service worker caches both (`manabi-strokes`).
+
+```
+node tools/gen-stroke-data.mjs
+```

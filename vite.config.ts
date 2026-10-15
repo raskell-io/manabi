@@ -52,6 +52,19 @@ export default defineConfig({
 						}
 					},
 					{
+						// Stroke-order data for the drawing pad: bundled files and the
+						// pinned CDN fallback never change for a given URL — cache forever.
+						urlPattern: ({ url }) =>
+							/^\/strokes\/(zh|ja)\/[0-9a-f]+\.json$/.test(url.pathname) ||
+							(url.hostname === 'cdn.jsdelivr.net' && url.pathname.startsWith('/npm/hanzi-writer-data')),
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'manabi-strokes',
+							expiration: { maxEntries: 3000 },
+							cacheableResponse: { statuses: [0, 200] }
+						}
+					},
+					{
 						urlPattern: /^https:\/\/api\.openai\.com\/.*/i,
 						handler: 'NetworkOnly'
 					},

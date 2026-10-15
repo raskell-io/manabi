@@ -30,6 +30,7 @@
 		"@automerge/automerge": "^3.2.1",
 		"@fontsource-variable/nunito": "^5.3.0",
 		"@huggingface/transformers": "^4.0.1",
+		"hanzi-writer": "^3.7.3",
 		"idb-keyval": "^6.2.2",
 		"lucide-svelte": "^0.562.0",
 		"vite-plugin-top-level-await": "^1.6.0",

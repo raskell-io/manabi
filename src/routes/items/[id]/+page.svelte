@@ -4,6 +4,9 @@
 	import { ArrowLeft, Trash2, Plus, Sparkles, Play } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
+	import StrokePad from '$lib/components/StrokePad.svelte';
+	import { hanChars, strokeLang } from '$lib/strokes';
+	import { radicalOf } from '$lib/radicals';
 	import { deleteItem, getItem, pronunciationAttempts, settings, updateItem } from '$lib/db/store';
 	import { playRef } from '$lib/audio';
 	import { suggestRating } from '$lib/pronunciation';
@@ -23,6 +26,13 @@
 			form = JSON.parse(JSON.stringify(item));
 		}
 	});
+
+	// "Write it": stroke order + tracing for each hanzi/kanji in the (saved) target.
+	const writeLang = $derived(item ? strokeLang(item.language) : null);
+	const writeChars = $derived(item && writeLang ? hanChars(item.target) : []);
+	let writeIdx = $state(0);
+	const writeChar = $derived(writeChars[Math.min(writeIdx, writeChars.length - 1)]);
+	const writeRadical = $derived(writeChar ? radicalOf(writeChar) : undefined);
 
 	let tagsText = $state('');
 	$effect(() => {
@@ -122,6 +132,25 @@
 			{/if}
 			{#if vowelMsg}<span class="muted">{vowelMsg}</span>{/if}
 		</div>
+	{/if}
+
+	{#if writeLang && writeChar}
+		<section class="write">
+			<div class="write-head">
+				<h2>Write it</h2>
+				{#if writeChars.length > 1}
+					<div class="write-chars" role="tablist" aria-label="Character">
+						{#each writeChars as c, i (c)}
+							<button role="tab" class:on={c === writeChar} aria-selected={c === writeChar} lang={item?.language === 'zh' ? 'zh-Hans' : 'ja'} onclick={() => (writeIdx = i)}>{c}</button>
+						{/each}
+					</div>
+				{/if}
+				{#if writeRadical}
+					<a class="write-radical" href="/radicals?r={writeRadical.radical.n}">Radical {writeRadical.radical.char} · {writeRadical.radical.meaning}</a>
+				{/if}
+			</div>
+			{#key writeChar}<StrokePad char={writeChar} lang={writeLang} size={220} />{/key}
+		</section>
 	{/if}
 
 	<div class="grid">
@@ -264,6 +293,47 @@
 	.script-input {
 		font-family: var(--font-script);
 		font-size: 1.1rem;
+	}
+	.write {
+		margin: 0 0 1.5rem;
+		padding: 1rem 1rem 1.25rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1.25rem;
+	}
+	.write-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem 1rem;
+		margin-bottom: 0.75rem;
+	}
+	.write-head h2 {
+		margin: 0;
+	}
+	.write-chars {
+		display: inline-flex;
+		gap: 0.3rem;
+	}
+	.write-chars button {
+		min-width: 2.4rem;
+		padding: 0.15rem 0.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.7rem;
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-family: var(--font-script);
+		font-size: 1.2rem;
+	}
+	.write-chars button.on {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+	}
+	.write-radical {
+		margin-left: auto;
+		font-size: 0.8rem;
+		font-weight: 800;
+		color: var(--color-teal);
 	}
 	.examples {
 		margin-top: 2rem;

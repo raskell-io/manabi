@@ -21,6 +21,7 @@
 	// Each tool gets its own colour, like a set of crayons.
 	const TINT: Record<string, string> = {
 		'/scripts': 'var(--color-accent)',
+		'/radicals': 'var(--color-teal)',
 		'/vocab': 'var(--color-sky)',
 		'/items': 'var(--color-success)',
 		'/lessons': 'var(--color-warning)',

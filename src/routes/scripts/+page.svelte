@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { Eye, Plus, Check } from 'lucide-svelte';
-	import { settings, studyScriptChar } from '$lib/db/store';
+	import { Eye, Plus, Check, PenLine } from 'lucide-svelte';
+	import GlyphSheet from '$lib/components/GlyphSheet.svelte';
+	import { allItems, settings, studyScriptChar } from '$lib/db/store';
+	import { isHan, strokeLang } from '$lib/strokes';
 	import { scriptSections, blockGlyphs, type Glyph, type ScriptSection } from '$lib/scripts';
 	import { LANGUAGES, languageDir, type Language } from '$lib/db/types';
 
@@ -12,7 +14,11 @@
 	let activeId = $state('');
 	let levelIdx = $state(0);
 	let hideReadings = $state(false);
-	let added = $state<Set<string>>(new Set());
+	// Characters already in your reviews (marked ✓ on the grid).
+	const added = $derived(new Set($allItems.filter((it) => it.language === lang).map((it) => it.target)));
+	// Kanji/hanzi open a detail sheet (stroke order, tracing, radical); other glyphs add directly.
+	let sheet = $state<Glyph | null>(null);
+	const drawable = $derived(strokeLang(lang) !== null);
 
 	// Keep the active tab valid when the language changes; reset level on tab change.
 	$effect(() => {
@@ -32,17 +38,12 @@
 		return active.glyphs ?? [];
 	});
 
-	function add(glyph: Glyph) {
-		studyScriptChar(lang, glyph);
-		added = new Set(added).add(glyph.char);
+	function tap(glyph: Glyph) {
+		if (drawable && isHan(glyph.char)) sheet = glyph;
+		else studyScriptChar(lang, glyph);
 	}
 	function addVisible() {
-		const next = new Set(added);
-		for (const glyph of visibleGlyphs) {
-			studyScriptChar(lang, glyph);
-			next.add(glyph.char);
-		}
-		added = next;
+		for (const glyph of visibleGlyphs) studyScriptChar(lang, glyph);
 	}
 </script>
 
@@ -53,17 +54,21 @@
 			<input type="checkbox" bind:checked={hideReadings} /> <Eye size={14} /> Hide readings
 		</label>
 	</div>
-	<p class="muted">{langName} writing systems. Tap any glyph to add it to your reviews.</p>
+	<p class="muted">
+		{langName} writing systems.
+		{#if drawable}Tap a kanji or hanzi to watch its stroke order and practise writing it; tap kana to add them to your reviews.{:else}Tap any glyph to add it to your reviews.{/if}
+	</p>
 </header>
 
 {#snippet cell(glyph: Glyph)}
-	<button class="glyph-cell" class:added={added.has(glyph.char)} onclick={() => add(glyph)} title="Add to reviews">
+	{@const opens = drawable && isHan(glyph.char)}
+	<button class="glyph-cell" class:added={added.has(glyph.char)} onclick={() => tap(glyph)} title={opens ? 'Stroke order & practice' : 'Add to reviews'}>
 		<span class="glyph" lang={lang === 'zh' ? 'zh-Hans' : lang} {dir}>{glyph.char}</span>
 		{#if !hideReadings}
 			<span class="roman">{glyph.roman}</span>
 			{#if glyph.gloss}<span class="gloss">{glyph.gloss}</span>{/if}
 		{/if}
-		<span class="mark">{#if added.has(glyph.char)}<Check size={12} />{:else}<Plus size={12} />{/if}</span>
+		<span class="mark">{#if added.has(glyph.char)}<Check size={12} />{:else if opens}<PenLine size={12} />{:else}<Plus size={12} />{/if}</span>
 	</button>
 {/snippet}
 
@@ -118,6 +123,10 @@
 			HSK 3.0 word lists and makemeahanzi.
 		</p>
 	{/if}
+{/if}
+
+{#if sheet}
+	<GlyphSheet glyph={sheet} language={lang} onClose={() => (sheet = null)} />
 {/if}
 
 <style>

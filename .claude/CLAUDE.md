@@ -1,7 +1,8 @@
 # Manabi (学び)
 
 A local-first, reading-first language learning PWA for Chinese (zh), Japanese (ja),
-Korean (ko), and Hebrew (he). Trains reading and speaking — explicitly **no handwriting**. Same
+Korean (ko), and Hebrew (he). Trains reading and speaking. Handwriting exists only as optional
+practice (stroke-order animation + tracing on the drawing pad) and is **never an SRS skill**. Same
 stack as kurumi: SvelteKit 2 + Svelte 5 runes, Tailwind 4, Automerge over IndexedDB,
 transformers.js + OpenAI behind an inference router, adapter-static PWA.
 
@@ -38,8 +39,10 @@ src/lib/
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
   sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO)
-  components/ ScriptText · AudioButton · Recorder · ExerciseRunner · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep) · Confetti
-src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · vocab · items[/[id]] · lessons · dashboard · workbench · settings
+  strokes.ts  drawing-pad data: bundled static/strokes/{zh,ja}/<hex>.json (strokes-index.ts) else pinned jsDelivr CDN
+  radicals.ts 214 Kangxi radicals + radicalOf / radicalMembers / searchRadicals over generated radicals-data.ts
+  components/ ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep) · Confetti
+src/routes/   / · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · radicals[?r=n] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
