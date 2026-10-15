@@ -83,7 +83,7 @@ describe('seedsToApply (existing-user upgrade path)', () => {
 
 describe('seed passages (conversations & texts)', () => {
 	it('ships several conversations and texts in every language', () => {
-		for (const lang of ['zh', 'ja', 'he'] as const) {
+		for (const lang of ['zh', 'ja', 'ko', 'he'] as const) {
 			const ps = passages.filter((p) => p.language === lang);
 			expect(ps.filter((p) => p.kind === 'conversation').length, lang).toBeGreaterThanOrEqual(2);
 			expect(ps.filter((p) => p.kind === 'text').length, lang).toBeGreaterThanOrEqual(2);

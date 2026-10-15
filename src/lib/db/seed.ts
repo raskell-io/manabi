@@ -842,6 +842,132 @@ const ZH_PASSAGES: PassageSpec[] = [
 			{ target: '很多人午饭和晚饭都点外卖。', reading: 'Hěn duō rén wǔfàn hé wǎnfàn dōu diǎn wàimài.', meaning: 'Many people order delivery for both lunch and dinner.' },
 			{ target: '不过，自己做饭更健康也更便宜。', reading: 'Búguò, zìjǐ zuòfàn gèng jiànkāng yě gèng piányi.', meaning: 'However, cooking yourself is healthier and cheaper.' }
 		]
+	},
+	{
+		id: 'pass-zh-rent',
+		kind: 'conversation',
+		title: '租房子 — Renting an apartment',
+		level: 'A2',
+		tags: ['daily', 'home'],
+		intro: 'Asking an agent about a one-bedroom near the subway.',
+		lines: [
+			{ speaker: '中介', target: '您好，您想租什么样的房子？', reading: 'Nín hǎo, nín xiǎng zū shénme yàng de fángzi?', meaning: 'Hello, what kind of place are you looking to rent?' },
+			{ speaker: '租客', target: '我想租一室一厅，离地铁站近一点。', reading: 'Wǒ xiǎng zū yí shì yì tīng, lí dìtiě zhàn jìn yìdiǎn.', meaning: 'I’d like a one-bedroom with a living room, fairly close to a subway station.' },
+			{ speaker: '中介', target: '这套房子走路五分钟就到地铁。', reading: 'Zhè tào fángzi zǒulù wǔ fēnzhōng jiù dào dìtiě.', meaning: 'From this apartment it’s just a five-minute walk to the subway.' },
+			{ speaker: '租客', target: '房租一个月多少钱？', reading: 'Fángzū yí ge yuè duōshao qián?', meaning: 'How much is the rent per month?' },
+			{ speaker: '中介', target: '四千五，押一付三。', reading: 'Sìqiān wǔ, yā yī fù sān.', meaning: '4,500 — one month’s deposit, three months paid up front.' },
+			{ speaker: '租客', target: '有点儿贵。我可以先看看吗？', reading: 'Yǒudiǎnr guì. Wǒ kěyǐ xiān kànkan ma?', meaning: 'A bit expensive. Can I have a look first?' }
+		]
+	},
+	{
+		id: 'pass-zh-pharmacy',
+		kind: 'conversation',
+		title: '在药店 — At the pharmacy',
+		level: 'A2',
+		tags: ['health', 'daily'],
+		intro: 'Describing cold symptoms to a pharmacist.',
+		lines: [
+			{ speaker: '店员', target: '您好，哪里不舒服？', reading: 'Nín hǎo, nǎlǐ bù shūfu?', meaning: 'Hello, what seems to be the problem?' },
+			{ speaker: '顾客', target: '我有点儿感冒，嗓子疼，还咳嗽。', reading: 'Wǒ yǒudiǎnr gǎnmào, sǎngzi téng, hái késou.', meaning: 'I have a bit of a cold — a sore throat and a cough.' },
+			{ speaker: '店员', target: '发烧吗？', reading: 'Fāshāo ma?', meaning: 'Do you have a fever?' },
+			{ speaker: '顾客', target: '不发烧。', reading: 'Bù fāshāo.', meaning: 'No fever.' },
+			{ speaker: '店员', target: '这个药一天吃三次，饭后吃。', reading: 'Zhège yào yì tiān chī sān cì, fàn hòu chī.', meaning: 'Take this medicine three times a day, after meals.' },
+			{ speaker: '顾客', target: '好的，谢谢。要多喝水，对吧？', reading: 'Hǎo de, xièxie. Yào duō hē shuǐ, duì ba?', meaning: 'Okay, thanks. I should drink lots of water, right?' },
+			{ speaker: '店员', target: '对，好好儿休息。', reading: 'Duì, hǎohāor xiūxi.', meaning: 'Right — and get plenty of rest.' }
+		]
+	},
+	{
+		id: 'pass-zh-parcel',
+		kind: 'conversation',
+		title: '取快递 — Picking up a parcel',
+		level: 'A2',
+		tags: ['daily', 'shopping'],
+		intro: 'A courier calls about a delivery left in the parcel locker.',
+		lines: [
+			{ speaker: '快递员', target: '你好，你的快递到了，放在楼下的快递柜里。', reading: 'Nǐ hǎo, nǐ de kuàidì dào le, fàng zài lóuxià de kuàidìguì lǐ.', meaning: 'Hi, your parcel has arrived — it’s in the parcel locker downstairs.' },
+			{ speaker: '我', target: '好的，取件码是多少？', reading: 'Hǎo de, qǔjiànmǎ shì duōshao?', meaning: 'Okay, what’s the pickup code?' },
+			{ speaker: '快递员', target: '我已经发短信给你了。', reading: 'Wǒ yǐjīng fā duǎnxìn gěi nǐ le.', meaning: 'I’ve already texted it to you.' },
+			{ speaker: '我', target: '收到了，谢谢！', reading: 'Shōudào le, xièxie!', meaning: 'Got it, thanks!' },
+			{ speaker: '快递员', target: '不客气。箱子有点儿重，小心点儿。', reading: 'Bú kèqi. Xiāngzi yǒudiǎnr zhòng, xiǎoxīn diǎnr.', meaning: 'You’re welcome. The box is a bit heavy, so be careful.' }
+		]
+	},
+	{
+		id: 'pass-zh-haircut',
+		kind: 'conversation',
+		title: '理发 — Getting a haircut',
+		level: 'A2',
+		tags: ['daily'],
+		intro: 'Telling the barber how you want it cut.',
+		lines: [
+			{ speaker: '理发师', target: '您想怎么剪？', reading: 'Nín xiǎng zěnme jiǎn?', meaning: 'How would you like it cut?' },
+			{ speaker: '顾客', target: '剪短一点儿，但是不要太短。', reading: 'Jiǎn duǎn yìdiǎnr, dànshì búyào tài duǎn.', meaning: 'A bit shorter, but not too short.' },
+			{ speaker: '理发师', target: '后面也剪吗？', reading: 'Hòumiàn yě jiǎn ma?', meaning: 'The back as well?' },
+			{ speaker: '顾客', target: '对，旁边和后面都剪一点儿。', reading: 'Duì, pángbiān hé hòumiàn dōu jiǎn yìdiǎnr.', meaning: 'Yes, take a little off the sides and the back.' },
+			{ speaker: '理发师', target: '先洗头吧。水温可以吗？', reading: 'Xiān xǐ tóu ba. Shuǐwēn kěyǐ ma?', meaning: 'Let’s wash your hair first. Is the water temperature okay?' },
+			{ speaker: '顾客', target: '可以，正好。', reading: 'Kěyǐ, zhènghǎo.', meaning: 'Yes, just right.' }
+		]
+	},
+	{
+		id: 'pass-zh-weather',
+		kind: 'text',
+		title: '明天的天气 — Tomorrow’s weather',
+		level: 'A2',
+		tags: ['weather', 'daily'],
+		intro: 'A short weather forecast.',
+		lines: [
+			{ target: '明天北京是晴天，气温十五到二十五度。', reading: 'Míngtiān Běijīng shì qíngtiān, qìwēn shíwǔ dào èrshíwǔ dù.', meaning: 'Tomorrow Beijing will be sunny, with temperatures from 15 to 25 degrees.' },
+			{ target: '早上和晚上比较凉，出门最好带一件外套。', reading: 'Zǎoshang hé wǎnshang bǐjiào liáng, chūmén zuìhǎo dài yí jiàn wàitào.', meaning: 'Mornings and evenings are fairly cool, so it’s best to take a jacket when you go out.' },
+			{ target: '后天可能会下雨，风也比较大。', reading: 'Hòutiān kěnéng huì xià yǔ, fēng yě bǐjiào dà.', meaning: 'The day after tomorrow it may rain, and it will be quite windy.' },
+			{ target: '请大家注意天气变化，别忘了带伞。', reading: 'Qǐng dàjiā zhùyì tiānqì biànhuà, bié wàng le dài sǎn.', meaning: 'Please keep an eye on the weather, and don’t forget your umbrella.' }
+		]
+	},
+	{
+		id: 'pass-zh-commute',
+		kind: 'text',
+		title: '上班的路上 — The morning commute',
+		level: 'A2',
+		tags: ['daily', 'work', 'transport'],
+		intro: 'Getting to the office by bike and subway.',
+		lines: [
+			{ target: '我每天早上七点半出门。', reading: 'Wǒ měitiān zǎoshang qī diǎn bàn chūmén.', meaning: 'I leave home at half past seven every morning.' },
+			{ target: '先骑共享单车到地铁站，然后坐地铁去公司。', reading: 'Xiān qí gòngxiǎng dānchē dào dìtiě zhàn, ránhòu zuò dìtiě qù gōngsī.', meaning: 'First I ride a shared bike to the subway station, then take the subway to the office.' },
+			{ target: '早高峰的时候，地铁里人特别多。', reading: 'Zǎo gāofēng de shíhou, dìtiě lǐ rén tèbié duō.', meaning: 'During the morning rush hour the subway is extremely crowded.' },
+			{ target: '我一般在车上听音乐或者看新闻。', reading: 'Wǒ yìbān zài chē shàng tīng yīnyuè huòzhě kàn xīnwén.', meaning: 'On the train I usually listen to music or read the news.' },
+			{ target: '差不多四十分钟以后，我就到公司了。', reading: 'Chàbuduō sìshí fēnzhōng yǐhòu, wǒ jiù dào gōngsī le.', meaning: 'After about forty minutes, I’m at the office.' }
+		]
+	},
+	{
+		id: 'pass-zh-birthday',
+		kind: 'conversation',
+		title: '生日聚会 — A birthday invitation',
+		level: 'A2',
+		tags: ['plans', 'daily'],
+		intro: 'Inviting a friend over for a birthday dinner.',
+		lines: [
+			{ speaker: 'A', target: '下个星期六是我的生日，你来我家吃饭吧！', reading: 'Xià ge xīngqīliù shì wǒ de shēngrì, nǐ lái wǒ jiā chī fàn ba!', meaning: 'Next Saturday is my birthday — come to my place for dinner!' },
+			{ speaker: 'B', target: '好啊！生日快乐！几点到？', reading: 'Hǎo a! Shēngrì kuàilè! Jǐ diǎn dào?', meaning: 'Sure! Happy birthday! What time should I come?' },
+			{ speaker: 'A', target: '晚上六点吧。我还请了几个同事。', reading: 'Wǎnshang liù diǎn ba. Wǒ hái qǐng le jǐ ge tóngshì.', meaning: 'Six in the evening. I’ve invited a few coworkers too.' },
+			{ speaker: 'B', target: '要我带什么吗？', reading: 'Yào wǒ dài shénme ma?', meaning: 'Want me to bring anything?' },
+			{ speaker: 'A', target: '不用，你来就行！', reading: 'Búyòng, nǐ lái jiù xíng!', meaning: 'No need — just come!' },
+			{ speaker: 'B', target: '那我带一个蛋糕吧。', reading: 'Nà wǒ dài yí ge dàngāo ba.', meaning: 'Then I’ll bring a cake.' }
+		]
+	},
+	{
+		id: 'pass-zh-bank',
+		kind: 'conversation',
+		title: '在银行 — Opening a bank account',
+		level: 'A2',
+		tags: ['money', 'daily'],
+		intro: 'Opening an account and getting a bank card.',
+		lines: [
+			{ speaker: '职员', target: '您好，请问您要办什么业务？', reading: 'Nín hǎo, qǐngwèn nín yào bàn shénme yèwù?', meaning: 'Hello, what can I help you with today?' },
+			{ speaker: '顾客', target: '我想开一个银行账户。', reading: 'Wǒ xiǎng kāi yí ge yínháng zhànghù.', meaning: 'I’d like to open a bank account.' },
+			{ speaker: '职员', target: '请给我看一下您的护照。', reading: 'Qǐng gěi wǒ kàn yíxià nín de hùzhào.', meaning: 'May I see your passport, please?' },
+			{ speaker: '顾客', target: '给您。还需要什么吗？', reading: 'Gěi nín. Hái xūyào shénme ma?', meaning: 'Here you are. Do you need anything else?' },
+			{ speaker: '职员', target: '请填一下这张表，然后在这里签字。', reading: 'Qǐng tián yíxià zhè zhāng biǎo, ránhòu zài zhèlǐ qiānzì.', meaning: 'Please fill in this form, then sign here.' },
+			{ speaker: '顾客', target: '我可以同时办一张银行卡吗？', reading: 'Wǒ kěyǐ tóngshí bàn yì zhāng yínhángkǎ ma?', meaning: 'Can I get a bank card at the same time?' },
+			{ speaker: '职员', target: '可以，十分钟就好。', reading: 'Kěyǐ, shí fēnzhōng jiù hǎo.', meaning: 'Yes, it’ll be ready in ten minutes.' }
+		]
 	}
 ];
 
@@ -1042,6 +1168,129 @@ const JA_PASSAGES: PassageSpec[] = [
 			{ target: '最近は、健康にいいと言われている。', reading: 'さいきんは、けんこうにいいといわれている。', transliteration: 'Saikin wa, kenkō ni ii to iwarete iru.', meaning: 'Recently, it’s said to be good for your health.' },
 			{ target: '家で作る人も、店で食べる人も多い。', reading: 'いえでつくるひとも、みせでたべるひともおおい。', transliteration: 'Ie de tsukuru hito mo, mise de taberu hito mo ōi.', meaning: 'Many people both cook at home and eat out.' }
 		]
+	},
+	{
+		id: 'pass-ja-clinic',
+		kind: 'conversation',
+		title: '病院の受付 — At the clinic reception',
+		level: 'N3',
+		tags: ['health', 'polite'],
+		intro: 'Checking in at a clinic for the first time.',
+		lines: [
+			{ speaker: '受付', target: 'こんにちは。初診ですか。', reading: 'こんにちは。しょしんですか。', transliteration: 'Konnichiwa. Shoshin desu ka.', meaning: 'Hello. Is this your first visit?' },
+			{ speaker: '患者', target: 'はい、初めてです。', reading: 'はい、はじめてです。', transliteration: 'Hai, hajimete desu.', meaning: 'Yes, it’s my first time.' },
+			{ speaker: '受付', target: '保険証をお願いします。こちらの問診票にご記入ください。', reading: 'ほけんしょうをおねがいします。こちらのもんしんひょうにごきにゅうください。', transliteration: 'Hokenshō o onegai shimasu. Kochira no monshinhyō ni go-kinyū kudasai.', meaning: 'Your health insurance card, please. And please fill out this questionnaire.' },
+			{ speaker: '患者', target: 'わかりました。どのくらい待ちますか。', reading: 'わかりました。どのくらいまちますか。', transliteration: 'Wakarimashita. Dono kurai machimasu ka.', meaning: 'All right. How long is the wait?' },
+			{ speaker: '受付', target: '三十分ぐらいです。お名前をお呼びするまで、お待ちください。', reading: 'さんじゅっぷんぐらいです。おなまえをおよびするまで、おまちください。', transliteration: 'Sanjuppun gurai desu. O-namae o o-yobi suru made, o-machi kudasai.', meaning: 'About thirty minutes. Please wait until we call your name.' }
+		]
+	},
+	{
+		id: 'pass-ja-neighbor',
+		kind: 'conversation',
+		title: '引っ越しの挨拶 — Greeting the new neighbors',
+		level: 'N3',
+		tags: ['home', 'polite'],
+		intro: 'The customary hello (with a small gift) after moving in.',
+		lines: [
+			{ speaker: '田中', target: 'はじめまして。隣に引っ越してきた田中です。', reading: 'はじめまして。となりにひっこしてきたたなかです。', transliteration: 'Hajimemashite. Tonari ni hikkoshite kita Tanaka desu.', meaning: 'Nice to meet you. I’m Tanaka — I’ve just moved in next door.' },
+			{ speaker: '山本', target: 'あ、どうも。山本です。', reading: 'あ、どうも。やまもとです。', transliteration: 'A, dōmo. Yamamoto desu.', meaning: 'Oh, hello. I’m Yamamoto.' },
+			{ speaker: '田中', target: 'これ、つまらないものですが、どうぞ。', reading: 'これ、つまらないものですが、どうぞ。', transliteration: 'Kore, tsumaranai mono desu ga, dōzo.', meaning: 'It’s nothing much, but please take this.' },
+			{ speaker: '山本', target: 'わざわざありがとうございます。', reading: 'わざわざありがとうございます。', transliteration: 'Wazawaza arigatō gozaimasu.', meaning: 'Thank you for going to the trouble.' },
+			{ speaker: '田中', target: '何かとご迷惑をおかけするかもしれませんが、よろしくお願いします。', reading: 'なにかとごめいわくをおかけするかもしれませんが、よろしくおねがいします。', transliteration: 'Nanika to go-meiwaku o okake suru kamo shiremasen ga, yoroshiku onegai shimasu.', meaning: 'I may be a bother now and then, but I look forward to being your neighbor.' },
+			{ speaker: '山本', target: 'こちらこそ、よろしくお願いします。', reading: 'こちらこそ、よろしくおねがいします。', transliteration: 'Kochira koso, yoroshiku onegai shimasu.', meaning: 'Likewise — welcome.' }
+		]
+	},
+	{
+		id: 'pass-ja-garbage',
+		kind: 'text',
+		title: 'ゴミの出し方 — Putting out the trash',
+		level: 'N3',
+		tags: ['home', 'society'],
+		intro: 'A non-fiction note on Japan’s trash-sorting rules.',
+		lines: [
+			{ target: '日本では、ゴミを種類ごとに分けて出します。', reading: 'にほんでは、ゴミをしゅるいごとにわけてだします。', transliteration: 'Nihon de wa, gomi o shurui goto ni wakete dashimasu.', meaning: 'In Japan, trash is sorted by type before it is put out.' },
+			{ target: '燃えるゴミ、燃えないゴミ、資源ゴミなどがあります。', reading: 'もえるゴミ、もえないゴミ、しげんゴミなどがあります。', transliteration: 'Moeru gomi, moenai gomi, shigen gomi nado ga arimasu.', meaning: 'There is burnable trash, non-burnable trash, recyclables and so on.' },
+			{ target: '出す曜日は地域によって決まっています。', reading: 'だすようびはちいきによってきまっています。', transliteration: 'Dasu yōbi wa chiiki ni yotte kimatte imasu.', meaning: 'Each area sets its own collection days.' },
+			{ target: '朝八時までに、決められた場所に出してください。', reading: 'あさはちじまでに、きめられたばしょにだしてください。', transliteration: 'Asa hachi-ji made ni, kimerareta basho ni dashite kudasai.', meaning: 'Please put it out at the designated spot by 8 a.m.' },
+			{ target: 'ルールを守らないと、回収されないこともあります。', reading: 'ルールをまもらないと、かいしゅうされないこともあります。', transliteration: 'Rūru o mamoranai to, kaishū sarenai koto mo arimasu.', meaning: 'If you don’t follow the rules, it may not be collected.' }
+		]
+	},
+	{
+		id: 'pass-ja-salon',
+		kind: 'conversation',
+		title: '美容院で — At the hair salon',
+		level: 'N3',
+		tags: ['daily'],
+		intro: 'Explaining the cut you want.',
+		lines: [
+			{ speaker: '美容師', target: '今日はどうなさいますか。', reading: 'きょうはどうなさいますか。', transliteration: 'Kyō wa dō nasaimasu ka.', meaning: 'What would you like today?' },
+			{ speaker: '客', target: 'カットをお願いします。全体的に少し短くしてください。', reading: 'カットをおねがいします。ぜんたいてきにすこしみじかくしてください。', transliteration: 'Katto o onegai shimasu. Zentaiteki ni sukoshi mijikaku shite kudasai.', meaning: 'A cut, please. Just a little shorter all over.' },
+			{ speaker: '美容師', target: '前髪はどうしますか。', reading: 'まえがみはどうしますか。', transliteration: 'Maegami wa dō shimasu ka.', meaning: 'And your bangs?' },
+			{ speaker: '客', target: '眉にかかるぐらいでお願いします。', reading: 'まゆにかかるぐらいでおねがいします。', transliteration: 'Mayu ni kakaru gurai de onegai shimasu.', meaning: 'Down to about my eyebrows, please.' },
+			{ speaker: '美容師', target: 'かしこまりました。では、シャンプーからしますね。', reading: 'かしこまりました。では、シャンプーからしますね。', transliteration: 'Kashikomarimashita. Dewa, shanpū kara shimasu ne.', meaning: 'Certainly. We’ll start with a shampoo, then.' }
+		]
+	},
+	{
+		id: 'pass-ja-post',
+		kind: 'conversation',
+		title: '郵便局で — At the post office',
+		level: 'N3',
+		tags: ['daily', 'shopping'],
+		intro: 'Sending a package abroad.',
+		lines: [
+			{ speaker: '客', target: 'この荷物をアメリカに送りたいんですが。', reading: 'このにもつをアメリカにおくりたいんですが。', transliteration: 'Kono nimotsu o Amerika ni okuritai n desu ga.', meaning: 'I’d like to send this package to the US.' },
+			{ speaker: '局員', target: '航空便と船便がありますが、どちらにしますか。', reading: 'こうくうびんとふなびんがありますが、どちらにしますか。', transliteration: 'Kōkūbin to funabin ga arimasu ga, dochira ni shimasu ka.', meaning: 'There’s airmail and sea mail — which would you like?' },
+			{ speaker: '客', target: '航空便だと、何日ぐらいかかりますか。', reading: 'こうくうびんだと、なんにちぐらいかかりますか。', transliteration: 'Kōkūbin da to, nan-nichi gurai kakarimasu ka.', meaning: 'How many days does airmail take?' },
+			{ speaker: '局員', target: '一週間ぐらいです。中身は何ですか。', reading: 'いっしゅうかんぐらいです。なかみはなんですか。', transliteration: 'Isshūkan gurai desu. Nakami wa nan desu ka.', meaning: 'About a week. What’s inside?' },
+			{ speaker: '客', target: '本とお菓子です。', reading: 'ほんとおかしです。', transliteration: 'Hon to okashi desu.', meaning: 'Books and snacks.' },
+			{ speaker: '局員', target: 'では、こちらの伝票にご記入ください。', reading: 'では、こちらのでんぴょうにごきにゅうください。', transliteration: 'Dewa, kochira no denpyō ni go-kinyū kudasai.', meaning: 'Then please fill out this form.' }
+		]
+	},
+	{
+		id: 'pass-ja-ic-card',
+		kind: 'conversation',
+		title: '駅でチャージ — Topping up a train card',
+		level: 'N3',
+		tags: ['travel', 'transport'],
+		intro: 'Asking station staff how to add money to an IC card.',
+		lines: [
+			{ speaker: '客', target: 'すみません、このカードにチャージしたいんですが、どうすればいいですか。', reading: 'すみません、このカードにチャージしたいんですが、どうすればいいですか。', transliteration: 'Sumimasen, kono kādo ni chāji shitai n desu ga, dō sureba ii desu ka.', meaning: 'Excuse me, I’d like to top up this card — how do I do it?' },
+			{ speaker: '駅員', target: 'あちらの券売機で、「チャージ」のボタンを押してください。', reading: 'あちらのけんばいきで、「チャージ」のボタンをおしてください。', transliteration: 'Achira no kenbaiki de, “chāji” no botan o oshite kudasai.', meaning: 'At the ticket machine over there, press the “Charge” button.' },
+			{ speaker: '客', target: '現金だけですか。', reading: 'げんきんだけですか。', transliteration: 'Genkin dake desu ka.', meaning: 'Is it cash only?' },
+			{ speaker: '駅員', target: 'はい、券売機は現金だけです。', reading: 'はい、けんばいきはげんきんだけです。', transliteration: 'Hai, kenbaiki wa genkin dake desu.', meaning: 'Yes, the ticket machines take cash only.' },
+			{ speaker: '客', target: 'わかりました。ありがとうございます。', reading: 'わかりました。ありがとうございます。', transliteration: 'Wakarimashita. Arigatō gozaimasu.', meaning: 'Got it. Thank you.' }
+		]
+	},
+	{
+		id: 'pass-ja-commute',
+		kind: 'text',
+		title: '朝の通勤 — The morning commute',
+		level: 'N3',
+		tags: ['daily', 'work', 'transport'],
+		intro: 'A first-person account of a weekday morning.',
+		lines: [
+			{ target: '私は毎朝七時の電車に乗って会社に行きます。', reading: 'わたしはまいあさしちじのでんしゃにのってかいしゃにいきます。', transliteration: 'Watashi wa maiasa shichi-ji no densha ni notte kaisha ni ikimasu.', meaning: 'Every morning I take the seven o’clock train to work.' },
+			{ target: '電車はいつも混んでいて、座れることはほとんどありません。', reading: 'でんしゃはいつもこんでいて、すわれることはほとんどありません。', transliteration: 'Densha wa itsumo konde ite, suwareru koto wa hotondo arimasen.', meaning: 'The train is always packed, and I hardly ever get a seat.' },
+			{ target: '立ったまま、スマホでニュースを読んだり、音楽を聞いたりします。', reading: 'たったまま、スマホでニュースをよんだり、おんがくをきいたりします。', transliteration: 'Tatta mama, sumaho de nyūsu o yondari, ongaku o kiitari shimasu.', meaning: 'Standing, I read the news on my phone or listen to music.' },
+			{ target: '駅から会社までは歩いて十分です。', reading: 'えきからかいしゃまではあるいてじゅっぷんです。', transliteration: 'Eki kara kaisha made wa aruite juppun desu.', meaning: 'From the station it’s a ten-minute walk to the office.' },
+			{ target: '途中のコンビニでコーヒーを買うのが、毎朝の楽しみです。', reading: 'とちゅうのコンビニでコーヒーをかうのが、まいあさのたのしみです。', transliteration: 'Tochū no konbini de kōhī o kau no ga, maiasa no tanoshimi desu.', meaning: 'Grabbing a coffee at a convenience store on the way is my little treat every morning.' }
+		]
+	},
+	{
+		id: 'pass-ja-gift',
+		kind: 'conversation',
+		title: 'プレゼント選び — Choosing a present',
+		level: 'N3',
+		tags: ['shopping', 'polite'],
+		intro: 'Buying and gift-wrapping a birthday present.',
+		lines: [
+			{ speaker: '店員', target: '何かお探しですか。', reading: 'なにかおさがしですか。', transliteration: 'Nanika o-sagashi desu ka.', meaning: 'Are you looking for something?' },
+			{ speaker: '客', target: '母の誕生日プレゼントを探しているんです。', reading: 'ははのたんじょうびプレゼントをさがしているんです。', transliteration: 'Haha no tanjōbi purezento o sagashite iru n desu.', meaning: 'I’m looking for a birthday present for my mother.' },
+			{ speaker: '店員', target: 'こちらのハンカチはいかがですか。人気がありますよ。', reading: 'こちらのハンカチはいかがですか。にんきがありますよ。', transliteration: 'Kochira no hankachi wa ikaga desu ka. Ninki ga arimasu yo.', meaning: 'How about this handkerchief? It’s very popular.' },
+			{ speaker: '客', target: 'いいですね。プレゼント用に包んでもらえますか。', reading: 'いいですね。プレゼントようにつつんでもらえますか。', transliteration: 'Ii desu ne. Purezento-yō ni tsutsunde moraemasu ka.', meaning: 'Lovely. Could you gift-wrap it?' },
+			{ speaker: '店員', target: 'かしこまりました。リボンは何色がよろしいですか。', reading: 'かしこまりました。リボンはなにいろがよろしいですか。', transliteration: 'Kashikomarimashita. Ribon wa nani-iro ga yoroshii desu ka.', meaning: 'Certainly. What color ribbon would you like?' },
+			{ speaker: '客', target: 'ピンクでお願いします。', reading: 'ピンクでおねがいします。', transliteration: 'Pinku de onegai shimasu.', meaning: 'Pink, please.' }
+		]
 	}
 ];
 
@@ -1232,6 +1481,134 @@ const HE_PASSAGES: PassageSpec[] = [
 			{ target: 'אֲנִי לוֹמֶדֶת בָּאוּנִיבֶרְסִיטָה.', reading: 'ani lomedet ba’universita.', meaning: 'I study at the university.' },
 			{ target: 'בַּזְּמַן הַפָּנוּי אֲנִי אוֹהֶבֶת לִקְרֹא.', reading: 'bazman hapanui ani ohevet likro.', meaning: 'In my free time I like to read.' }
 		]
+	},
+	{
+		id: 'pass-he-pharmacy',
+		kind: 'conversation',
+		title: 'בְּבֵית הַמִּרְקַחַת — At the pharmacy',
+		level: 'A2',
+		tags: ['health', 'daily'],
+		intro: 'Asking a pharmacist for something for a headache.',
+		lines: [
+			{ speaker: 'לָקוֹחַ', target: 'שָׁלוֹם, יֵשׁ לִי כְּאֵב רֹאשׁ.', reading: 'shalom, yesh li ke’ev rosh.', meaning: 'Hello, I have a headache.' },
+			{ speaker: 'רוֹקַחַת', target: 'יֵשׁ לְךָ גַּם חֹם?', reading: 'yesh lecha gam chom?', meaning: 'Do you have a fever too?' },
+			{ speaker: 'לָקוֹחַ', target: 'לֹא, רַק כְּאֵב רֹאשׁ.', reading: 'lo, rak ke’ev rosh.', meaning: 'No, just a headache.' },
+			{ speaker: 'רוֹקַחַת', target: 'קַח אֶת זֶה, כַּדּוּר אֶחָד כָּל שֵׁשׁ שָׁעוֹת.', reading: 'kach et ze, kadur echad kol shesh sha’ot.', meaning: 'Take this — one pill every six hours.' },
+			{ speaker: 'לָקוֹחַ', target: 'כַּמָּה זֶה עוֹלֶה?', reading: 'kama ze oleh?', meaning: 'How much does it cost?' },
+			{ speaker: 'רוֹקַחַת', target: 'עֶשְׂרִים שֶׁקֶל. רְפוּאָה שְׁלֵמָה!', reading: 'esrim shekel. refu’a shlema!', meaning: 'Twenty shekels. Get well soon!' }
+		]
+	},
+	{
+		id: 'pass-he-taxi',
+		kind: 'conversation',
+		title: 'בַּמּוֹנִית — In a taxi',
+		level: 'A2',
+		tags: ['travel', 'transport'],
+		intro: 'A taxi ride to the central bus station.',
+		lines: [
+			{ speaker: 'נוֹסֵעַ', target: 'שָׁלוֹם, לַתַּחֲנָה הַמֶּרְכָּזִית, בְּבַקָּשָׁה.', reading: 'shalom, latachana hamerkazit, bevakasha.', meaning: 'Hello, to the central station, please.' },
+			{ speaker: 'נֶהָג', target: 'בְּסֵדֶר. עִם מוֹנֶה?', reading: 'beseder. im mone?', meaning: 'Okay. With the meter?' },
+			{ speaker: 'נוֹסֵעַ', target: 'כֵּן, בְּבַקָּשָׁה. כַּמָּה זְמַן זֶה לוֹקֵחַ?', reading: 'ken, bevakasha. kama zman ze lokeach?', meaning: 'Yes, please. How long does it take?' },
+			{ speaker: 'נֶהָג', target: 'בְּעֵרֶךְ רֶבַע שָׁעָה, יֵשׁ פְּקָקִים.', reading: 'be’erech reva sha’a, yesh pkakim.', meaning: 'About a quarter of an hour — there’s traffic.' },
+			{ speaker: 'נוֹסֵעַ', target: 'אֶפְשָׁר לְשַׁלֵּם בְּכַרְטִיס אַשְׁרַאי?', reading: 'efshar leshalem bekartis ashrai?', meaning: 'Can I pay by credit card?' },
+			{ speaker: 'נֶהָג', target: 'כֵּן, אֵין בְּעָיָה.', reading: 'ken, ein be’aya.', meaning: 'Yes, no problem.' }
+		]
+	},
+	{
+		id: 'pass-he-shabbat',
+		kind: 'conversation',
+		title: 'אֲרוּחַת שַׁבָּת — A Shabbat dinner invitation',
+		level: 'A2',
+		tags: ['plans', 'culture'],
+		intro: 'Inviting a friend for Friday-night dinner.',
+		lines: [
+			{ speaker: 'א', target: 'מָה אַתָּה עוֹשֶׂה בְּיוֹם שִׁשִּׁי בָּעֶרֶב?', reading: 'ma ata ose beyom shishi ba’erev?', meaning: 'What are you doing on Friday evening?' },
+			{ speaker: 'ב', target: 'עוֹד לֹא יוֹדֵעַ. לָמָּה?', reading: 'od lo yode’a. lama?', meaning: 'I don’t know yet. Why?' },
+			{ speaker: 'א', target: 'בּוֹא לַאֲרוּחַת שַׁבָּת אֶצְלֵנוּ.', reading: 'bo la’aruchat shabbat etzlenu.', meaning: 'Come to Shabbat dinner at our place.' },
+			{ speaker: 'ב', target: 'בְּשִׂמְחָה! מָה לְהָבִיא?', reading: 'besimcha! ma lehavi?', meaning: 'Gladly! What should I bring?' },
+			{ speaker: 'א', target: 'אִם אַתָּה רוֹצֶה, בַּקְבּוּק יַיִן.', reading: 'im ata rotze, bakbuk yayin.', meaning: 'If you like, a bottle of wine.' },
+			{ speaker: 'ב', target: 'מְצֻיָּן. בְּאֵיזוֹ שָׁעָה?', reading: 'metzuyan. be’eizo sha’a?', meaning: 'Great. What time?' },
+			{ speaker: 'א', target: 'בְּשֶׁבַע. שַׁבָּת שָׁלוֹם!', reading: 'besheva. shabbat shalom!', meaning: 'At seven. Shabbat shalom!' }
+		]
+	},
+	{
+		id: 'pass-he-bus',
+		kind: 'conversation',
+		title: 'בָּאוֹטוֹבּוּס — On the bus',
+		level: 'A2',
+		tags: ['travel', 'transport'],
+		intro: 'Checking the route and paying with a Rav-Kav card.',
+		lines: [
+			{ speaker: 'נוֹסַעַת', target: 'סְלִיחָה, הָאוֹטוֹבּוּס הַזֶּה נוֹסֵעַ לַיָּם?', reading: 'slicha, ha’otobus haze nose’a layam?', meaning: 'Excuse me, does this bus go to the beach?' },
+			{ speaker: 'נֶהָג', target: 'כֵּן, אֲבָל זֶה לוֹקֵחַ חֲצִי שָׁעָה.', reading: 'ken, aval ze lokeach chatzi sha’a.', meaning: 'Yes, but it takes half an hour.' },
+			{ speaker: 'נוֹסַעַת', target: 'אֵיפֹה צָרִיךְ לָרֶדֶת?', reading: 'eifo tzarich laredet?', meaning: 'Where do I get off?' },
+			{ speaker: 'נֶהָג', target: 'בַּתַּחֲנָה הָאַחֲרוֹנָה.', reading: 'batachana ha’acharona.', meaning: 'At the last stop.' },
+			{ speaker: 'נוֹסַעַת', target: 'תּוֹדָה. אֶפְשָׁר לְשַׁלֵּם עִם רַב־קַו?', reading: 'todah. efshar leshalem im rav-kav?', meaning: 'Thanks. Can I pay with a Rav-Kav?' },
+			{ speaker: 'נֶהָג', target: 'כֵּן, תַּעֲבִירִי אֶת הַכַּרְטִיס כָּאן.', reading: 'ken, ta’aviri et hakartis kan.', meaning: 'Yes, tap the card here.' }
+		]
+	},
+	{
+		id: 'pass-he-clothes',
+		kind: 'conversation',
+		title: 'בַּחֲנוּת בְּגָדִים — At a clothing store',
+		level: 'A2',
+		tags: ['shopping'],
+		intro: 'Looking for a shirt and asking for a smaller size.',
+		lines: [
+			{ speaker: 'מוֹכֶרֶת', target: 'אֶפְשָׁר לַעֲזֹר?', reading: 'efshar la’azor?', meaning: 'Can I help you?' },
+			{ speaker: 'לָקוֹחַ', target: 'כֵּן, אֲנִי מְחַפֵּשׂ חֻלְצָה לְבָנָה.', reading: 'ken, ani mechapes chultza levana.', meaning: 'Yes, I’m looking for a white shirt.' },
+			{ speaker: 'מוֹכֶרֶת', target: 'אֵיזוֹ מִדָּה?', reading: 'eizo mida?', meaning: 'What size?' },
+			{ speaker: 'לָקוֹחַ', target: 'מֶדְיוּם. אֶפְשָׁר לִמְדֹּד?', reading: 'medyum. efshar limdod?', meaning: 'Medium. Can I try it on?' },
+			{ speaker: 'מוֹכֶרֶת', target: 'בְּוַדַּאי, תָּא הַמְּדִידָה שָׁם.', reading: 'bevadai, ta hamdida sham.', meaning: 'Of course — the fitting room is over there.' },
+			{ speaker: 'לָקוֹחַ', target: 'הִיא קְצָת גְּדוֹלָה. יֵשׁ קְטַנָּה יוֹתֵר?', reading: 'hi ktzat gdola. yesh ktana yoter?', meaning: 'It’s a bit big. Do you have a smaller one?' }
+		]
+	},
+	{
+		id: 'pass-he-morning',
+		kind: 'text',
+		title: 'הַבֹּקֶר שֶׁלִּי — My morning',
+		level: 'A1',
+		tags: ['daily', 'routine'],
+		intro: 'A simple weekday routine in the present tense.',
+		lines: [
+			{ target: 'אֲנִי קָם בְּשֵׁשׁ וָחֵצִי.', reading: 'ani kam beshesh vachetzi.', meaning: 'I get up at half past six.' },
+			{ target: 'אֲנִי שׁוֹתֶה קָפֶה וְאוֹכֵל לֶחֶם עִם גְּבִינָה.', reading: 'ani shote kafe ve’ochel lechem im gvina.', meaning: 'I drink coffee and eat bread with cheese.' },
+			{ target: 'אַחַר כָּךְ אֲנִי נוֹסֵעַ לָעֲבוֹדָה בָּאוֹטוֹבּוּס.', reading: 'achar kach ani nose’a la’avoda ba’otobus.', meaning: 'Then I go to work by bus.' },
+			{ target: 'הַנְּסִיעָה לוֹקַחַת עֶשְׂרִים דַּקּוֹת.', reading: 'hanesi’a lokachat esrim dakot.', meaning: 'The ride takes twenty minutes.' },
+			{ target: 'בָּאוֹטוֹבּוּס אֲנִי קוֹרֵא סֵפֶר.', reading: 'ba’otobus ani kore sefer.', meaning: 'On the bus I read a book.' }
+		]
+	},
+	{
+		id: 'pass-he-apartment',
+		kind: 'conversation',
+		title: 'מְחַפְּשִׂים דִּירָה — Viewing an apartment',
+		level: 'A2',
+		tags: ['home', 'daily'],
+		intro: 'Questions for a landlord: rooms, elevator, rent.',
+		lines: [
+			{ speaker: 'שׂוֹכֵר', target: 'כַּמָּה חֲדָרִים יֵשׁ בַּדִּירָה?', reading: 'kama chadarim yesh badira?', meaning: 'How many rooms does the apartment have?' },
+			{ speaker: 'בַּעַל הַבַּיִת', target: 'שְׁלוֹשָׁה חֲדָרִים וּמִרְפֶּסֶת.', reading: 'shlosha chadarim umirpeset.', meaning: 'Three rooms and a balcony.' },
+			{ speaker: 'שׂוֹכֵר', target: 'יֵשׁ מַעֲלִית?', reading: 'yesh ma’alit?', meaning: 'Is there an elevator?' },
+			{ speaker: 'בַּעַל הַבַּיִת', target: 'לֹא, אֲבָל זֶה רַק קוֹמָה שְׁנִיָּה.', reading: 'lo, aval ze rak koma shniya.', meaning: 'No, but it’s only the second floor.' },
+			{ speaker: 'שׂוֹכֵר', target: 'וְכַמָּה שְׂכַר הַדִּירָה?', reading: 'vekama schar hadira?', meaning: 'And how much is the rent?' },
+			{ speaker: 'בַּעַל הַבַּיִת', target: 'חֲמֵשֶׁת אֲלָפִים שֶׁקֶל לְחֹדֶשׁ.', reading: 'chameshet alafim shekel lechodesh.', meaning: 'Five thousand shekels a month.' },
+			{ speaker: 'שׂוֹכֵר', target: 'אֶפְשָׁר לִרְאוֹת אֶת הַמִּטְבָּח?', reading: 'efshar lir’ot et hamitbach?', meaning: 'Can I see the kitchen?' }
+		]
+	},
+	{
+		id: 'pass-he-doctor',
+		kind: 'conversation',
+		title: 'אֵצֶל הָרוֹפְאָה — At the doctor',
+		level: 'A2',
+		tags: ['health'],
+		intro: 'A sore throat, a mild fever, and the doctor’s advice.',
+		lines: [
+			{ speaker: 'רוֹפְאָה', target: 'מָה קָרָה?', reading: 'ma kara?', meaning: 'What seems to be the problem?' },
+			{ speaker: 'מְטֻפָּל', target: 'כּוֹאֵב לִי הַגָּרוֹן כְּבָר שְׁלוֹשָׁה יָמִים.', reading: 'ko’ev li hagaron kvar shlosha yamim.', meaning: 'My throat has hurt for three days now.' },
+			{ speaker: 'רוֹפְאָה', target: 'יֵשׁ לְךָ חֹם?', reading: 'yesh lecha chom?', meaning: 'Do you have a fever?' },
+			{ speaker: 'מְטֻפָּל', target: 'קְצָת, שְׁלוֹשִׁים וּשְׁמוֹנֶה.', reading: 'ktzat, shloshim ushmone.', meaning: 'A little — thirty-eight.' },
+			{ speaker: 'רוֹפְאָה', target: 'זֶה וִירוּס. תִּשְׁתֶּה הַרְבֵּה וְתָנוּחַ.', reading: 'ze virus. tishte harbe vetanuach.', meaning: 'It’s a virus. Drink plenty and rest.' }
+		]
 	}
 ];
 
@@ -1265,6 +1642,166 @@ const KO_PASSAGES: PassageSpec[] = [
 			{ target: '학교에서 한국어를 공부해요.', reading: 'hakgyoeseo hangugeoreul gongbuhaeyo.', meaning: 'At school I study Korean.' },
 			{ target: '점심에는 친구하고 밥을 먹어요.', reading: 'jeomsimeneun chinguhago babeul meogeoyo.', meaning: 'At lunch I eat with a friend.' },
 			{ target: '저녁에는 집에서 텔레비전을 봐요.', reading: 'jeonyeogeneun jibeseo tellebijeoneul bwayo.', meaning: 'In the evening I watch TV at home.' }
+		]
+	},
+	{
+		id: 'pass-ko-convenience',
+		kind: 'conversation',
+		title: '편의점에서 — At the convenience store',
+		level: 'A1',
+		tags: ['daily', 'shopping'],
+		intro: 'Paying for a snack — bag, card and receipt.',
+		lines: [
+			{ speaker: '직원', target: '어서 오세요.', reading: 'eoseo oseyo.', meaning: 'Welcome.' },
+			{ speaker: '손님', target: '이거 얼마예요?', reading: 'igeo eolmayeyo?', meaning: 'How much is this?' },
+			{ speaker: '직원', target: '천이백 원이에요. 봉투 필요하세요?', reading: 'cheonibaek wonieyo. bongtu piryohaseyo?', meaning: 'It’s 1,200 won. Do you need a bag?' },
+			{ speaker: '손님', target: '아니요, 괜찮아요. 카드로 계산할게요.', reading: 'aniyo, gwaenchanayo. kadeuro gyesanhalgeyo.', meaning: 'No, that’s fine. I’ll pay by card.' },
+			{ speaker: '직원', target: '네, 영수증 드릴까요?', reading: 'ne, yeongsujeung deurilkkayo?', meaning: 'Sure — would you like the receipt?' },
+			{ speaker: '손님', target: '아니요, 괜찮아요. 감사합니다.', reading: 'aniyo, gwaenchanayo. gamsahamnida.', meaning: 'No, thanks. Thank you.' }
+		]
+	},
+	{
+		id: 'pass-ko-restaurant',
+		kind: 'conversation',
+		title: '식당에서 — At a restaurant',
+		level: 'A1',
+		tags: ['daily', 'food'],
+		intro: 'Ordering stew and bibimbap at a neighborhood restaurant.',
+		lines: [
+			{ speaker: '직원', target: '몇 분이세요?', reading: 'myeot buniseyo?', meaning: 'How many people?' },
+			{ speaker: '손님', target: '두 명이요.', reading: 'du myeongiyo.', meaning: 'Two.' },
+			{ speaker: '직원', target: '이쪽으로 앉으세요. 메뉴 여기 있어요.', reading: 'ijjogeuro anjeuseyo. menyu yeogi isseoyo.', meaning: 'Please sit over here. Here’s the menu.' },
+			{ speaker: '손님', target: '김치찌개 하나하고 비빔밥 하나 주세요.', reading: 'gimchijjigae hanahago bibimbap hana juseyo.', meaning: 'One kimchi stew and one bibimbap, please.' },
+			{ speaker: '직원', target: '네, 맵게 해 드릴까요?', reading: 'ne, maepge hae deurilkkayo?', meaning: 'Sure — would you like it spicy?' },
+			{ speaker: '손님', target: '조금만 맵게 해 주세요. 그리고 물 좀 주세요.', reading: 'jogeumman maepge hae juseyo. geurigo mul jom juseyo.', meaning: 'Just a little spicy, please. And some water, please.' }
+		]
+	},
+	{
+		id: 'pass-ko-directions',
+		kind: 'conversation',
+		title: '길 묻기 — Asking for directions',
+		level: 'A1',
+		tags: ['daily', 'travel'],
+		intro: 'Finding the subway station.',
+		lines: [
+			{ speaker: '관광객', target: '실례합니다. 지하철역이 어디에 있어요?', reading: 'sillyehamnida. jihacheollyeogi eodie isseoyo?', meaning: 'Excuse me. Where is the subway station?' },
+			{ speaker: '행인', target: '저기 은행 보이세요?', reading: 'jeogi eunhaeng boiseyo?', meaning: 'Do you see that bank over there?' },
+			{ speaker: '관광객', target: '네, 보여요.', reading: 'ne, boyeoyo.', meaning: 'Yes, I see it.' },
+			{ speaker: '행인', target: '은행 앞에서 오른쪽으로 가세요. 역은 바로 옆에 있어요.', reading: 'eunhaeng apeseo oreunjjogeuro gaseyo. yeogeun baro yeope isseoyo.', meaning: 'Turn right in front of the bank. The station is right next to it.' },
+			{ speaker: '관광객', target: '걸어서 얼마나 걸려요?', reading: 'georeoseo eolmana geollyeoyo?', meaning: 'How long is it on foot?' },
+			{ speaker: '행인', target: '오 분쯤 걸려요.', reading: 'o bunjjeum geollyeoyo.', meaning: 'About five minutes.' },
+			{ speaker: '관광객', target: '감사합니다!', reading: 'gamsahamnida!', meaning: 'Thank you!' }
+		]
+	},
+	{
+		id: 'pass-ko-taxi',
+		kind: 'conversation',
+		title: '택시 타기 — Taking a taxi',
+		level: 'A2',
+		tags: ['travel', 'transport'],
+		intro: 'A short taxi ride to Seoul Station.',
+		lines: [
+			{ speaker: '손님', target: '안녕하세요. 서울역으로 가 주세요.', reading: 'annyeonghaseyo. seoullyeogeuro ga juseyo.', meaning: 'Hello. To Seoul Station, please.' },
+			{ speaker: '기사', target: '네. 길이 좀 막히네요.', reading: 'ne. giri jom makineyo.', meaning: 'Sure. Traffic’s a bit heavy.' },
+			{ speaker: '손님', target: '얼마나 걸릴까요?', reading: 'eolmana geollilkkayo?', meaning: 'How long will it take?' },
+			{ speaker: '기사', target: '이십 분쯤 걸릴 거예요.', reading: 'isip bunjjeum geollil geoyeyo.', meaning: 'It’ll take about twenty minutes.' },
+			{ speaker: '손님', target: '여기서 세워 주세요. 카드 돼요?', reading: 'yeogiseo sewo juseyo. kadeu dwaeyo?', meaning: 'Please stop here. Can I pay by card?' },
+			{ speaker: '기사', target: '네, 여기 대 주세요.', reading: 'ne, yeogi dae juseyo.', meaning: 'Yes, tap it here.' }
+		]
+	},
+	{
+		id: 'pass-ko-clothes',
+		kind: 'conversation',
+		title: '옷 가게에서 — Shopping for clothes',
+		level: 'A2',
+		tags: ['shopping'],
+		intro: 'Asking for another color and size.',
+		lines: [
+			{ speaker: '직원', target: '찾으시는 거 있으세요?', reading: 'chajeusineun geo isseuseyo?', meaning: 'Can I help you find something?' },
+			{ speaker: '손님', target: '이 티셔츠 다른 색깔도 있어요?', reading: 'i tisyeocheu dareun saekkaldo isseoyo?', meaning: 'Does this T-shirt come in other colors?' },
+			{ speaker: '직원', target: '네, 검은색하고 흰색이 있어요.', reading: 'ne, geomeunsaekago hinsaegi isseoyo.', meaning: 'Yes, we have black and white.' },
+			{ speaker: '손님', target: '입어 봐도 돼요?', reading: 'ibeo bwado dwaeyo?', meaning: 'Can I try it on?' },
+			{ speaker: '직원', target: '네, 탈의실은 저쪽이에요.', reading: 'ne, tarisireun jeojjogieyo.', meaning: 'Sure, the fitting room is over there.' },
+			{ speaker: '손님', target: '조금 커요. 한 사이즈 작은 거 있어요?', reading: 'jogeum keoyo. han saijeu jageun geo isseoyo?', meaning: 'It’s a bit big. Do you have one a size smaller?' },
+			{ speaker: '직원', target: '잠깐만요. 여기 있어요.', reading: 'jamkkanmanyo. yeogi isseoyo.', meaning: 'Just a moment. Here you go.' }
+		]
+	},
+	{
+		id: 'pass-ko-pharmacy',
+		kind: 'conversation',
+		title: '약국에서 — At the pharmacy',
+		level: 'A2',
+		tags: ['health', 'daily'],
+		intro: 'A headache, a slight fever, and how to take the medicine.',
+		lines: [
+			{ speaker: '약사', target: '어디가 아프세요?', reading: 'eodiga apeuseyo?', meaning: 'What’s wrong?' },
+			{ speaker: '손님', target: '머리가 아프고 열이 조금 있어요.', reading: 'meoriga apeugo yeori jogeum isseoyo.', meaning: 'I have a headache and a slight fever.' },
+			{ speaker: '약사', target: '언제부터 아프셨어요?', reading: 'eonjebuteo apeusyeosseoyo?', meaning: 'Since when have you been unwell?' },
+			{ speaker: '손님', target: '어제 저녁부터요.', reading: 'eoje jeonyeokbuteoyo.', meaning: 'Since yesterday evening.' },
+			{ speaker: '약사', target: '이 약을 하루에 세 번, 식후에 드세요.', reading: 'i yageul harue se beon, sikue deuseyo.', meaning: 'Take this medicine three times a day, after meals.' },
+			{ speaker: '손님', target: '감사합니다. 얼마예요?', reading: 'gamsahamnida. eolmayeyo?', meaning: 'Thank you. How much is it?' },
+			{ speaker: '약사', target: '오천 원입니다.', reading: 'ocheon wonimnida.', meaning: 'That’s 5,000 won.' }
+		]
+	},
+	{
+		id: 'pass-ko-weekend',
+		kind: 'conversation',
+		title: '주말 계획 — Weekend plans',
+		level: 'A1',
+		tags: ['plans', 'daily'],
+		intro: 'Two coworkers plan a picnic by the Han River.',
+		lines: [
+			{ speaker: '민수', target: '지수 씨, 이번 주말에 뭐 해요?', reading: 'jisu ssi, ibeon jumare mwo haeyo?', meaning: 'Jisu, what are you doing this weekend?' },
+			{ speaker: '지수', target: '토요일에 친구를 만나요. 일요일은 괜찮아요.', reading: 'toyoire chingureul mannayo. iryoireun gwaenchanayo.', meaning: 'I’m meeting a friend on Saturday. Sunday is free.' },
+			{ speaker: '민수', target: '그럼 일요일에 같이 한강공원에 갈래요?', reading: 'geureom iryoire gachi hangang gongwone gallaeyo?', meaning: 'Then do you want to go to Hangang Park together on Sunday?' },
+			{ speaker: '지수', target: '좋아요! 치킨도 먹어요.', reading: 'joayo! chikindo meogeoyo.', meaning: 'Sounds great! Let’s have chicken, too.' },
+			{ speaker: '민수', target: '그럼 열두 시에 역에서 만나요.', reading: 'geureom yeoldu sie yeogeseo mannayo.', meaning: 'Then let’s meet at the station at twelve.' }
+		]
+	},
+	{
+		id: 'pass-ko-weather',
+		kind: 'text',
+		title: '오늘 날씨 — Today’s weather',
+		level: 'A1',
+		tags: ['weather', 'daily'],
+		intro: 'A simple weather report in polite forms.',
+		lines: [
+			{ target: '오늘은 날씨가 아주 좋아요.', reading: 'oneureun nalssiga aju joayo.', meaning: 'The weather is very nice today.' },
+			{ target: '하늘이 맑고 바람이 시원해요.', reading: 'haneuri malgo barami siwonhaeyo.', meaning: 'The sky is clear and the breeze is cool.' },
+			{ target: '하지만 내일은 비가 많이 올 거예요.', reading: 'hajiman naeireun biga mani ol geoyeyo.', meaning: 'But tomorrow it will rain a lot.' },
+			{ target: '그래서 내일은 우산을 꼭 가져가세요.', reading: 'geuraeseo naeireun usaneul kkok gajyeogaseyo.', meaning: 'So be sure to take an umbrella tomorrow.' },
+			{ target: '주말에는 다시 따뜻해질 거예요.', reading: 'jumareneun dasi ttatteutaejil geoyeyo.', meaning: 'It will get warm again at the weekend.' }
+		]
+	},
+	{
+		id: 'pass-ko-delivery',
+		kind: 'text',
+		title: '한국의 배달 문화 — Delivery culture in Korea',
+		level: 'A2',
+		tags: ['food', 'society'],
+		intro: 'A short non-fiction text on food delivery.',
+		lines: [
+			{ target: '한국에서는 배달 음식이 아주 인기가 많아요.', reading: 'hangugeseoneun baedal eumsigi aju ingiga manayo.', meaning: 'In Korea, food delivery is extremely popular.' },
+			{ target: '앱으로 주문하면 보통 삼십 분 안에 와요.', reading: 'aebeuro jumunhamyeon botong samsip bun ane wayo.', meaning: 'If you order through an app, it usually arrives within thirty minutes.' },
+			{ target: '치킨, 피자, 짜장면이 특히 인기가 있어요.', reading: 'chikin, pija, jjajangmyeoni teuki ingiga isseoyo.', meaning: 'Fried chicken, pizza and jjajangmyeon are especially popular.' },
+			{ target: '공원이나 강가에서도 음식을 시킬 수 있어요.', reading: 'gongwonina ganggaeseodo eumsigeul sikil su isseoyo.', meaning: 'You can even order food to a park or the riverside.' },
+			{ target: '밤늦게까지 배달이 돼서 아주 편리해요.', reading: 'bamneutgekkaji baedari dwaeseo aju pyeollihaeyo.', meaning: 'Delivery runs until late at night, so it’s very convenient.' }
+		]
+	},
+	{
+		id: 'pass-ko-intro',
+		kind: 'text',
+		title: '자기소개 — Introducing myself',
+		level: 'A1',
+		tags: ['daily', 'greeting'],
+		intro: 'A short self-introduction.',
+		lines: [
+			{ target: '안녕하세요. 제 이름은 안나예요.', reading: 'annyeonghaseyo. je ireumeun annayeyo.', meaning: 'Hello. My name is Anna.' },
+			{ target: '저는 독일 사람이에요.', reading: 'jeoneun dogil saramieyo.', meaning: 'I’m German.' },
+			{ target: '지금 서울에 있는 회사에 다녀요.', reading: 'jigeum seoure inneun hoesae danyeoyo.', meaning: 'I work at a company in Seoul now.' },
+			{ target: '취미는 등산하고 요리예요.', reading: 'chwimineun deungsanhago yoriyeyo.', meaning: 'My hobbies are hiking and cooking.' },
+			{ target: '한국어는 아직 어렵지만 재미있어요.', reading: 'hangugeoneun ajik eoryeopjiman jaemiisseoyo.', meaning: 'Korean is still hard, but it’s fun.' },
+			{ target: '만나서 반갑습니다.', reading: 'mannaseo bangapseumnida.', meaning: 'Nice to meet you.' }
 		]
 	}
 ];
