@@ -8,9 +8,9 @@
 
 import { get, writable, type Writable } from 'svelte/store';
 
-export type LocalTask = 'tts' | 'asr';
+export type LocalTask = 'tts' | 'asr' | 'niqqud';
 
-const HF_TASK: Record<LocalTask, string> = { tts: 'text-to-speech', asr: 'automatic-speech-recognition' };
+const HF_TASK: Record<Exclude<LocalTask, 'niqqud'>, string> = { tts: 'text-to-speech', asr: 'automatic-speech-recognition' };
 
 /** Extra pipeline options (device, dtype). */
 export interface PipelineOptions {
@@ -26,7 +26,8 @@ export type ModelStatus =
 
 export const localModelStatus: Writable<Record<string, ModelStatus>> = writable({});
 
-function setStatus(key: string, status: ModelStatus): void {
+/** Set a model's status (key `${task}:${model}`); for models loaded outside transformers.js. */
+export function setStatus(key: string, status: ModelStatus): void {
 	localModelStatus.update((cur) => ({ ...cur, [key]: status }));
 }
 
@@ -43,7 +44,7 @@ interface ProgressEvent {
 	file?: string;
 }
 
-export async function loadPipeline(task: LocalTask, model: string, options: PipelineOptions = {}): Promise<unknown> {
+export async function loadPipeline(task: Exclude<LocalTask, 'niqqud'>, model: string, options: PipelineOptions = {}): Promise<unknown> {
 	const key = `${task}:${model}`;
 	if (pipelineCache.has(key)) return pipelineCache.get(key);
 	if (pendingLoads.has(key)) return pendingLoads.get(key)!;

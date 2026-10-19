@@ -144,10 +144,10 @@
 		<div class="vowel-row">
 			{#if bareHebrew && canDiacritize($settings)}
 				<button class="vowel" onclick={addVowels} disabled={vowelBusy}>
-					<Sparkles size={14} /> {vowelBusy ? 'Adding vowels…' : 'Add vowels (AI)'}
+					<Sparkles size={14} /> {vowelBusy ? 'Adding vowels…' : $settings.localNiqqud ? 'Add vowels' : 'Add vowels (AI)'}
 				</button>
 			{:else if bareHebrew}
-				<span class="muted">This Hebrew has no vowel points. Add an OpenAI key in Settings to point it automatically.</span>
+				<span class="muted">This Hebrew has no vowel points. Turn on vowels on this device, or add an OpenAI key, in Settings to point it automatically.</span>
 			{/if}
 			{#if vowelMsg}<span class="muted">{vowelMsg}</span>{/if}
 		</div>

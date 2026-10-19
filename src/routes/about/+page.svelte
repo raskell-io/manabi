@@ -42,6 +42,8 @@
 			items: [
 				{ name: 'Microsoft neural voices', href: 'https://github.com/rany2/edge-tts', what: 'The recorded pronunciations (Xiaoxiao, HiuMaan, Nanami, SunHi, Hila), generated with edge-tts' },
 				{ name: 'Whisper', href: 'https://github.com/openai/whisper', what: 'On-device speech recognition (ONNX weights by onnx-community)', licence: 'MIT' },
+				{ name: 'whisper-small-cantonese', href: 'https://huggingface.co/alvanlii/whisper-small-cantonese', what: 'On-device Cantonese speech recognition, by Alvan Li (ONNX by onnx-community)', licence: 'Apache-2.0' },
+				{ name: 'DictaBERT menaked', href: 'https://huggingface.co/dicta-il/dictabert-large-char-menaked', what: 'On-device Hebrew vowels, by Dicta (INT8 ONNX conversion by Tale Me)', licence: 'CC BY 4.0' },
 				{ name: 'MMS', href: 'https://huggingface.co/facebook/mms-tts-kor', what: 'On-device Korean voice, by Meta', licence: 'CC BY-NC 4.0' }
 			]
 		},

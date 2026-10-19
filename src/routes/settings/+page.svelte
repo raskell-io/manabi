@@ -17,6 +17,7 @@
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
 	import { localModelStatus } from '$lib/inference/local-models';
 	import { ASR_MODELS, asrDevice, hasWebGpu, loadAsr, type AsrModel } from '$lib/inference/providers/asr-local';
+	import { loadNiqqud, NIQQUD_STATUS_KEY } from '$lib/inference/providers/niqqud-local';
 	import { readingOf, toZhScript, zhLangTag, zhScript, ZH_READINGS, ZH_SCRIPTS } from '$lib/chinese';
 
 	let s = $derived($settings);
@@ -30,6 +31,7 @@
 	const sizeModel = $derived(ASR_MODELS[s.localAsrModel]);
 	const asrStatus = $derived(statusOf('asr', sizeModel.id));
 	const yueStatus = $derived(statusOf('asr', ASR_MODELS.cantonese.id));
+	const niqqudStatus = $derived($localModelStatus[NIQQUD_STATUS_KEY] ?? { state: 'idle' as const });
 	/** "Loaded for this session (GPU)" — where a loaded model runs. */
 	const ranOn = (m: AsrModel) => ($asrDevice[m.id] === 'webgpu' ? ' on the GPU' : $asrDevice[m.id] === 'wasm' ? ' on the CPU' : '');
 	// Whether this browser offers WebGPU (checked once, lazily).
@@ -300,6 +302,20 @@
 		<span class="muted">Preview:</span>
 		<span class="he-preview">{s.hideHebrewVowels ? stripNiqqud('שָׁלוֹם') : 'שָׁלוֹם'}</span>
 	</p>
+	<label class="check">
+		<input type="checkbox" checked={s.localNiqqud} onchange={(e) => updateSettings({ localNiqqud: e.currentTarget.checked })} />
+		<span>Add vowels on this device — Dicta’s Hebrew model (≈ 320 MB) points words and texts that come without niqqud, offline and without a key. Otherwise OpenAI does it when a key is set.</span>
+	</label>
+	{#if s.localNiqqud}
+		<div class="backup-row niqqud-model">
+			<button class="action" onclick={() => void loadNiqqud().catch(() => {})} disabled={niqqudStatus.state === 'loading' || niqqudStatus.state === 'ready'}>
+				<Download size={16} /> {niqqudStatus.state === 'ready' ? 'Ready' : 'Download now'}
+			</button>
+			<span class="sync-status" class:error={niqqudStatus.state === 'error'} role="status">
+				{#if niqqudStatus.state === 'loading'}{niqqudStatus.phase === 'initializing' ? 'Starting…' : `Downloading… ${Math.round(niqqudStatus.progress)}%`}{:else if niqqudStatus.state === 'error'}{niqqudStatus.error}{:else if niqqudStatus.state === 'ready'}Loaded for this session.{:else}Downloads on first use, then works offline.{/if}
+			</span>
+		</div>
+	{/if}
 </section>
 
 <section class="group">

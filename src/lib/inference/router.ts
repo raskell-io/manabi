@@ -4,13 +4,15 @@
  * TTS is local-first (the user's choice): try on-device MMS, fall back to
  * OpenAI when available. Transcription prefers OpenAI (more accurate) and
  * falls back to on-device Whisper when that is switched on (no key, offline).
- * Generation and Hebrew diacritization are OpenAI-only.
+ * Hebrew diacritization runs on-device (Dicta's model) when that's on, else
+ * OpenAI. Generation is OpenAI-only.
  */
 
 import type { ManabiSettings } from '$lib/db/types';
 import { ttsLocalProvider } from './providers/tts-local';
 import { openaiProvider } from './providers/openai';
 import { asrLocalProvider } from './providers/asr-local';
+import { niqqudLocalProvider } from './providers/niqqud-local';
 import type {
 	DiacritizeInput,
 	DiacritizeResult,
@@ -33,6 +35,8 @@ import type {
 // leave an import still undefined while this module initializes.
 // Order matters: TTS prefers the first provider that succeeds.
 const providers = (): InferenceProvider[] => [ttsLocalProvider, openaiProvider];
+// Hebrew vowels: on-device first when it's on (a specialist model, offline), then OpenAI.
+const diacritizers = (): InferenceProvider[] => [niqqudLocalProvider, openaiProvider];
 // Transcription: the remote model first, then the on-device one.
 const transcribers = (): InferenceProvider[] => [openaiProvider, asrLocalProvider];
 
@@ -80,11 +84,13 @@ export async function diacritize(
 	input: DiacritizeInput,
 	settings: ManabiSettings
 ): Promise<InferenceResult<DiacritizeResult>> {
-	for (const p of providers()) {
+	let last: InferenceResult<DiacritizeResult> | null = null;
+	for (const p of diacritizers()) {
 		if (!p.diacritize || !p.capabilities(settings).diacritize) continue;
-		return p.diacritize(input, settings);
+		last = await p.diacritize(input, settings);
+		if (last.ok) return last;
 	}
-	return { ok: false, error: 'No diacritization provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+	return last ?? { ok: false, error: 'No diacritization provider (turn on on-device vowels or set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
 }
 
 /** Transcribe a learner's recording: OpenAI, else (or if it fails) on-device Whisper. */
@@ -116,7 +122,7 @@ export async function annotate(
 }
 
 export function canDiacritize(settings: ManabiSettings): boolean {
-	return providers().some((p) => p.diacritize && p.capabilities(settings).diacritize);
+	return diacritizers().some((p) => p.diacritize && p.capabilities(settings).diacritize);
 }
 
 export function canTranscribe(settings: ManabiSettings): boolean {
