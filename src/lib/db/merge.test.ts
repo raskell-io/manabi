@@ -129,6 +129,15 @@ describe('mergeInto', () => {
 		expect(local.settings.newPerDay).toBe(7);
 	});
 
+	it('unions XP sessions, so totals from both devices add up', () => {
+		const local = createEmptyDocument();
+		local.xpSessions = { a: { at: 1, xp: 40, language: 'zh' } };
+		const other = createEmptyDocument();
+		other.xpSessions = { a: { at: 1, xp: 40, language: 'zh' }, b: { at: 2, xp: 25, language: 'ja' } };
+		mergeInto(local, other);
+		expect(Object.values(local.xpSessions).reduce((n, x) => n + x.xp, 0)).toBe(65);
+	});
+
 	it('tolerates an older-schema backup with missing collections', () => {
 		const local = createEmptyDocument();
 		const old = { schemaVersion: 1, learningItems: { a: item('a') }, srsStates: {} } as unknown as ManabiDocument;

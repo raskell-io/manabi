@@ -3,7 +3,7 @@
  * and how much was practised on each past day. Pure, over plain data.
  */
 
-import { isoDate, type Dimension, type Language, type LearningItem, type SkillMemory } from '$lib/db/types';
+import { isoDate, type Dimension, type Language, type LearningItem, type SkillMemory, type XpSession } from '$lib/db/types';
 
 export interface DayCount {
 	date: string; // ISO YYYY-MM-DD
@@ -67,4 +67,23 @@ export function activityCalendar(times: number[], today: string, weeks = 18): (D
 export function level(count: number, max: number): 0 | 1 | 2 | 3 | 4 {
 	if (count <= 0 || max <= 0) return 0;
 	return Math.min(4, Math.max(1, Math.ceil((count / max) * 4))) as 1 | 2 | 3 | 4;
+}
+
+export interface XpSummary {
+	total: number;
+	today: number;
+	week: number; // the last 7 days, today included
+}
+
+/** XP earned overall, today and over the last week (all languages). */
+export function xpSummary(sessions: XpSession[], today: string): XpSummary {
+	const weekStart = addDays(today, -6);
+	const out: XpSummary = { total: 0, today: 0, week: 0 };
+	for (const s of sessions) {
+		out.total += s.xp;
+		const day = isoDate(new Date(s.at));
+		if (day === today) out.today += s.xp;
+		if (day >= weekStart && day <= today) out.week += s.xp;
+	}
+	return out;
 }

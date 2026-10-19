@@ -144,5 +144,11 @@ hand-verified seed ships built-in so the app is usable before you generate anyth
 ## Status
 
 MVP: M1 (data model + item browser) · M2 (SRS + review loop) · M3 (audio) · AI workbench.
-Deferred: markdown round-trip in the sync repo; on-device models for transcription and
-Hebrew diacritization (both use OpenAI today).
+Deferred: lessons in the Markdown round-trip; an on-device model for Hebrew diacritization
+(OpenAI only today); WebGPU for on-device Whisper (WASM only so far).
+
+## License
+
+The code is MIT-licensed (see [LICENSE](LICENSE)). Bundled data keeps its own terms: the
+dictionaries in `static/dict/` are CC BY-SA (see [static/dict/LICENSE.md](static/dict/LICENSE.md)),
+and the in-app **About** page lists every source and its licence.

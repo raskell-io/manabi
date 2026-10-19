@@ -19,11 +19,14 @@
 		getItem,
 		practiceTimes,
 		recordPronunciationAttempt,
+		recordXp,
 		settings,
-		snapshotQueue
+		snapshotQueue,
+		xpSessions
 	} from '$lib/db/store';
 	import { buildExercise } from '$lib/exercises/generate';
-	import { DIMENSIONS, DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
+	import { DIMENSIONS, DIMENSION_LABELS, todayIso, type Dimension, type LearningItem } from '$lib/db/types';
+	import { xpSummary } from '$lib/srs/stats';
 	import { parseMode, resolveScope, scopeHref, type Mode, type ReviewScope } from '$lib/srs/scope';
 	import { computeStreak, formatDuration, lastSevenDays, type WeekDay } from '$lib/today';
 	import { rankAudioPractice, type AudioDimension, type RankedPractice } from '$lib/srs/practice';
@@ -70,6 +73,8 @@
 	let fx = 0;
 	const XP_RIGHT = 10;
 	const XP_COMBO_BONUS = 5; // per answer while on a run of 3+
+	// Banked when the session ends; the summary shows the running total.
+	const xpBank = $derived(xpSummary($xpSessions, todayIso()));
 	const isMilestone = (n: number) => n === 3 || n === 5 || (n >= 10 && n % 10 === 0);
 
 	function reward(gain: number, runLength: number, at: number) {
@@ -246,6 +251,7 @@
 			// Fresh counts for "Next up" (what this session cleared is gone now).
 			allTasks = snapshotQueue(scope ?? undefined).tasks;
 			epoch += 1;
+			recordXp(xp, scope?.language ?? get(activeLanguage));
 			void maybeAutoSync(); // push this session's progress (no-op unless configured)
 			// First session of the day that counts: the streak screen comes first.
 			const after = computeStreak(get(practiceTimes));
@@ -380,6 +386,9 @@
 				<div class="sum s-time"><span class="lbl"><Timer size={13} strokeWidth={3} /> time</span><span class="num">{formatDuration(elapsedMs)}</span></div>
 				<div class="sum s-xp"><span class="lbl"><Sparkles size={13} strokeWidth={3} /> XP</span><span class="num"><CountUp value={xp} delay={650} duration={900} /></span></div>
 			</div>
+			{#if xpBank.total > 0}
+				<p class="xp-bank"><Sparkles size={14} strokeWidth={3} /> <CountUp value={xpBank.total} from={xpBank.total - xp} delay={900} duration={900} format={(n) => Math.round(n).toLocaleString()} /> XP in total · {xpBank.today} today</p>
+			{/if}
 			<ul class="skills">
 				{#each bySkill as s (s.dim)}
 					{@const pct = s.answered ? Math.round((100 * s.ok) / s.answered) : 0}
@@ -652,6 +661,15 @@
 	}
 	.scope-line {
 		margin: 0 0 0.5rem;
+	}
+	.xp-bank {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		margin: 0 0 1rem;
+		color: var(--color-text-muted);
+		font-weight: 800;
+		font-size: 0.9rem;
 	}
 	.sum-grid {
 		display: grid;

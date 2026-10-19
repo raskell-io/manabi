@@ -102,7 +102,8 @@ export function contentOf(doc: ManabiDocument): Record<string, unknown> {
 		contentDrafts: map(doc.contentDrafts),
 		passageDrafts: map(doc.passageDrafts),
 		seededIds: doc.seededIds ?? {},
-		passageReads: doc.passageReads ?? {}
+		passageReads: doc.passageReads ?? {},
+		xpSessions: doc.xpSessions ?? {}
 	};
 }
 
@@ -155,7 +156,7 @@ const DRAFT_RANK = { pending: 0, rejected: 1, approved: 2 } as const;
  * (only if the content actually differs); SRS → per skill, the more recently
  * reviewed state wins and `lapses` takes the max; lessons → item ids are
  * unioned; drafts → approved beats rejected beats pending; attempts,
- * `seededIds` and `passageReads` (earliest time) are unioned. Settings are
+ * `seededIds`, `passageReads` (earliest time) and `xpSessions` are unioned. Settings are
  * never touched.
  */
 export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSummary {
@@ -273,6 +274,12 @@ export function mergeInto(local: ManabiDocument, other: ManabiDocument): MergeSu
 		if (!local.passageReads) local.passageReads = {};
 		const mine = local.passageReads[id];
 		if (mine === undefined || at < mine) local.passageReads[id] = at;
+	}
+
+	// XP sessions: union by id (a session's points never change).
+	for (const [id, x] of entries(other.xpSessions)) {
+		if (!local.xpSessions) local.xpSessions = {};
+		if (!local.xpSessions[id]) local.xpSessions[id] = plain(x);
 	}
 
 	return s;

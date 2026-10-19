@@ -355,6 +355,16 @@ export function defaultSettings(): ManabiSettings {
 	};
 }
 
+// --- XP ---------------------------------------------------------------------
+
+/** One finished review session's points (10 per right answer, +5 on a run of 3+). */
+export interface XpSession {
+	at: number; // when the session ended (ms)
+	xp: number;
+	language: Language;
+	[key: string]: unknown;
+}
+
 // --- Document ---------------------------------------------------------------
 
 export const SCHEMA_VERSION = 13;
@@ -373,6 +383,8 @@ export interface ManabiDocument {
 	seededIds: Record<string, boolean>;
 	/** Passages read to the end: passage id → when first read (ms). Drives the learning path. */
 	passageReads?: Record<string, number>;
+	/** Points earned per finished session (unioned on merge, so totals add up across devices). */
+	xpSessions?: Record<string, XpSession>;
 	settings: ManabiSettings;
 	[key: string]: unknown;
 }
@@ -390,6 +402,7 @@ export function createEmptyDocument(): ManabiDocument {
 		passageDrafts: {},
 		seededIds: {},
 		passageReads: {},
+		xpSessions: {},
 		settings: defaultSettings()
 	};
 }

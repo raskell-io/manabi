@@ -44,6 +44,20 @@ test('a lesson starts with an intro card, then XP and combos as you go', async (
 	}
 	await expect(page.locator('.combo-toast')).toHaveText(/3 in a row!/);
 	await expect(page.locator('.bar.hot')).toBeVisible();
+
+	// Finish the session right: its XP is banked and adds up on Progress.
+	let total = 35;
+	for (let i = 4; !(await page.locator('.summary, .streak-screen').count()); i++) {
+		const word = (await page.locator('.prompt .script').first().innerText()).trim();
+		await page.locator('.choice', { hasText: meaningOf.get(word)! }).first().click();
+		await page.keyboard.press('Enter');
+		total += 15;
+		if (i > 40) throw new Error('session did not end');
+	}
+	await toSummary(page);
+	await expect(page.locator('.xp-bank')).toHaveText(`${total} XP in total · ${total} today`);
+	await page.goto('/dashboard');
+	await expect(page.locator('.xp-tile.total .xp-num')).toHaveText(String(total));
 });
 
 test('a session in dark mode', async ({ page }) => {

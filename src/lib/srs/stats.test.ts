@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activityCalendar, level, reviewForecast } from './stats';
+import { activityCalendar, level, reviewForecast, xpSummary } from './stats';
 import { freshSkillMemory, type LearningItem } from '$lib/db/types';
 
 const item = (id: string, language: 'zh' | 'ja' = 'zh'): LearningItem => ({
@@ -37,5 +37,27 @@ describe('activityCalendar', () => {
 	it('levels are relative to the busiest day', () => {
 		expect([0, 1, 5, 10, 20].map((n) => level(n, 20))).toEqual([0, 1, 1, 2, 4]);
 		expect(level(3, 0)).toBe(0);
+	});
+});
+
+describe('xpSummary', () => {
+	const at = (iso: string, h = 12) => {
+		const [y, m, d] = iso.split('-').map(Number);
+		return new Date(y, m - 1, d, h).getTime();
+	};
+	it('adds up overall, today and the last seven days', () => {
+		const s = xpSummary(
+			[
+				{ at: at('2026-10-19', 8), xp: 40, language: 'zh' },
+				{ at: at('2026-10-19', 20), xp: 15, language: 'ja' },
+				{ at: at('2026-10-13'), xp: 30, language: 'zh' },
+				{ at: at('2026-10-12'), xp: 100, language: 'ko' }
+			],
+			'2026-10-19'
+		);
+		expect(s).toEqual({ total: 185, today: 55, week: 85 });
+	});
+	it('is all zero with no sessions', () => {
+		expect(xpSummary([], '2026-10-19')).toEqual({ total: 0, today: 0, week: 0 });
 	});
 });

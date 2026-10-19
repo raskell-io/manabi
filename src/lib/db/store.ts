@@ -42,7 +42,8 @@ import {
 	type PassageLine,
 	type PronunciationAttempt,
 	type SelfRating,
-	type SkillMemory
+	type SkillMemory,
+	type XpSession
 } from './types';
 
 const STORAGE_KEY = 'manabi-doc';
@@ -152,6 +153,9 @@ export const practiceTimes: Readable<number[]> = derived(docStore, ($doc) => {
 		...Object.values($doc.pronunciationAttempts).map((a) => a.at)
 	];
 });
+
+/** Every finished session's XP (all languages). */
+export const xpSessions: Readable<XpSession[]> = derived(docStore, ($doc) => Object.values($doc?.xpSessions ?? {}));
 
 export const skillMemories: Readable<SkillMemory[]> = derived(docStore, ($doc) => {
 	if (!$doc) return [];
@@ -682,6 +686,15 @@ export function markPassageRead(id: string): void {
 	updateDoc((d) => {
 		if (!d.passageReads) d.passageReads = {};
 		d.passageReads[id] = Date.now();
+	});
+}
+
+/** Bank a finished session's XP. */
+export function recordXp(xp: number, language: Language): void {
+	if (!doc || xp <= 0) return;
+	updateDoc((d) => {
+		if (!d.xpSessions) d.xpSessions = {};
+		d.xpSessions[generateId()] = { at: Date.now(), xp, language };
 	});
 }
 

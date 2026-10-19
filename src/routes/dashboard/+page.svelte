@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { GraduationCap, Mic } from 'lucide-svelte';
+	import { GraduationCap, Mic, Sparkles } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
 	import ReviewForecast from '$lib/components/ReviewForecast.svelte';
 	import ActivityCalendar from '$lib/components/ActivityCalendar.svelte';
-	import { allItems, exerciseAttempts, getItem, practiceTimes, pronunciationAttempts, settings, skillMemories } from '$lib/db/store';
+	import { allItems, exerciseAttempts, getItem, practiceTimes, pronunciationAttempts, settings, skillMemories, xpSessions } from '$lib/db/store';
 	import { DIMENSIONS, DIMENSION_LABELS, LANGUAGES, todayIso, type Dimension } from '$lib/db/types';
-	import { activityCalendar, reviewForecast } from '$lib/srs/stats';
+	import { activityCalendar, reviewForecast, xpSummary } from '$lib/srs/stats';
 	import { scopeHref } from '$lib/srs/scope';
 	import { suggestRating, summarizePronunciation } from '$lib/pronunciation';
 
 	// What's coming (this language) and what's been done (all languages).
 	const forecast = $derived(reviewForecast($allItems, $skillMemories, $settings.activeLanguage, todayIso()));
 	const calendar = $derived(activityCalendar($practiceTimes, todayIso()));
+	const xp = $derived(xpSummary($xpSessions, todayIso()));
 
 	// Per-dimension accuracy for the active language.
 	const byDimension = $derived(
@@ -72,6 +73,12 @@
 		<p class="muted">Reviews ahead and practice so far, then accuracy by skill for {LANGUAGES.find((l) => l.code === $settings.activeLanguage)?.name}.</p>
 	</div>
 </div>
+
+<section class="xp" aria-label="XP">
+	<div class="xp-tile total"><span class="xp-lbl"><Sparkles size={13} strokeWidth={3} /> Total XP</span><span class="xp-num">{xp.total.toLocaleString()}</span></div>
+	<div class="xp-tile"><span class="xp-lbl">This week</span><span class="xp-num">{xp.week.toLocaleString()}</span></div>
+	<div class="xp-tile"><span class="xp-lbl">Today</span><span class="xp-num">{xp.today.toLocaleString()}</span></div>
+</section>
 
 <section class="charts">
 	<ReviewForecast days={forecast} />
@@ -150,6 +157,41 @@
 </section>
 
 <style>
+	.xp {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem;
+		max-width: 36rem;
+		margin-bottom: 1.25rem;
+	}
+	.xp-tile {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		padding: 0.7rem 0.9rem;
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius);
+	}
+	.xp-tile.total {
+		border-color: var(--color-warning);
+	}
+	.xp-lbl {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.75rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
+	}
+	.xp-num {
+		font-size: 1.5rem;
+		font-weight: 900;
+	}
+	.total .xp-num {
+		color: var(--color-warning);
+	}
 	.charts {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
