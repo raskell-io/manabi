@@ -56,7 +56,7 @@ src/lib/
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
   haptics.ts  tapCorrect / tapWrong (navigator.vibrate; Android only, iOS ignores)
   install.ts  PWA install hint: captured beforeinstallprompt (Chromium) or iOS Share-sheet steps; Home only, ≥5 attempts, dismiss once
-src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
+src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings · about (credits & licences, build stamp from vite `define`)
 ```
 
 ## Key modules

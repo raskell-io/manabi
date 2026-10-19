@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CalendarPlus, Download, RefreshCw, Upload } from 'lucide-svelte';
+	import { CalendarPlus, Download, Info, RefreshCw, Upload } from 'lucide-svelte';
 	import { isTime, reminderIcs } from '$lib/reminder';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import {
@@ -339,7 +339,22 @@
 	</div>
 </section>
 
+<p class="about-link"><a href="/about"><Info size={16} /> About Manabi · credits &amp; licences</a></p>
+
 <style>
+	.about-link {
+		margin: 1.5rem 0 0;
+	}
+	.about-link a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: var(--color-text-muted);
+		font-weight: 700;
+	}
+	.about-link a:hover {
+		color: var(--color-accent);
+	}
 	h1 {
 		margin-bottom: 1.5rem;
 	}

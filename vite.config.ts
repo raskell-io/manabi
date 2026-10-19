@@ -4,8 +4,25 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vite';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
+import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+
+// Build stamp for the About page: package version, commit and date.
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+function commit(): string {
+	try {
+		return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+	} catch {
+		return 'dev';
+	}
+}
 
 export default defineConfig({
+	define: {
+		__APP_VERSION__: JSON.stringify(pkg.version),
+		__BUILD_COMMIT__: JSON.stringify(commit()),
+		__BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
+	},
 	plugins: [
 		wasm(),
 		topLevelAwait(),

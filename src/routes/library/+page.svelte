@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronRight } from 'lucide-svelte';
+	import { ChevronRight, Info } from 'lucide-svelte';
 	import { activeItems, contentDrafts, lessons, passageDrafts, settings } from '$lib/db/store';
 	import { LANGUAGES } from '$lib/db/types';
 	import { LIBRARY } from '$lib/nav';
@@ -46,7 +46,22 @@
 	{/each}
 </section>
 
+<p class="about-link"><a href="/about"><Info size={16} /> About Manabi · credits &amp; licences</a></p>
+
 <style>
+	.about-link {
+		margin: 1.5rem 0 0;
+	}
+	.about-link a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: var(--color-text-muted);
+		font-weight: 700;
+	}
+	.about-link a:hover {
+		color: var(--color-accent);
+	}
 	h1 {
 		margin: 0 0 0.25rem;
 	}
