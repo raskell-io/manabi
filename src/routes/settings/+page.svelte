@@ -289,6 +289,10 @@
 		<input type="checkbox" checked={s.syncAuto} onchange={(e) => updateSettings({ syncAuto: e.currentTarget.checked })} />
 		<span>Sync automatically — on start, after each review session, and when the device comes back online.</span>
 	</label>
+	<label class="check">
+		<input type="checkbox" checked={s.syncMarkdown} onchange={(e) => updateSettings({ syncMarkdown: e.currentTarget.checked })} />
+		<span>Also keep your items and texts as Markdown in the repository (<code>content/&lt;language&gt;/items.md</code>, <code>passages.md</code>). Edit them on GitHub — fix a meaning, add an example or a new word — and the change comes back on the next sync. Progress stays in the snapshot only.</span>
+	</label>
 	<div class="backup-row">
 		<button class="action" onclick={() => void syncNow()} disabled={!syncConfigured || $syncState.status === 'syncing'}><RefreshCw size={16} /> Sync now</button>
 		<span class="sync-status" class:error={$syncState.status === 'error'} role="status">{syncStatusText($syncState)}</span>

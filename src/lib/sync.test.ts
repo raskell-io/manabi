@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { addSummary, fromBase64, isRepo, isSyncConfigured, runSync, toBase64, type RemoteFile, type SyncIO } from './sync';
 import { emptySummary, fingerprint, mergeInto, stableStringify } from '$lib/db/merge';
 import { createEmptyDocument, freshSkillMemory, type LearningItem, type ManabiDocument } from '$lib/db/types';
+import { applyItemEdits, parseItems, renderItems } from '$lib/content-md';
 
 function item(id: string): LearningItem {
 	return {
@@ -153,5 +154,60 @@ describe('helpers', () => {
 		b.items.updated = 3;
 		b.attempts = 4;
 		expect(addSummary(a, b)).toMatchObject({ items: { added: 1, updated: 3 }, attempts: 6 });
+	});
+});
+
+describe('runSync with Markdown content', () => {
+	/** A content IO over the real render/parse/apply, against an in-memory repo. */
+	function withContent(local: ManabiDocument, files: Map<string, { text: string; sha: string }>) {
+		const f = fakeIO(local, null);
+		let n = 0;
+		f.io.content = {
+			paths: () => ['content/zh/items.md'],
+			async fetchText(path) {
+				f.log.push(`get ${path}`);
+				return files.get(path) ?? null;
+			},
+			async putText(path, text, sha) {
+				f.log.push(`put ${path} sha=${sha}`);
+				files.set(path, { text, sha: `s${++n}` });
+				return 'ok';
+			},
+			apply: (_path, text) => applyItemEdits(local, 'zh', parseItems(text), () => `new-${++n}`, 2),
+			render: () => renderItems('zh', Object.values(local.learningItems))
+		};
+		return f;
+	}
+
+	it('writes the Markdown on first sync, and leaves it alone when nothing changed', async () => {
+		const local = createEmptyDocument();
+		local.learningItems.a = item('a');
+		const files = new Map<string, { text: string; sha: string }>();
+		const first = await runSync(withContent(local, files).io);
+		expect(first.files).toBe(1);
+		expect(files.get('content/zh/items.md')?.text).toContain('## a\n<!-- id: a');
+		const again = withContent(local, files);
+		const second = await runSync(again.io);
+		expect(second.files).toBe(0);
+		expect(again.log.filter((l) => l.startsWith('put content'))).toEqual([]);
+	});
+
+	it('applies a hand edit before pushing the snapshot, then rewrites the file', async () => {
+		const local = createEmptyDocument();
+		local.learningItems.a = item('a');
+		const files = new Map<string, { text: string; sha: string }>();
+		await runSync(withContent(local, files).io);
+		const md = files.get('content/zh/items.md')!;
+		files.set('content/zh/items.md', { text: md.text.replace('- meaning: a', '- meaning: edited on GitHub'), sha: 'gh1' });
+
+		const f = withContent(local, files);
+		const r = await runSync(f.io);
+		expect(local.learningItems.a.meaning).toBe('edited on GitHub');
+		expect(r.pulled.items.updated).toBe(1);
+		expect(r.pushed).toBe(true);
+		expect(f.remoteDoc()?.learningItems.a.meaning).toBe('edited on GitHub');
+		// The rewritten file carries a fresh hash, so the edit isn't applied twice.
+		expect(r.files).toBe(1);
+		expect(parseItems(files.get('content/zh/items.md')!.text).every((p) => !p.touched)).toBe(true);
 	});
 });

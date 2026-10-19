@@ -39,7 +39,7 @@ src/lib/
   exercises/  templates.ts (Exercise shape) · generate.ts (buildExercise + distractors)
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
-  sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO)
+  sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO); with settings.syncMarkdown also content/<lang>/{items,passages}.md (content-md.ts: render/parse, per-section hash → only hand-edited sections apply back, never deletes)
   strokes.ts  drawing-pad data: bundled static/strokes/{zh,ja}/<hex>.json (strokes-index.ts) else pinned jsDelivr CDN
   chinese.ts  Chinese script option (settings.zhScript: Simplified · Traditional TW/HK): content stays Simplified, display converts via lazily loaded opencc-js (`toZhScript`, `scriptLangTag`; awaited at boot); readings shown as pinyin or Zhuyin (settings.zhReading, `displayReading` → zhuyin.ts)
   radicals.ts 214 Kangxi radicals + radicalOf / radicalMembers / searchRadicals over generated radicals-data.ts
@@ -105,6 +105,6 @@ the build; every test fails on a page or console error): `npm run test:e2e`, or
 `npx playwright test` with a build in place. CI runs both.
 
 ## Deferred (future milestones)
-Markdown round-trip of content in the sync repo (snapshot sync itself ships — `sync.ts`;
-isomorphic-git is out because GitHub's git-over-HTTP has no CORS); an on-device model for
+Lessons in the Markdown round-trip (items and passages ship; isomorphic-git is out because
+GitHub's git-over-HTTP has no CORS); an on-device model for
 Hebrew diacritization (OpenAI-only today); WebGPU for on-device Whisper (WASM only so far).

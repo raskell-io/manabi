@@ -309,6 +309,7 @@ export interface ManabiSettings {
 	githubSyncRepo: string; // "owner/repo" holding the sync snapshot ('' = sync off)
 	githubSyncToken: string; // fine-grained PAT (Contents: read & write); stored locally
 	syncAuto: boolean; // sync on start, after a review session, and when back online
+	syncMarkdown: boolean; // also keep items + passages as editable Markdown in the repo (content-md.ts)
 	localTtsEnabled: boolean; // synthesize pronunciation on-device
 	asrScoring: boolean; // score recordings with speech recognition (OpenAI, or on-device below)
 	localAsr: boolean; // recognize speech on-device with Whisper (transformers.js); opt-in download
@@ -334,6 +335,7 @@ export function defaultSettings(): ManabiSettings {
 		githubSyncRepo: '',
 		githubSyncToken: '',
 		syncAuto: true,
+		syncMarkdown: true,
 		localTtsEnabled: true,
 		asrScoring: true,
 		localAsr: false,
@@ -350,7 +352,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 export interface ManabiDocument {
 	schemaVersion: number;

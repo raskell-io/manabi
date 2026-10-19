@@ -14,6 +14,7 @@ import { fromBase64, toBase64 } from '$lib/base64';
 import { deleteBlob } from './blob-store';
 import { emptySummary, isManabiDocument, mergeInto, plain, type MergeSummary } from './merge';
 import { passagesToApply, seedsToApply } from './seed';
+import { applyItemEdits, applyPassageEdits, parseItems, parsePassages, renderItems, renderPassages, type EditCounts } from '$lib/content-md';
 import { gradeDimension, isPass } from '$lib/srs/schedule';
 import { buildQueue, queueCounts, type QueueSummary } from '$lib/srs/queue';
 import {
@@ -630,6 +631,44 @@ export function createPassage(input: NewPassageInput): string {
 		});
 	});
 	return id;
+}
+
+// --- Markdown round-trip (sync repo content/<lang>/*.md, see content-md.ts) ---------------
+
+/** The Markdown file a sync path stands for, rendered from the current content; null when empty. */
+export function renderContentFile(path: string): string | null {
+	const m = /^content\/(zh|ja|ko|he)\/(items|passages)\.md$/.exec(path);
+	if (!m || !doc) return null;
+	const language = m[1] as Language;
+	if (m[2] === 'items') {
+		const items = Object.values(doc.learningItems).filter((it) => it.language === language);
+		return items.length ? renderItems(language, items) : null;
+	}
+	const ps = Object.values(doc.passages ?? {}).filter((p) => p.language === language);
+	return ps.length ? renderPassages(language, ps) : null;
+}
+
+/** Apply the hand-edited sections of a synced Markdown file. */
+export function applyContentFile(path: string, text: string): EditCounts {
+	const m = /^content\/(zh|ja|ko|he)\/(items|passages)\.md$/.exec(path);
+	let counts: EditCounts = { added: 0, updated: 0 };
+	if (!m) return counts;
+	const language = m[1] as Language;
+	const now = Date.now();
+	if (m[2] === 'items') {
+		const parsed = parseItems(text);
+		if (!parsed.some((p) => p.touched)) return counts;
+		updateDoc((d) => {
+			counts = applyItemEdits(d, language, parsed, generateId, now);
+		});
+	} else {
+		const parsed = parsePassages(text);
+		if (!parsed.some((p) => p.touched)) return counts;
+		updateDoc((d) => {
+			counts = applyPassageEdits(d, language, parsed, generateId, now);
+		});
+	}
+	return counts;
 }
 
 /** Record that a passage was read to the end (first time only). */
