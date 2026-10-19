@@ -21,8 +21,9 @@ Cantonese the OpenAI request carries an `instructions` string asking for Hong Ko
 Han characters are otherwise read as Mandarin; whether the model obeys is unverified (see
 [Cantonese](./cantonese.md)).
 
-(The other on-device model, **Whisper**, is speech *recognition* for pronunciation scoring,
-not TTS — see [SRS → pronunciation scoring](./srs.md#pronunciation-scoring-asr).)
+(The other on-device models are not TTS: **Whisper** is speech *recognition* for pronunciation
+scoring — see [SRS → pronunciation scoring](./srs.md#pronunciation-scoring-asr) — and Dicta's
+model adds Hebrew vowels.)
 
 The synthesis engine is **edge-tts** (free Microsoft neural voices), chosen after local
 models failed to cover the languages well:
@@ -40,13 +41,13 @@ path is broken; MMS Hebrew is robotic.)
 
 ## Why sprite packs (the file-count constraint)
 
-There are **~20,000 unique clips**. Cloudflare Pages caps a deployment at **20,000 files**,
+There are **~25,600 unique clips**. Cloudflare Pages caps a deployment at **20,000 files**,
 so one file per clip will not fit. Instead, clips are concatenated into a few hundred
 **audio sprite packs** with a small inter-clip gap, and a per-language **manifest** records
 where each clip lives inside its pack.
 
-Current output: **362 WebM/Opus packs (~78 MB)** + five manifests
-(`manifest-zh.json` 11,365 entries, `manifest-yue.json` 212, `manifest-ja.json` 8,568,
+Current output: **446 WebM/Opus packs (~103 MB)** + five manifests
+(`manifest-zh.json` 11,365 entries, `manifest-yue.json` 5,097, `manifest-ja.json` 8,568,
 `manifest-ko.json` 352, `manifest-he.json` 225). That is ~370 files total — comfortably under the
 cap, even with the dictionary shards (~290 files) and bundled stroke data alongside.
 
@@ -82,7 +83,7 @@ examples + passage lines + all vocab words + all script glyphs — deduped and *
 pack buckets** (`{lang}-core`, `{lang}-vocab-{level}`, `{lang}-kanji-{level}`, etc.; Cantonese
 has `yue-core`, `yue-tones` and `yue-hanzi-{starter,everyday}`). The Zhuyin section of the Scripts
 page is skipped: bare bopomofo symbols give the voice nothing to read. Output
-is `[{ lang, text, group }]` (~20,700 entries).
+is `[{ lang, text, group }]` (~25,600 entries).
 
 ### 2. Synthesize + pack — `tools/gen-audio.py`
 
@@ -181,6 +182,6 @@ env with `edge-tts` + `ffmpeg` works. Commit `static/audio/packs/` and
 ## What is NOT precached
 
 The service worker precaches the app shell but **not** the audio packs ([PWA](./pwa-and-deployment.md)).
-78 MB would make the first install enormous, and Range-request caching in a service worker
+103 MB would make the first install enormous, and Range-request caching in a service worker
 is error-prone. Packs are fetched on demand and held in the browser's HTTP cache, so audio
 works offline after first use.

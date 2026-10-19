@@ -5,7 +5,7 @@ Manabi's learning content comes from three sources, in increasing size:
 1. **Built-in seed** — a small, hand-verified set that ships in the app so it is usable
    immediately, offline, with no key.
 2. **Generated reference data** — the full kana/kanji/hanzi tables (Scripts page), the
-   complete HSK/JLPT word lists (Vocab browser), radicals, stroke-order data and the
+   complete HSK/JLPT word lists and Cantonese frequency bands (Vocab browser), radicals, stroke-order data and the
    tap-a-word dictionaries, produced by offline generators from open datasets.
 3. **AI-generated drafts** — optional, created in the [workbench](./ai-workbench.md) and
    approved by you.
@@ -97,18 +97,29 @@ Generates the Vocab browser data into `static/wordlists/` as per-level JSON plus
 `index.json`:
 
 ```
-node tools/gen-vocab-data.mjs
+node tools/gen-vocab-data.mjs [zh] [ja] [yue]
 ```
+
+With no arguments it builds all three; naming languages rebuilds only those and merges them into
+the existing `index.json`.
 
 - **Chinese** — full HSK 3.0: levels 1–6 plus the 7–9 band (~11k words), from
   [`drkameleon/complete-hsk-vocabulary`](https://github.com/drkameleon/complete-hsk-vocabulary).
 - **Japanese** — JLPT N5–N1 (~7.9k words), from
   [`jamsinclair/open-anki-jlpt-decks`](https://github.com/jamsinclair/open-anki-jlpt-decks)
   (expression / reading / meaning, derived from JMdict and Tanos lists).
+- **Cantonese** — the 5,000 most frequent words of the words.hk corpus, ranked by its
+  public-domain word counts with Jyutping from its word list
+  ([words.hk/faiman/analysis](https://words.hk/faiman/analysis/)), glossed in English from
+  `static/dict/yue` (CC-Canto / CC-CEDICT, CC BY-SA — so build that dictionary first with
+  `node tools/gen-dict.mjs yue`). Words without a reading or a dictionary entry are skipped. Four
+  bands by rank: **Top 500 / 501–1,500 / 1,501–3,000 / 3,001–5,000** (`yue-500.json` …
+  `yue-5000.json`; the level id is the band's upper rank, which `/vocab` shows as that range; added
+  words are tagged `YUE Top 500`, `YUE 501–1,500` …).
 
-There are no Cantonese, Korean or Hebrew word lists (`/vocab` says so). Each word list entry is compact (`{ t: target, r: reading, m: meaning }`). The `/vocab`
+There are no Korean or Hebrew word lists (`/vocab` says so). Each word list entry is compact (`{ t: target, r: reading, m: meaning }`). The `/vocab`
 page **fetches the active language's levels on demand** — these files are deliberately
-**not** bundled and **not** in the Automerge document, because ~19k words would bloat both.
+**not** bundled and **not** in the Automerge document, because ~24k words would bloat both.
 Only words you tap **＋ Add** become `LearningItem`s, via `studyVocabWord` (single) or
 `addVocabWords` (a whole level = one Automerge change).
 
@@ -135,7 +146,7 @@ All of these create published `LearningItem`s, which `buildQueue` then schedules
 | Add place or people names | Edit `names-data.ts` by hand (same five sections per language), run the tests. |
 | Add Hebrew roots or root words | Edit `roots-data.ts` by hand (vowelled; seed words spelled exactly as in the seed), run the tests. |
 | Refresh kanji/hanzi tables | `node tools/gen-scripts-data.mjs`, commit `scripts-data.ts`. |
-| Refresh HSK/JLPT word lists | `node tools/gen-vocab-data.mjs`, commit `static/wordlists/`. |
+| Refresh HSK/JLPT/Cantonese word lists | `node tools/gen-vocab-data.mjs [zh] [ja] [yue]` (yue after `gen-dict.mjs yue`), commit `static/wordlists/`. |
 | Refresh radicals / stroke data | `node tools/gen-radicals-data.mjs`, then `node tools/gen-stroke-data.mjs`; commit the outputs. |
 | Refresh the dictionaries | `node tools/gen-dict.mjs [zh] [yue] [ja] [ko] [he]`, commit `static/dict/`. |
 | Add audio for new content | Re-run the [audio pipeline](./audio.md#regenerating). |

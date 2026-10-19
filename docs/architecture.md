@@ -2,8 +2,8 @@
 
 Manabi is a single-page, local-first PWA. There is no backend: the browser holds all
 state, computes the schedule, renders exercises, and (optionally) talks directly to OpenAI.
-(Optional on-device models — Korean TTS and Whisper speech recognition — run in the browser
-too.) This document is the map; the subsystem docs are the territory.
+(Optional on-device models — Korean TTS, Whisper speech recognition and Dicta's Hebrew vowel
+model — run in the browser too.) This document is the map; the subsystem docs are the territory.
 
 ## Why this stack
 
@@ -19,7 +19,8 @@ notes app: durable local state, a flashcard scheduler, and a human-in-the-loop A
 | Persistence | **IndexedDB** via `idb-keyval` (+ a raw-IDB blob store for audio) | Durable, large-capacity, offline browser storage |
 | Build/output | **`adapter-static`** (SPA) + **Vite 7** | Ships a static bundle any host can serve; no SSR runtime |
 | PWA | **`@vite-pwa/sveltekit`** (Workbox) | Service worker, precaching, installability |
-| On-device ML | **`@huggingface/transformers`** (MMS TTS, Whisper ASR) | Korean text-to-speech (the only MMS voice with an ONNX port; other languages use the [prerecorded audio](./audio.md)) and opt-in offline speech recognition for pronunciation scoring ([SRS](./srs.md#pronunciation-scoring-asr)) |
+| On-device ML | **`@huggingface/transformers`** (MMS TTS, Whisper ASR) | Korean text-to-speech (the only MMS voice with an ONNX port; other languages use the [prerecorded audio](./audio.md)) and opt-in offline speech recognition for pronunciation scoring ([SRS](./srs.md#pronunciation-scoring-asr)), on WebGPU when there's a real GPU, else WASM |
+| Hebrew vowels | **`onnxruntime-web`** (direct dependency, pinned to the version transformers.js uses, so there is one copy) | Opt-in on-device niqqud with Dicta's DictaBERT menaked (INT8 ONNX, WASM), cached in the Cache API ([AI workbench](./ai-workbench.md#other-router-tasks-hebrew-diacritization-annotation--transcription)) |
 | Chinese script | **`opencc-js`** (lazily loaded) | Display conversion Simplified → Traditional (Taiwan / Hong Kong); content stays Simplified. Also turns Cantonese speech-recognition output into Hong Kong Traditional (`toHongKong`) |
 | Tooling | **mise**, **vitest**, **Playwright**, **svelte-check**, **TypeScript** | Reproducible Node 22, unit tests, browser tests, strict typing |
 
@@ -66,6 +67,8 @@ written into it (to keep the doc small and fast):
   as words are tapped and cached by the service worker. See [content](./content.md#dictionaries--toolsgen-dictmjs).
 - **Stroke data** — `static/strokes/{zh,ja}/<hex>.json` for the drawing pad (Cantonese uses the
   `zh` set).
+- **On-device models** (opt-in) — Whisper and MMS weights, cached by transformers.js; the
+  Hebrew vowel model, cached in the Cache API (`manabi-models`).
 - **Script tables** — generated into `src/lib/scripts-data.ts` (and `radicals-data.ts`;
   bundled, but treated as static reference data, not user state).
 
@@ -109,11 +112,12 @@ src/
       answer.ts         checkTyped() — typed-recall answer checking
     inference/
       router.ts         provider routing (TTS local-first; transcription OpenAI → Whisper;
-                        generation, annotation, diacritization OpenAI-only)
+                        diacritization on-device → OpenAI; generation, annotation OpenAI-only)
       types.ts          provider interface + task types
       local-models.ts   transformers.js pipeline loader + download status
       asr-text.ts       Whisper transcript clean-up, language names, token budget
-      providers/openai.ts, providers/tts-local.ts (Korean MMS), providers/asr-local.ts (Whisper)
+      providers/openai.ts, providers/tts-local.ts (Korean MMS), providers/asr-local.ts (Whisper:
+                        ASR_MODELS, WebGPU / WASM), providers/niqqud-local.ts (DictaBERT menaked)
     audio.ts            prerecorded-pack playback (seek a slice via HTTP Range)
     chinese.ts          Simplified / Traditional display (opencc-js), zhVariants,
                         $toZhScript / $readingOf / $rubyOf stores
@@ -127,7 +131,8 @@ src/
     content-md.ts       Markdown render / parse / apply for the sync repo
     sync.ts             GitHub Contents-API sync (runSync over SyncIO / ContentIO)
     pronunciation.ts    transcript scoring (normalize + Levenshtein)
-    hebrew.ts           niqqud validation for AI diacritization
+    hebrew.ts           niqqud validation for diacritization (AI or on-device)
+    niqqud-model.ts     pure parts of the on-device vowel model: tokenizer, applyNikud
     reminder.ts         daily reminder as a repeating .ics event
     scripts.ts          Scripts-page data assembly + helpers
     scripts-data.ts     GENERATED kana/kanji/hanzi tables (do not hand-edit)
@@ -136,7 +141,7 @@ src/
     path.ts, today.ts, nav.ts, ui.ts, haptics.ts, install.ts, sounds.ts
     components/         ScriptText, TapText, LookupSheet, AudioButton, Recorder, ExerciseRunner,
                         StrokePad, GlyphSheet, ReviewForecast, ActivityCalendar, PathStrip,
-                        HowItWorks, InstallHint, Mascot, Confetti
+                        HowItWorks, InstallHint, StreakCelebration, GoalCelebration, Mascot, Confetti
 e2e/                    Playwright browser tests (desktop + phone)
 tools/                  offline data + audio generators (Node/Python, not shipped)
 serve.mjs               dependency-free static server for local hosting

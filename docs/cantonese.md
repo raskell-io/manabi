@@ -56,14 +56,20 @@ language in the browser (lookup, ruby, Scripts, path, names, a review).
   typed, not converted).
 - **Drawing pad**: `strokeLang('yue')` is `'zh'`, so Cantonese uses the Chinese (Make Me a Hanzi)
   stroke data.
-- **Not there:** word lists on `/vocab` (none exist for Cantonese yet), and on-device TTS.
+- **Word lists** on `/vocab`: the 5,000 most frequent words of the words.hk corpus in four bands,
+  shown as **Top 500 / 501–1,500 / 1,501–3,000 / 3,001–5,000** (`static/wordlists/yue-500.json` …
+  `yue-5000.json`; level ids are the band's upper rank). An added word is tagged `YUE Top 500`,
+  `YUE 501–1,500` etc. Every word has a prerecorded clip, like the other languages' lists.
+- **Not there:** on-device TTS.
 
 ## Data sources and licences
 
 | What | Source | Licence |
 | --- | --- | --- |
 | Dictionary (`static/dict/yue/`, ~113k keys, ~10 MB) | **CC-Canto** (Pleco, cantonese.org) + **CC-CEDICT** (MDBG) with Pleco's Cantonese readings for it (`cccedict-canto-readings`) | CC BY-SA 3.0 (CC-Canto, readings) / CC BY-SA 4.0 (CC-CEDICT); see `static/dict/LICENSE.md` |
-| Audio (212 clips, `static/audio/packs/yue-*.webm`, `manifest-yue.json`) | edge-tts `zh-HK-HiuMaanNeural` | same grey area as the other languages' packs ([audio](./audio.md)) |
+| Word lists (`static/wordlists/yue-*.json`) | **words.hk** corpus word frequencies (`existingwordcount.csv`) and Jyutping (`wordslist.csv`) from [words.hk/faiman/analysis](https://words.hk/faiman/analysis/); English glosses from the dictionary above | Public domain (frequencies, Jyutping); glosses CC BY-SA |
+| On-device recognition (opt-in) | `onnx-community/whisper-small-cantonese-ONNX`, an ONNX port of `alvanlii/whisper-small-cantonese` | Apache-2.0 |
+| Audio (5,097 clips — seed, Scripts and the word lists; `static/audio/packs/yue-*.webm`, `manifest-yue.json`) | edge-tts `zh-HK-HiuMaanNeural` | same grey area as the other languages' packs ([audio](./audio.md)) |
 | Stroke order | Make Me a Hanzi via `hanzi-writer-data` | Arphic Public License |
 | Seed, passages, names, paths | written for Manabi | MIT, with the code |
 
@@ -83,6 +89,13 @@ dictionary, which catches a mistyped tone.
 - Whisper **base and small have no Cantonese token** (only large-v3 knows `yue`), so on-device
   recognition runs with language `'chinese'` (`WHISPER_LANGUAGE` in `asr-text.ts`). The result
   tends to be Mandarin-flavoured standard written Chinese, sometimes Simplified.
+- The opt-in **Cantonese model** (`settings.localAsrCantonese`, Settings → Pronunciation, its own
+  **Download now**) replaces them for Cantonese takes: `onnx-community/whisper-small-cantonese-ONNX`
+  (`ASR_MODELS.cantonese` in `asr-local.ts`, ≈ 300 MB, q4 / q4 weights on both WebGPU and WASM).
+  It writes colloquial Cantonese (係 喺 冇 嗰). Its ONNX generation config has no language table,
+  so it is started with `decoder_input_ids` `[50258, 50260, 50359, 50363]`
+  (`<|startoftranscript|> <|zh|> <|transcribe|> <|notimestamps|>`). Measured warm per take in
+  Chrome on an Apple GPU: 0.8 s on WebGPU, ≈ 10 s on the CPU.
 - OpenAI transcription takes ISO 639-1 codes, so Cantonese is sent as `zh` with a Cantonese prompt
   (以下係廣東話嘅句子，用香港繁體字寫。).
 - Both transcripts are converted to Hong Kong Traditional (`toHongKong` in `chinese.ts`, opencc-js),
@@ -116,6 +129,8 @@ characters in Mandarin.
 - **Dictionary.** `node tools/gen-dict.mjs yue` (needs network and `unzip`; downloads cached in
   `.cache/dict/`), commit `static/dict/yue/` and `static/dict/index.json`. Fix a bad lead reading
   with `YUE_FIRST`, add a missing word with `YUE_EXTRA`.
+- **Word lists.** `node tools/gen-vocab-data.mjs yue` (after the dictionary, for glosses) rewrites
+  the four `yue-*.json` bands and merges them into `static/wordlists/index.json`.
 - **AI drafts.** The workbench's reading guide asks for colloquial Hong Kong Cantonese in
   Traditional characters with spaced Jyutping; review drafts for standard written Chinese
   creeping in (是 / 的 / 不).
@@ -136,9 +151,8 @@ characters in Mandarin.
 ### Speech recognition
 
 - `onnx-community/whisper-small-cantonese-ONNX` (fine-tune of `alvanlii/whisper-small-cantonese`,
-  Apache-2.0, ~8% CER on Common Voice zh-HK) has a transformers.js port — the candidate for a
-  proper on-device Cantonese model in `asr-local.ts`, writing colloquial Cantonese directly. Mind
-  the onnxruntime-web int8-decoder problem (use fp16 / q4 weights).
+  Apache-2.0, ~8% CER on Common Voice zh-HK) is **in use** as the opt-in on-device Cantonese
+  model (see [above](#speech-recognition-and-synthesis)).
 - OpenAI: the newer transcription models may accept `yue` directly; whether their output is
   colloquial (係 / 嘅) rather than 書面語 is untested. `colloquialize` would still be needed for
   standard-Chinese output.
@@ -146,8 +160,9 @@ characters in Mandarin.
 ### Vocabulary and levels
 
 - **words.hk**: full data on request under a non-commercial licence; its derived lists (word /
-  character frequency, readings) are public domain — the natural basis for frequency levels and a
-  `/vocab` word list.
-- There is no HSK equivalent, so lists need hand curation, bucketed by words.hk frequency;
-  HKCanCor (CC BY 4.0) gives spoken frequency.
+  character frequency, readings) are public domain — **in use** for the `/vocab` frequency bands
+  (`node tools/gen-vocab-data.mjs yue`, after `node tools/gen-dict.mjs yue`, which supplies the
+  glosses; words without a reading or a dictionary entry are skipped).
+- There is no HSK equivalent, so the bands are by corpus frequency, not curated levels;
+  HKCanCor (CC BY 4.0) would give spoken frequency.
 - CC-Canto dates from 2017; newer slang and some everyday words are missing (hence `YUE_EXTRA`).

@@ -26,7 +26,7 @@ an ordered provider list and uses the first one whose `capabilities(settings)` a
 | `generateItems` | remote only | OpenAI (JSON mode) |
 | `generatePassages` | remote only | OpenAI (JSON mode) |
 | `annotate` | remote only | OpenAI (JSON mode) — reading + translation per line of an own text |
-| `diacritize` | remote only | OpenAI (JSON mode) — Hebrew niqqud |
+| `diacritize` | local-first (opt-in), then remote | DictaBERT menaked (local, `localNiqqud`) → OpenAI (JSON mode) — Hebrew niqqud |
 | `synthesize` (TTS) | local-first, then remote | MMS (local, **Korean only**) → OpenAI |
 | `transcribe` (ASR) | remote-first, then local | OpenAI → Whisper (local, opt-in) |
 
@@ -36,23 +36,28 @@ transcribe(input, settings)       // ASR — OpenAI first, on-device Whisper fal
 generateItems(input, settings)    // vocab drafts (OpenAI JSON)
 generatePassages(input, settings) // reading drafts (OpenAI JSON)
 annotate(input, settings)         // own-text readings + translations (OpenAI JSON)
-diacritize(input, settings)       // Hebrew niqqud (OpenAI JSON)
+diacritize(input, settings)       // Hebrew niqqud — on-device model first when on, then OpenAI JSON
 canGenerate / canSynthesize / canTranscribe / canDiacritize(settings)  // capability checks
 ```
 
-Generation, annotation and diacritization are **OpenAI-only** (they need reliable JSON
-output). TTS is **local-first**, but the only on-device voice is Korean, and most audio comes
+Generation and annotation are **OpenAI-only** (they need reliable JSON output).
+Diacritization tries the on-device Hebrew model first when `settings.localNiqqud` is on, then
+OpenAI. TTS is **local-first**, but the only on-device voice is Korean, and most audio comes
 from the [prerecording pipeline](./audio.md) anyway — the router's TTS path only fires for
 text without a clip. Transcription runs the other way round: the remote model is more
 accurate, so it goes first, and a failing or impossible call (no key, offline) falls through
 to the on-device model when that is switched on. Synthesis and transcription try the next
-provider when one fails; the JSON tasks return the first capable provider's result.
+provider when one fails, and so does diacritization; generation and annotation return the
+first capable provider's result. The provider lists are built on use (functions, not module
+constants): the providers share chunks with pages that import them directly, and a chunk
+import cycle once left `asrLocalProvider` undefined while the router initialized.
 
 Providers live in [`providers/openai.ts`](../src/lib/inference/providers/openai.ts) (chat
 JSON-mode generation, annotation, diacritization, a TTS endpoint and transcription),
 [`providers/tts-local.ts`](../src/lib/inference/providers/tts-local.ts) (transformers.js
 MMS, Korean) and [`providers/asr-local.ts`](../src/lib/inference/providers/asr-local.ts)
-(transformers.js Whisper). [`local-models.ts`](../src/lib/inference/local-models.ts) loads
+(transformers.js Whisper) and [`providers/niqqud-local.ts`](../src/lib/inference/providers/niqqud-local.ts)
+(DictaBERT menaked in onnxruntime-web). [`local-models.ts`](../src/lib/inference/local-models.ts) loads
 transformers.js pipelines lazily (dynamic import, so the runtime stays out of the initial
 bundle), dedupes concurrent loads, and publishes download progress in `localModelStatus`.
 
@@ -114,7 +119,24 @@ The same router serves three more tasks (advertised through `ProviderCapabilitie
   back exactly the input (`acceptDiacritized`), so the model can never rewrite letters.
   `diacritizeItems` / `diacritizePassages` batch a whole generation into one request and only
   send strings that `needsNiqqud` (two or more Hebrew letters, no marks). Used by the item
-  editor's **Add vowels (AI)** button and automatically by the Workbench for Hebrew output.
+  editor's **Add vowels** button (**Add vowels (AI)** when the on-device model is off) and
+  automatically by the Workbench for Hebrew output.
+
+  With `settings.localNiqqud` (Settings → Hebrew, with a **Download now** button) the router
+  first tries **on-device**: [`providers/niqqud-local.ts`](../src/lib/inference/providers/niqqud-local.ts)
+  runs an INT8 ONNX conversion (by Tale Me) of Dicta's `dicta-il/dictabert-large-char-menaked`
+  (CC BY 4.0) in **onnxruntime-web** (WASM). `onnxruntime-web` is a direct dependency pinned to
+  the version transformers.js uses (`1.26.0-dev.20260416-b7804b056c`), so there is one copy and
+  one set of WASM files. The model (pinned revision, 317,980,253 bytes, checked by size) and its
+  `tokenizer.json` (pinned at Dicta revision `d311fbf`) download once with progress into the
+  Cache API (`manabi-models`) and then work offline. The pure parts —
+  the character-level tokenizer, `applyNikud` (leaves matres lectionis letters unpointed, NFC
+  output) and `argmaxRows` — live in [`niqqud-model.ts`](../src/lib/niqqud-model.ts) with unit
+  tests. The same `acceptDiacritized` check applies to its output. Measured: first download and
+  load ≈ 30 s; from the cache ≈ 2.5 s to load and point a sentence; then ≈ 300 ms per sentence.
+  In-memory / incognito browser profiles reject the Cache API put of the 318 MB file, so there
+  it downloads again each session. If the on-device model fails, OpenAI is tried when a key is
+  set.
 - **`annotate({ language, lines })`** — for **Read your own text** (`/read/new`): one
   `{ reading, transliteration?, meaning }` per input line, same order (Chat Completions, JSON
   mode, temperature 0.2). `validateAnnotations` rejects a result whose line count does not
@@ -123,9 +145,11 @@ The same router serves three more tasks (advertised through `ProviderCapabilitie
 - **`transcribe({ audio, language })`** — OpenAI first: sends a learner's recording
   (multipart) to the transcription endpoint (`gpt-4o-mini-transcribe`) with the language hint;
   for Chinese a neutral Simplified-script prompt keeps the output in the same script as the
-  items. Then, when `settings.localAsr` is on, **on-device Whisper** (`asr-local.ts`: WASM,
-  base = q8 encoder + fp16 decoder because onnxruntime-web's int8 decoders fail, Chinese
-  normalized to Simplified, hallucinated stock phrases dropped by `asr-text.ts`). Both are
+  items. Then, when `settings.localAsr` is on, **on-device Whisper** (`asr-local.ts`: the
+  `ASR_MODELS` registry — base, small, and the opt-in Cantonese fine-tune — on WebGPU when
+  `localAsrGpu` is on and there's a real GPU, else WASM, where base = q8 encoder + fp16 decoder
+  because onnxruntime-web's int8 decoders fail; Chinese normalized to Simplified, hallucinated
+  stock phrases dropped by `asr-text.ts`). Both are
   gated by the **Pronunciation** setting (`asrScoring`). Scoring is pure and lives in
   [`src/lib/pronunciation.ts`](../src/lib/pronunciation.ts) — see [SRS → Pronunciation
   scoring](./srs.md#pronunciation-scoring-asr).

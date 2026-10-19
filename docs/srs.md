@@ -154,6 +154,15 @@ summary shows "N XP in total · M today" and Progress shows total / this week / 
 `xpSummary` in [`srs/stats.ts`](../src/lib/srs/stats.ts). XP is a reward layer only: it never
 touches scheduling.
 
+**Daily goal.** `settings.xpGoal` (default 50; the choices are `XP_GOALS` in
+[`db/types.ts`](../src/lib/db/types.ts): 20 Casual, 50 Regular, 100 Serious, 200 Intense) is
+today's XP target across all languages. Home's ring shows `xpSummary(…).today` against it, turns
+gold with "Goal reached!" once met, and links to `/settings#goal`; Progress's Today tile shows
+"/ goal". When a session's XP takes today's total from below the goal to at or above it, the
+review page sets `goalHit` and shows
+[`GoalCelebration`](../src/lib/components/GoalCelebration.svelte) (sound `playGoal`) after the
+streak screen, if any, and before the summary.
+
 ## Exercises
 
 [`exercises/templates.ts`](../src/lib/exercises/templates.ts) defines the exercise shapes
@@ -257,14 +266,23 @@ switched on — so Whisper covers no key, offline, or a failed call
 ([AI workbench → router](./ai-workbench.md#other-router-tasks-hebrew-diacritization-annotation--transcription)).
 
 On-device recognition ([`providers/asr-local.ts`](../src/lib/inference/providers/asr-local.ts))
-runs transformers.js `automatic-speech-recognition` in **WASM** with
-`onnx-community/whisper-base` (≈ 130 MB, ~3 s per take) or `whisper-small` (≈ 300 MB, ~10 s;
-`settings.localAsrModel`). The model downloads on first use (or via **Download now** in
+runs transformers.js `automatic-speech-recognition` with `onnx-community/whisper-base`
+(≈ 130 MB, ~3 s per take in WASM) or `whisper-small` (≈ 300 MB, ~10 s;
+`settings.localAsrModel`) — the `ASR_MODELS` registry, which also holds the Cantonese model
+below and each model's weights per device. The model downloads on first use (or via **Download now** in
 Settings, with progress from `localModelStatus`) and is cached by transformers.js, so it then
 works offline. Details that matter:
 
+- **Device.** With `settings.localAsrGpu` on (the default) and a real GPU — `hasWebGpu()`
+  requests an adapter with a 2 s timeout, and a software fallback adapter (headless Chromium's
+  SwiftShader) doesn't count — the model loads on **WebGPU**; if that load fails it falls back to
+  **WASM**. Settings shows where a loaded model runs (`asrDevice`: "on the GPU" / "on the CPU")
+  and whether WebGPU is available. Measured warm per take in Chrome on an Apple GPU:
+  whisper-base 0.2 s on the GPU; the Cantonese model 0.8 s on the GPU vs ≈ 10 s on the CPU.
 - **Weights.** onnxruntime-web's WASM backend rejects Whisper's int8 decoders ("Missing
-  required scale"), so base uses a **q8 encoder + fp16 decoder** and small uses q4 / q4.
+  required scale"), so in WASM base uses a **q8 encoder + fp16 decoder** and small uses q4 / q4.
+  On WebGPU base uses an **fp32 encoder + q4 decoder**; small and the Cantonese model keep
+  q4 / q4.
 - The recording is decoded to 16 kHz mono; the language is always set; the token budget is
   scaled to the clip length (`maxTokensFor`, 8–96 tokens).
 - [`asr-text.ts`](../src/lib/inference/asr-text.ts) `cleanTranscript` drops known
@@ -274,8 +292,13 @@ works offline. Details that matter:
   large-v3 knows `yue`), so the output is often Mandarin-flavoured written Chinese; it is
   converted to Hong Kong Traditional and colloquialized before scoring. OpenAI transcription
   likewise sends `language: 'zh'` with a Cantonese prompt (以下係廣東話嘅句子，用香港繁體字寫。).
+  With the opt-in `settings.localAsrCantonese`, Cantonese takes use
+  `onnx-community/whisper-small-cantonese-ONNX` instead (an ONNX port of
+  `alvanlii/whisper-small-cantonese`, Apache-2.0, ≈ 300 MB), which writes colloquial Cantonese
+  (係 喺 冇 嗰). Its ONNX generation config lacks the language table, so transformers.js refuses
+  `language` / `task`; it is started with `decoder_input_ids` `<|startoftranscript|> <|zh|>
+  <|transcribe|> <|notimestamps|>` = `[50258, 50260, 50359, 50363]` (`AsrModel.prompt`).
 - **Hebrew needs `small`**; with base, Hebrew recordings fail locally (and use OpenAI only).
-- WebGPU is untested; WASM only so far.
 
 ## Extending the scheduler
 

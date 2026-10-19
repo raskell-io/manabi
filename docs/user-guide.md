@@ -72,7 +72,9 @@ nothing). On a desktop the same destinations sit in the sidebar.
 
 - **Home (`/`)** — today in one tap: a **Continue** card that opens the right session
   (Reading when anything is new or due, otherwise Listening, then Speaking), the other
-  modes with their counts underneath, today's numbers, and any lessons with something due.
+  modes with their counts underneath, the **daily goal ring** (today's XP against your goal —
+  see [Points, runs and streaks](#points-runs-and-streaks)), the week's streak, and any lessons
+  with something due.
   The language chips at the top switch languages.
 - **Review (`/review`)** — the core loop. Pick a mode and answer cards:
   - **Reading** — text-only recognition, recall, and context (cloze) exercises, scheduled
@@ -110,9 +112,10 @@ nothing). On a desktop the same destinations sit in the sidebar.
   Jyutping tones, and the Hebrew alef-bet. Tap a glyph to hear it and add it to your reviews, or add a whole
   set at once.
 - **Vocab (`/vocab`)** — browse the full official word lists (HSK for Chinese, JLPT for
-  Japanese). Search or browse by level; the reading sits above each word; tap **＋ Add** to
-  start studying it, or add an entire level. There are no word lists for Cantonese, Korean or
-  Hebrew yet.
+  Japanese) and, for Cantonese, the 5,000 most frequent words in four bands (**Top 500**,
+  **501–1,500**, **1,501–3,000**, **3,001–5,000**). Search or browse by level; the reading sits
+  above each word; tap **＋ Add** to start studying it, or add an entire level. There are no
+  word lists for Korean or Hebrew yet.
 - **Items (`/items`)** — every item you are studying. Search, edit, or delete. Each item has
   a play button for its audio, and **Review these** runs a session over exactly the items
   currently listed (e.g. everything matching "HSK2"). An item's page also lists your recent
@@ -120,7 +123,7 @@ nothing). On a desktop the same destinations sit in the sidebar.
 - **Lessons (`/lessons`)** — group items into named bundles. Each card shows what's new
   and due inside it, and its **Review** button runs any review mode over just that lesson's
   items. Daily limits don't apply inside a lesson — you get all of it.
-- **Progress (`/dashboard`)** — your **XP**: total, this week and today; **Coming up**: how many skill reviews fall due on each of the
+- **Progress (`/dashboard`)** — your **XP**: total, this week and today (against your daily goal); **Coming up**: how many skill reviews fall due on each of the
   next 14 days in this language (anything overdue counts as today); **Practice**: how many
   answers and recordings you made on each day of the last 18 weeks, as a calendar from light to
   dark. Hover or tap a day for its count; both charts also have a table view. Then your weak
@@ -130,9 +133,9 @@ nothing). On a desktop the same destinations sit in the sidebar.
   which opens Speaking over just those words.
 - **Workbench (`/workbench`)** — generate new vocabulary or reading passages with AI (see
   below) into a review queue you approve before anything is added.
-- **Settings (`/settings`)** — active language, daily limits, review options (grade buttons,
-  typed recall), audio, pronunciation scoring and on-device recognition, the **Chinese** script
-  and reading aid, the Hebrew vowel-hiding toggle, your OpenAI key (for the AI features),
+- **Settings (`/settings`)** — active language, daily limits and the **daily goal**, review options (grade buttons,
+  typed recall), audio, pronunciation scoring and on-device recognition, the
+  **Chinese** script and reading aid, the Hebrew vowel-hiding toggle and on-device vowels, your OpenAI key (for the AI features),
   **Backup** (export a file / import & merge), **Sync (GitHub)**, the **Daily reminder**, and
   the theme — described below.
 
@@ -154,6 +157,12 @@ your **streak** — a flame screen with the week so far — before the summary, 
 count up. Points are banked when a session ends: the summary shows **N XP in total · M today**,
 and **Progress** keeps your total, this week's and today's XP (all languages together; they
 travel with backups and sync). All of it is still when your device asks for reduced motion.
+
+The **daily goal** is a number of XP per day, across all languages: **20** (Casual), **50**
+(Regular, the default), **100** (Serious) or **200** (Intense). Home's ring fills with today's XP
+against it and turns gold with **Goal reached!** once you are there; tap the ring to change the
+goal in **Settings → Daily limits**. The session that takes you past it gets its own celebration screen, after the
+streak screen and before the summary.
 
 ## Typing answers
 
@@ -215,7 +224,8 @@ few Cantonese-only characters (咗 佢 冇 啲 喺 哋 嚟 嗰 攰) and says so.
 
 Speech recognition hears Cantonese less reliably than the other languages: it tends to write
 standard Chinese (是 for 係), so Manabi maps those words back before scoring — your rating is
-the one that counts. Words you add yourself have no recording; with an OpenAI key they are read
+the one that counts. On-device, the optional Cantonese model (see
+[below](#speech-recognition-on-your-device)) writes colloquial Cantonese directly. Words you add yourself have no recording; with an OpenAI key they are read
 by OpenAI's voice, asked for Hong Kong Cantonese, which may still sound Mandarin.
 
 ## Speech recognition on your device
@@ -223,7 +233,15 @@ by OpenAI's voice, asked for Hong Kong Cantonese, which may still sound Mandarin
 **Settings → Pronunciation → Recognize speech on this device** scores your recordings without
 an OpenAI key and without a connection. Pick **Base** (~130 MB, about 3 seconds per take) or
 **Small** (~300 MB, about 10 seconds; needed for Hebrew). The model downloads the first time
-it is used — or press **Download now** — and then works offline. It is less accurate than
+it is used — or press **Download now** — and then works offline. Those times are on the CPU:
+with **Run it on the graphics card** on (the default) and a browser that has WebGPU, it runs
+on the GPU instead, several times faster, and Settings shows where a loaded model runs ("on the
+GPU" / "on the CPU"). If the GPU can't load it, it falls back to the CPU.
+
+For Cantonese there is an extra option: a Whisper trained on Hong Kong Cantonese (~300 MB, with
+its own **Download now**). It writes what you actually say — 係, 喺, 冇, 嗰 — where the general
+model writes standard Chinese. It is slow on the CPU (around 10 seconds a take), under a second
+on a GPU. It is less accurate than
 OpenAI, especially for single words, so when you have a key OpenAI is used first and the
 on-device model only steps in when that is not possible. As always, you confirm the
 suggested rating.
@@ -236,8 +254,12 @@ settings strips the niqqud so you practice reading unpointed text, the way real 
 written.
 
 Content you add yourself may arrive bare. Items whose Hebrew has no vowel points show a
-**no vowels** badge in the Items list, and their editor offers **Add vowels (AI)**: with an
-OpenAI key, the text is pointed for you to check before saving. The letters are guaranteed
+**no vowels** badge in the Items list, and their editor offers **Add vowels**: the text is
+pointed for you to check before saving. **Settings → Hebrew → Add vowels on this device**
+downloads Dicta's Hebrew vowel model (~320 MB, once; press **Download now** or it downloads on
+first use) and then points text offline and without a key, in a fraction of a second per
+sentence; otherwise, or if it fails, an OpenAI key does it (the button then reads **Add vowels
+(AI)**). The letters are guaranteed
 untouched — a result that changes anything but the marks is discarded. The Workbench points
 its Hebrew output the same way before it reaches the review queue.
 
@@ -256,7 +278,7 @@ deliberately is never "too much".
 - **Everything is local.** Your items, progress, recordings, and settings live in your
   browser's IndexedDB. There is no server account and no analytics.
 - **Your OpenAI key** (only needed for the AI features: the workbench, AI readings for your
-  own texts, adding Hebrew vowels, and cloud speech recognition) is stored in settings on your
+  own texts, adding Hebrew vowels unless the on-device model is on, and cloud speech recognition) is stored in settings on your
   device and used to call OpenAI directly from your browser. It is never sent anywhere
   else and is never committed to the repo. Your recordings go to OpenAI only for scoring, and
   not at all with on-device recognition.

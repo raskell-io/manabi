@@ -28,7 +28,7 @@ first, then dive into whichever subsystem you are touching.
 | [SRS & review loop](./srs.md) | Dev | Multi-dimensional SM-2, the due queue, unlock rules, exercise generation (typed recall, dictation), pronunciation scoring |
 | [Content pipeline](./content.md) | Dev | Built-in seed, the kana/kanji/hanzi, vocab, radicals, strokes & dictionary generators, Chinese script conversion, how to add content |
 | [Audio pipeline](./audio.md) | Dev | Prerecorded Opus sprite packs, the playback engine, regenerating audio |
-| [AI content workbench](./ai-workbench.md) | Dev | The inference router, providers (incl. on-device Whisper), draft → review → publish, adding a provider |
+| [AI content workbench](./ai-workbench.md) | Dev | The inference router, providers (incl. on-device Whisper and Hebrew vowels), draft → review → publish, adding a provider |
 | [PWA & deployment](./pwa-and-deployment.md) | Dev | PWA wiring, offline/service worker, Cloudflare Pages, local hosting |
 | [GitHub sync](./sync.md) | Dev | Multi-device sync of the backup snapshot via the GitHub Contents API, plus the editable Markdown copy of items and passages: the sync round, triggers, security, limits |
 | [Development & extending](./development.md) | Dev | Setup, tasks, unit and browser (Playwright) tests, conventions, and step-by-step extension recipes |
@@ -42,13 +42,14 @@ listening, context, and recall — each with its own SM-2 spaced-repetition sche
 review loop builds a due queue, serves generated exercises (multiple choice, cloze, typed
 recall, sentence dictation, record-and-compare), grades them, and advances the schedules.
 Content comes from three places: a small hand-verified **seed**, large **generated reference
-sets** (full kana/kanji/hanzi tables, HSK/JLPT word lists, radicals, stroke data, and
+sets** (full kana/kanji/hanzi tables, HSK/JLPT word lists and Cantonese frequency bands, radicals, stroke data, and
 tap-a-word **dictionaries** for all five languages), and an optional **AI workbench** that
 drafts new items for human approval; learners can also paste **their own text** to read.
 Chinese is stored Simplified and displayed in Simplified or Traditional (Taiwan / Hong Kong),
 with pinyin or Zhuyin readings; Cantonese is stored in Hong Kong Traditional with Jyutping. Audio is **prerecorded** and bundled into a few hundred Opus
 sprite packs (on-device TTS exists only for Korean); pronunciation is scored by speech
-recognition — OpenAI, or Whisper running in the browser. Finished sessions bank **XP**, kept in
-the document so totals follow you across devices. State is an **Automerge CRDT
+recognition — OpenAI, or Whisper running in the browser (on the GPU where there is one); Hebrew
+vowels are added by OpenAI or by Dicta's model on the device. Finished sessions bank **XP**
+towards a daily goal, kept in the document so totals follow you across devices. State is an **Automerge CRDT
 document** persisted to IndexedDB, so the app is offline-first; devices sync through a private
 GitHub repository with no server of our own.

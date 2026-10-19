@@ -76,7 +76,9 @@ Deliberately **excluded**:
   `manabi-dict`) as words are tapped; audio manifests and word lists likewise in `manabi-data`,
   stroke data `CacheFirst` in `manabi-strokes`.
 - OpenAI and Hugging Face requests — `NetworkOnly` runtime rules. On-device models (Korean
-  TTS, Whisper) are cached by transformers.js itself, not the service worker; the
+  TTS, Whisper) are cached by transformers.js itself, not the service worker; the Hebrew vowel
+  model (≈ 318 MB) is stored by the app in the Cache API (`manabi-models`) — in-memory /
+  incognito profiles reject that put, so there it downloads again each session. The
   onnxruntime WASM files are excluded from precaching (`globIgnores`).
 
 (The opencc-js Traditional Chinese dictionaries are an ordinary JS chunk, so they are

@@ -56,6 +56,7 @@ build (uploading traces on failure).
   - `content-md.test.ts`, `sync.test.ts`, `db/merge.test.ts` — Markdown round-trip of all
     seed content, the sync round over fakes, the backup merge
   - `inference/asr-text.test.ts`, `pronunciation.test.ts`, `hebrew.test.ts`,
+    `niqqud-model.test.ts` (the on-device vowel model's tokenizer and pointing),
     `reminder.test.ts`, and the rest (`src/**/*.test.ts`)
 
   Tests target **pure functions** with injectable dates/RNG.
@@ -66,10 +67,10 @@ build (uploading traces on failure).
   shared `test` in [`e2e/fixtures.ts`](../e2e/fixtures.ts) **fails any test that logs an
   uncaught page error or console error** (404s excepted) — the bug class `svelte-check` misses,
   such as an optional parameter left in a compiled `.svelte` script. Specs cover every page in
-  every language (and that none is wider than a phone), a full review session, typed recall and
+  every language (and that none is wider than a phone), a full review session (with the streak and daily-goal screens and Home's goal ring), typed recall and
   dictation over several days with a fake clock, the drawing pad, radicals, roots, names,
   paths, Traditional / Zhuyin / ruby, dictionary lookup and own texts, settings (incl.
-  on-device recognition), the Markdown sync against a faked GitHub, the progress charts and
+  on-device recognition: the GPU toggle, the Cantonese model), Cantonese word lists, the Markdown sync against a faked GitHub, the progress charts and
   reminder, and one animated mascot per screen. External APIs (OpenAI, GitHub) are faked with
   `context.route()`.
 
@@ -161,7 +162,8 @@ This is the largest change (it touches the data model, content, and audio):
 2. Add seed items/passages in `seed.ts` (new stable ids).
 3. Add the script tables (kana/letters) to `scripts.ts`; extend `gen-scripts-data.mjs` if
    the language has a character set to generate.
-4. Add word lists (extend `gen-vocab-data.mjs`, regenerate `static/wordlists/`).
+4. Add word lists (extend `gen-vocab-data.mjs` with a section behind its language argument,
+   run `node tools/gen-vocab-data.mjs <lang>`, which merges into `static/wordlists/index.json`).
 5. Regenerate audio (`dump-audio-texts.mjs` + `gen-audio.py`) — it picks up the new texts.
 6. Add a dictionary: a builder in `tools/gen-dict.mjs` (and the language in `DICT_LANGUAGES`,
    `dict-shard.ts`), its licence in `static/dict/LICENSE.md`, and lookup rules in `lookup.ts`

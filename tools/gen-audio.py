@@ -68,7 +68,8 @@ async def synthesize(texts: list[dict]) -> None:
             path = f"{CACHE}/{h}.mp3"
             for attempt in range(4):
                 try:
-                    await edge_tts.Communicate(t["text"], VOICE[t["lang"]]).save(path)
+                    # A stalled connection would otherwise hang the whole run.
+                    await asyncio.wait_for(edge_tts.Communicate(t["text"], VOICE[t["lang"]]).save(path), timeout=30)
                     if os.path.getsize(path) > 0:  # edge-tts can save an empty file on a hiccup
                         break
                     raise ValueError("empty audio")

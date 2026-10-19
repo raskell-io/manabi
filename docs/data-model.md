@@ -9,7 +9,7 @@ Source of truth: [`src/lib/db/types.ts`](../src/lib/db/types.ts) (shapes) and
 
 ## The document
 
-`SCHEMA_VERSION = 13` (see [the history](#schema-history)). The document is a set of keyed maps (objects keyed by id) plus
+`SCHEMA_VERSION = 14` (see [the history](#schema-history)). The document is a set of keyed maps (objects keyed by id) plus
 settings:
 
 ```ts
@@ -150,6 +150,9 @@ interface ManabiSettings {
   localTtsEnabled;                    // on-device TTS (Korean MMS only)
   asrScoring;                         // score recordings with speech recognition
   localAsr; localAsrModel;            // on-device Whisper (opt-in), 'base' | 'small'
+  localAsrCantonese;                  // Cantonese takes use a Cantonese fine-tune of Whisper small
+  localAsrGpu;                        // run on-device Whisper on WebGPU when there's a real GPU
+  localNiqqud;                        // add Hebrew vowels on-device (DictaBERT menaked)
   hideHebrewVowels;
   zhScript;                           // 'simplified' | 'traditional-tw' | 'traditional-hk'
   zhReading;                          // 'pinyin' | 'zhuyin'
@@ -157,15 +160,17 @@ interface ManabiSettings {
   gradeButtons; typedRecall;
   theme: 'system' | 'light' | 'dark';
   reminderTime;                       // 'HH:MM' for the daily calendar reminder
+  xpGoal;                             // daily XP goal (all languages), Home's ring
   pathChoice;                         // learning path picked per language
 }
 ```
 
 Defaults (`defaultSettings()`): `newPerDay: 5`, `reviewCap: 40`, `openaiModel: 'gpt-4o'`,
 `activeLanguage: 'zh'`, `syncAuto` and `syncMarkdown` on, `localTtsEnabled` and `asrScoring`
-on, `localAsr` off with `localAsrModel: 'base'`, `zhScript: 'simplified'`,
-`zhReading: 'pinyin'`, `zhRuby` off, `gradeButtons` and `typedRecall` on, `theme: 'light'`,
-`reminderTime: '19:00'`, `pathChoice: {}`.
+on, `localAsr` off with `localAsrModel: 'base'`, `localAsrCantonese` off, `localAsrGpu` on,
+`localNiqqud` off, `zhScript: 'simplified'`, `zhReading: 'pinyin'`, `zhRuby` off, `gradeButtons`
+and `typedRecall` on, `theme: 'light'`, `reminderTime: '19:00'`, `xpGoal: 50` (one of
+`XP_GOALS`: 20 / 50 / 100 / 200), `pathChoice: {}`.
 
 ### Chinese script and readings
 
@@ -336,6 +341,7 @@ repurpose an existing field destructively — old documents in users' browsers s
 | 11 | `syncMarkdown` (Markdown round-trip) |
 | 12 | `zhRuby`; `LearningItem.zhVariants`, backfilled for seed words from `SEED_ZH_VARIANTS` |
 | 13 | `reminderTime` (daily reminder) |
+| 14 | `xpGoal` (daily XP goal), `localAsrCantonese`, `localAsrGpu` (on-device Whisper), `localNiqqud` (on-device Hebrew vowels) |
 
 (`passageReads`, `xpSessions` and `pathChoice` arrived without a bump: the collections are optional
 and the setting is filled from the defaults on the next migration. Adding Cantonese needed no bump
