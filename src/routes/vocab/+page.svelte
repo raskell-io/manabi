@@ -5,6 +5,7 @@
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import { addVocabWords, studyVocabWord, settings, type VocabWord } from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
+	import { toZhScript } from '$lib/chinese';
 
 	type LevelMeta = { level: string; file: string; count: number };
 	type Manifest = Record<string, LevelMeta[]>;
@@ -27,7 +28,11 @@
 		const q = query.trim().toLowerCase();
 		if (!q) return words;
 		return words.filter(
-			(w) => w.t.includes(q) || w.r.toLowerCase().includes(q) || w.m.toLowerCase().includes(q)
+			(w) =>
+				w.t.includes(q) ||
+				(lang === 'zh' && $toZhScript(w.t).includes(q)) ||
+				w.r.toLowerCase().includes(q) ||
+				w.m.toLowerCase().includes(q)
 		);
 	});
 	const shown = $derived(filtered.slice(0, DISPLAY_CAP));

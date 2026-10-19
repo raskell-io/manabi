@@ -10,20 +10,24 @@
 	import { RADICALS, getRadical, radicalMembers, searchRadicals, type Radical } from '$lib/radicals';
 	import { scriptSections, sectionGlyphs, type Glyph } from '$lib/scripts';
 	import { isBundled, strokeLang, hanChars } from '$lib/strokes';
+	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 
 	const lang = $derived<Language>($settings.activeLanguage);
 	const drawLang = $derived(strokeLang(lang));
-	const scriptLang = $derived(lang === 'zh' ? 'zh-Hans' : 'ja');
+	const scriptLang = $derived(scriptLangTag(lang, $zhScript));
+	// Characters as read: Traditional forms (語, filed under 言) when that script is picked.
+	const shown = (text: string) => displayText(text, lang, $toZhScript);
 
 	// The characters this page lists: the language's Scripts reference set
-	// (HSK 1–3 hanzi / JLPT N5–N3 kanji) plus any character in your own items.
+	// (HSK 1–3 hanzi / JLPT N5–N3 kanji) plus any character in your own items,
+	// keyed by the displayed form.
 	const reference = $derived.by(() => {
 		const m = new Map<string, Glyph>();
-		for (const s of scriptSections(lang)) if (s.kind === 'leveled') for (const g of sectionGlyphs(s)) m.set(g.char, g);
+		for (const s of scriptSections(lang)) if (s.kind === 'leveled') for (const g of sectionGlyphs(s)) m.set(shown(g.char), g);
 		return m;
 	});
 	const mine = $derived(
-		new Set($allItems.filter((it) => it.language === lang).flatMap((it) => hanChars(it.target)))
+		new Set($allItems.filter((it) => it.language === lang).flatMap((it) => hanChars(shown(it.target))))
 	);
 	const keep = (c: string) => reference.has(c) || mine.has(c);
 
@@ -58,8 +62,8 @@
 	function glyphFor(c: string): Glyph {
 		const ref = reference.get(c);
 		if (ref) return ref;
-		const it = $allItems.find((i) => i.language === lang && i.target === c);
-		return { char: c, roman: it?.reading ?? '', gloss: it?.meaning };
+		const it = $allItems.find((i) => i.language === lang && shown(i.target) === c);
+		return { char: it?.target ?? c, roman: it?.reading ?? '', gloss: it?.meaning };
 	}
 </script>
 

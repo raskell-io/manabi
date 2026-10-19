@@ -5,6 +5,7 @@
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import { allItems, createItem, settings } from '$lib/db/store';
 	import { LANGUAGES, needsNiqqud } from '$lib/db/types';
+	import { toZhScript } from '$lib/chinese';
 	import { MAX_SCOPE_ITEMS, scopeHref } from '$lib/srs/scope';
 
 	let query = $state('');
@@ -17,6 +18,7 @@
 			const q = query.toLowerCase();
 			return (
 				it.target.toLowerCase().includes(q) ||
+				(it.language === 'zh' && $toZhScript(it.target).includes(q)) ||
 				it.reading.toLowerCase().includes(q) ||
 				it.meaning.toLowerCase().includes(q) ||
 				it.tags.some((t) => t.toLowerCase().includes(q))

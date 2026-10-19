@@ -11,6 +11,7 @@
  *  - Radical ↔ ideograph mapping (CJKRadicals.txt) and radical names
  *    (UnicodeData.txt, "KANGXI RADICAL …"): Unicode Character Database.
  *  - Pinyin of each radical: github.com/skishore/makemeahanzi (Unihan-derived).
+ *  - Traditional forms of the Chinese text (Taiwan + Hong Kong): opencc-js.
  * Unicode data © Unicode, Inc., Unicode License v3.
  */
 import { build } from 'esbuild';
@@ -23,6 +24,9 @@ import { pathToFileURL } from 'node:url';
 const UCD = 'https://www.unicode.org/Public/UCD/latest/ucd';
 const MMAH_URL = 'https://raw.githubusercontent.com/skishore/makemeahanzi/master/dictionary.txt';
 const HAN = /\p{Script=Han}/u;
+
+const OpenCC = await import('opencc-js/cn2t');
+const toTraditional = ['tw', 'hk'].map((to) => OpenCC.Converter({ from: 'cn', to }));
 
 async function get(url) {
 	const r = await fetch(url);
@@ -133,14 +137,26 @@ async function main() {
 		const addText = (t) => {
 			for (const c of t ?? '') if (HAN.test(c)) chars.add(c);
 		};
+		// Chinese text also contributes its Traditional forms (Taiwan + Hong Kong),
+		// which the Traditional script option displays (src/lib/chinese.ts).
+		const addZh = (t) => {
+			addText(t);
+			for (const conv of toTraditional) addText(conv(t ?? ''));
+		};
 		const sd = await loadTs('src/lib/scripts-data.ts');
-		for (const list of Object.values(sd)) if (Array.isArray(list)) for (const g of list) addText(g.char);
+		for (const [name, list] of Object.entries(sd)) {
+			if (Array.isArray(list)) for (const g of list) (name.startsWith('HANZI_') ? addZh : addText)(g.char);
+		}
 		const { seedItems, seedPassages } = await loadTs('src/lib/db/seed.ts');
-		for (const it of seedItems()) if (it.language === 'zh' || it.language === 'ja') addText(it.target);
-		for (const p of seedPassages()) if (p.language === 'zh' || p.language === 'ja') for (const l of p.lines) addText(l.target);
+		for (const it of seedItems()) if (it.language === 'zh') addZh(it.target); else if (it.language === 'ja') addText(it.target);
+		for (const p of seedPassages()) {
+			if (p.language === 'zh') for (const l of p.lines) addZh(l.target);
+			else if (p.language === 'ja') for (const l of p.lines) addText(l.target);
+		}
 		for (const f of readdirSync('static/wordlists')) {
 			if (!/^(zh|ja)-.*\.json$/.test(f)) continue;
-			for (const w of JSON.parse(readFileSync(`static/wordlists/${f}`, 'utf8'))) addText(w.t);
+			const add = f.startsWith('zh-') ? addZh : addText;
+			for (const w of JSON.parse(readFileSync(`static/wordlists/${f}`, 'utf8'))) add(w.t);
 		}
 		for (const r of radicals) addText(r.char);
 

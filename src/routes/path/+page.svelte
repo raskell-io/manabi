@@ -7,6 +7,7 @@
 	import Mascot from '$lib/components/Mascot.svelte';
 	import { choosePath, pathData, setActiveLanguage, settings, studyItems } from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
+	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { isPathId, pathsFor, pathState, stageItemIds, stagePreview, suggestedPath, type PathId, type PathStage, type StageProgress } from '$lib/path';
 	import { scopeHref } from '$lib/srs/scope';
 
@@ -141,7 +142,7 @@
 				{/if}
 				<span class="face" class:long={[...st.badge].length > 2}>
 					{#if st.badge}
-						<span class="badge" lang={lang === 'zh' ? 'zh-Hans' : lang}>{st.badge}</span>
+						<span class="badge" lang={scriptLangTag(lang, $zhScript)}>{displayText(st.badge, lang, $toZhScript)}</span>
 					{:else if st.id === 'ears'}
 						<Headphones size={30} strokeWidth={2.4} />
 					{:else if st.id === 'recall'}
@@ -187,7 +188,7 @@
 
 				{#if preview.length}
 					<div class="preview" class:titles={st.kind === 'reading'} dir={lang === 'he' && st.kind !== 'reading' ? 'rtl' : 'ltr'}>
-						{#each preview as t (t)}<span lang={st.kind === 'reading' ? 'en' : lang} dir="auto">{t}</span>{/each}
+						{#each preview as t (t)}<span lang={st.kind === 'reading' ? 'en' : scriptLangTag(lang, $zhScript)} dir="auto">{st.kind === 'reading' ? t : displayText(t, lang, $toZhScript)}</span>{/each}
 					</div>
 				{/if}
 

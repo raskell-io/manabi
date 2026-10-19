@@ -5,6 +5,7 @@
 	import { isHan, strokeLang } from '$lib/strokes';
 	import { scriptSections, blockGlyphs, type Glyph, type ScriptSection } from '$lib/scripts';
 	import { LANGUAGES, languageDir, type Language } from '$lib/db/types';
+	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 
 	const lang = $derived<Language>($settings.activeLanguage);
 	const sections = $derived(scriptSections(lang));
@@ -63,7 +64,7 @@
 {#snippet cell(glyph: Glyph)}
 	{@const opens = drawable && isHan(glyph.char)}
 	<button class="glyph-cell" class:added={added.has(glyph.char)} onclick={() => tap(glyph)} title={opens ? 'Stroke order & practice' : 'Add to reviews'}>
-		<span class="glyph" lang={lang === 'zh' ? 'zh-Hans' : lang} {dir}>{glyph.char}</span>
+		<span class="glyph" lang={scriptLangTag(lang, $zhScript)} {dir}>{displayText(glyph.char, lang, $toZhScript)}</span>
 		{#if !hideReadings}
 			<span class="roman">{glyph.roman}</span>
 			{#if glyph.gloss}<span class="gloss">{glyph.gloss}</span>{/if}

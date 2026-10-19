@@ -1,12 +1,14 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import { page } from '$app/stores';
 	import { Settings as SettingsIcon, Sun, Moon, Download, Flame } from 'lucide-svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 	import { armInstallCapture, installPrompt, promptInstall } from '$lib/install';
 	import { initDB, practiceTimes, settings, updateSettings } from '$lib/db/store';
+	import { setZhScript } from '$lib/chinese';
 	import { computeStreak } from '$lib/today';
 	import { LANGUAGES } from '$lib/db/types';
 	import { startAutoSync } from '$lib/sync';
@@ -31,6 +33,10 @@
 	$effect(() => {
 		if (ready) applyTheme($settings.theme);
 	});
+	// Chinese display script (Simplified / Traditional); the first load is awaited in onMount.
+	$effect(() => {
+		if (ready) void setZhScript($settings.zhScript);
+	});
 
 	function prefersDark(): boolean {
 		return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -48,6 +54,9 @@
 
 	onMount(async () => {
 		await initDB();
+		// Load the Traditional converter before the first render, so a Traditional
+		// reader never sees a flash of Simplified.
+		await setZhScript(get(settings).zhScript);
 		ready = true;
 		armInstallCapture();
 		// GitHub sync (if configured): pull/merge/push on start + when back online.

@@ -6,6 +6,7 @@
 	import Recorder from './Recorder.svelte';
 	import ScriptText from './ScriptText.svelte';
 	import { settings } from '$lib/db/store';
+	import { scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { playPrerecorded } from '$lib/audio';
 	import { playCorrect, playWrong } from '$lib/sounds';
 	import { tapCorrect, tapWrong } from '$lib/haptics';
@@ -31,24 +32,27 @@
 	let cheer = $state('');
 	const answered = $derived(selected !== null);
 
-	// Respect the Hebrew "hide vowels" setting in text we render by hand (ScriptText
-	// does this automatically, but here we split the sentence to highlight the word).
-	function vowelAware(t: string): string {
-		return exercise.language === 'he' && $settings.hideHebrewVowels ? stripNiqqud(t) : t;
+	// Respect the Hebrew "hide vowels" setting and the Chinese script in text we
+	// render by hand (ScriptText does both automatically, but here we split the
+	// sentence to highlight the word).
+	function shown(t: string): string {
+		if (exercise.language === 'he' && $settings.hideHebrewVowels) return stripNiqqud(t);
+		return exercise.language === 'zh' ? $toZhScript(t) : t;
 	}
 
 	// Split the full cloze sentence around the answer so we can fill the blank in
-	// place and highlight the inserted word once answered.
+	// place and highlight the inserted word once answered. The sentence is shown
+	// whole where possible, so phrase-level conversion sees its full context.
 	const clozeParts = $derived.by(() => {
 		const full = exercise.clozeFull;
 		if (!full) return null;
 		const i = full.indexOf(item.target);
 		if (i < 0) return null;
-		return {
-			before: vowelAware(full.slice(0, i)),
-			word: vowelAware(item.target),
-			after: vowelAware(full.slice(i + item.target.length))
-		};
+		const whole = shown(full);
+		const word = shown(item.target);
+		const j = whole.indexOf(word);
+		if (j >= 0) return { before: whole.slice(0, j), word, after: whole.slice(j + word.length) };
+		return { before: shown(full.slice(0, i)), word, after: shown(full.slice(i + item.target.length)) };
 	});
 
 	// Auto-play the word when it appears (the script prompt of a reading card, or
@@ -162,8 +166,8 @@
 		{:else if exercise.promptMode === 'cloze'}
 			{#if answered && exercise.clozeFull}
 				<!-- Answered: complete the sentence in place, with the reading beneath it. -->
-				<p class="cloze-sentence" dir={languageDir(exercise.language)} lang={exercise.language}>
-					{#if clozeParts}{clozeParts.before}<strong>{clozeParts.word}</strong>{clozeParts.after}{:else}{vowelAware(exercise.clozeFull ?? '')}{/if}
+				<p class="cloze-sentence" dir={languageDir(exercise.language)} lang={scriptLangTag(exercise.language, $zhScript)}>
+					{#if clozeParts}{clozeParts.before}<strong>{clozeParts.word}</strong>{clozeParts.after}{:else}{shown(exercise.clozeFull ?? '')}{/if}
 				</p>
 				{#if exercise.clozeReading}<div class="reading">{exercise.clozeReading}</div>{/if}
 				{#if exercise.clozeTranslit}<div class="translit">{exercise.clozeTranslit}</div>{/if}

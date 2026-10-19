@@ -6,6 +6,7 @@
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import StrokePad from '$lib/components/StrokePad.svelte';
 	import { hanChars, strokeLang } from '$lib/strokes';
+	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { radicalOf } from '$lib/radicals';
 	import { rootLabel, rootOfWord, splitByRoot } from '$lib/roots';
 	import { deleteItem, getItem, pronunciationAttempts, settings, updateItem } from '$lib/db/store';
@@ -28,9 +29,10 @@
 		}
 	});
 
-	// "Write it": stroke order + tracing for each hanzi/kanji in the (saved) target.
+	// "Write it": stroke order + tracing for each hanzi/kanji in the (saved) target,
+	// in the Chinese script being read.
 	const writeLang = $derived(item ? strokeLang(item.language) : null);
-	const writeChars = $derived(item && writeLang ? hanChars(item.target) : []);
+	const writeChars = $derived(item && writeLang ? hanChars(displayText(item.target, item.language, $toZhScript)) : []);
 	let writeIdx = $state(0);
 	const writeChar = $derived(writeChars[Math.min(writeIdx, writeChars.length - 1)]);
 	const writeRadical = $derived(writeChar ? radicalOf(writeChar) : undefined);
@@ -145,7 +147,7 @@
 				{#if writeChars.length > 1}
 					<div class="write-chars" role="tablist" aria-label="Character">
 						{#each writeChars as c, i (c)}
-							<button role="tab" class:on={c === writeChar} aria-selected={c === writeChar} lang={item?.language === 'zh' ? 'zh-Hans' : 'ja'} onclick={() => (writeIdx = i)}>{c}</button>
+							<button role="tab" class:on={c === writeChar} aria-selected={c === writeChar} lang={item ? scriptLangTag(item.language, $zhScript) : undefined} onclick={() => (writeIdx = i)}>{c}</button>
 						{/each}
 					</div>
 				{/if}

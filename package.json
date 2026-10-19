@@ -33,6 +33,7 @@
 		"hanzi-writer": "^3.7.3",
 		"idb-keyval": "^6.2.2",
 		"lucide-svelte": "^0.562.0",
+		"opencc-js": "^1.4.2",
 		"vite-plugin-top-level-await": "^1.6.0",
 		"vite-plugin-wasm": "^3.5.0"
 	}

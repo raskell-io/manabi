@@ -13,6 +13,7 @@
 	import { LANGUAGES, stripNiqqud, todayIso, type Language } from '$lib/db/types';
 	import type { MergeSummary } from '$lib/db/merge';
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
+	import { toZhScript, zhLangTag, zhScript, ZH_SCRIPTS } from '$lib/chinese';
 
 	let s = $derived($settings);
 
@@ -168,6 +169,23 @@
 </section>
 
 <section class="group">
+	<h2>Chinese</h2>
+	<p class="muted">Which characters to read. Words, progress and audio are shared — switching only changes how Chinese is written, never what you have learned.</p>
+	<div class="lang-row">
+		{#each ZH_SCRIPTS as z (z.value)}
+			<button class="lang" class:active={s.zhScript === z.value} onclick={() => updateSettings({ zhScript: z.value })}>
+				<span class="native" lang={zhLangTag(z.value)}>{z.native}</span>
+				<span class="name">{z.label}</span>
+			</button>
+		{/each}
+	</div>
+	<p class="preview-row">
+		<span class="muted">Preview:</span>
+		<span class="zh-preview" lang={zhLangTag($zhScript)}>{$toZhScript('我们说汉语。头发、面条、这里')}</span>
+	</p>
+</section>
+
+<section class="group">
 	<h2>Hebrew</h2>
 	<label class="check">
 		<input type="checkbox" checked={s.hideHebrewVowels} onchange={(e) => updateSettings({ hideHebrewVowels: e.currentTarget.checked })} />
@@ -286,6 +304,10 @@
 		font-family: var(--font-script);
 		font-size: 1.4rem;
 		direction: rtl;
+	}
+	.zh-preview {
+		font-family: var(--font-script);
+		font-size: 1.25rem;
 	}
 	input,
 	select {

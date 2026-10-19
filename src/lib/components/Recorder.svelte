@@ -3,6 +3,7 @@
 	import { storeBlob } from '$lib/db/blob-store';
 	import { playRef } from '$lib/audio';
 	import { settings } from '$lib/db/store';
+	import { displayText, toZhScript } from '$lib/chinese';
 	import { canTranscribe, transcribe } from '$lib/inference/router';
 	import { scorePronunciation, suggestRating, type AsrResult } from '$lib/pronunciation';
 	import { tapCorrect, tapWrong } from '$lib/haptics';
@@ -67,7 +68,10 @@
 			const res = await transcribe({ audio: blob, language }, $settings);
 			if (id !== take) return;
 			if (res.ok && res.value) {
-				const { score } = scorePronunciation(res.value.text, { target: text, reading, language });
+				// Compare in the displayed Chinese script: the transcript may come back in
+				// either, and cn→Traditional leaves Traditional text as it is.
+				const conv = (t: string) => displayText(t, language, $toZhScript);
+				const { score } = scorePronunciation(conv(res.value.text), { target: conv(text), reading, language });
 				asr = { transcript: res.value.text, score, suggested: suggestRating(score) };
 			} else {
 				asrError = res.error ?? 'could not transcribe';

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { settings } from '$lib/db/store';
 	import { languageDir, stripNiqqud, type Language } from '$lib/db/types';
 
@@ -18,11 +19,13 @@
 	} = $props();
 
 	const dir = $derived(languageDir(language));
-	const langAttr = $derived(
-		language === 'zh' ? 'zh-Hans' : language === 'ja' ? 'ja' : language === 'ko' ? 'ko' : 'he'
-	);
+	const langAttr = $derived(scriptLangTag(language, $zhScript));
 	const display = $derived(
-		language === 'he' && $settings.hideHebrewVowels && !forceVowels ? stripNiqqud(text) : text
+		language === 'he' && $settings.hideHebrewVowels && !forceVowels
+			? stripNiqqud(text)
+			: language === 'zh'
+				? $toZhScript(text)
+				: text
 	);
 </script>
 

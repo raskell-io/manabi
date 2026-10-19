@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Bundles stroke-order data (for the Hanzi Writer drawing pad) for every
- * hanzi/kanji on the Scripts page, in the seed, and in the radical table, so
+ * hanzi/kanji on the Scripts page, in the seed, and in the radical table (plus
+ * the Traditional forms of the Chinese ones, via opencc-js), so
  * stroke order and tracing work offline. Run manually (needs network):
  *
  *   node tools/gen-stroke-data.mjs
@@ -43,9 +44,16 @@ const want = { zh: new Set(), ja: new Set() };
 const add = (lang, text) => {
 	for (const c of text ?? '') if (HAN.test(c)) want[lang].add(c);
 };
-for (const g of [...sd.HANZI_HSK1, ...sd.HANZI_HSK2, ...sd.HANZI_HSK3]) add('zh', g.char);
+// Chinese also bundles the Traditional forms (Taiwan + Hong Kong) the script option shows.
+const OpenCC = await import('opencc-js/cn2t');
+const toTraditional = ['tw', 'hk'].map((to) => OpenCC.Converter({ from: 'cn', to }));
+const addZh = (text) => {
+	add('zh', text);
+	for (const conv of toTraditional) add('zh', conv(text ?? ''));
+};
+for (const g of [...sd.HANZI_HSK1, ...sd.HANZI_HSK2, ...sd.HANZI_HSK3]) addZh(g.char);
 for (const g of [...sd.KANJI_N5, ...sd.KANJI_N4, ...sd.KANJI_N3]) add('ja', g.char);
-for (const it of seedItems()) if (it.language === 'zh' || it.language === 'ja') add(it.language, it.target);
+for (const it of seedItems()) if (it.language === 'zh') addZh(it.target); else if (it.language === 'ja') add('ja', it.target);
 for (const r of RADICALS) for (const lang of ['zh', 'ja']) add(lang, r.char + r.variants.join(''));
 
 async function fetchOne(lang, c) {

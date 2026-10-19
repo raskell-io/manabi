@@ -11,6 +11,7 @@
 	import type { Language } from '$lib/db/types';
 	import { isHan, strokeLang } from '$lib/strokes';
 	import { radicalOf } from '$lib/radicals';
+	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 
 	let {
 		glyph,
@@ -22,8 +23,10 @@
 		onClose: () => void;
 	} = $props();
 
-	const drawLang = $derived(isHan(glyph.char) ? strokeLang(language) : null);
-	const rad = $derived(isHan(glyph.char) ? radicalOf(glyph.char) : undefined);
+	// The character as read (Traditional when picked); `glyph.char` stays the stored form.
+	const shownChar = $derived(displayText(glyph.char, language, $toZhScript));
+	const drawLang = $derived(isHan(shownChar) ? strokeLang(language) : null);
+	const rad = $derived(isHan(shownChar) ? radicalOf(shownChar) : undefined);
 	const studying = $derived($allItems.some((it) => it.language === language && it.target === glyph.char));
 
 	function onKey(e: KeyboardEvent) {
@@ -35,7 +38,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div class="backdrop" onclick={onClose}></div>
-<div class="sheet" role="dialog" aria-modal="true" aria-label="{glyph.char} details">
+<div class="sheet" role="dialog" aria-modal="true" aria-label="{shownChar} details">
 	<button class="close" onclick={onClose} aria-label="Close"><X size={20} /></button>
 
 	<header>
@@ -45,7 +48,7 @@
 			{#if glyph.gloss}<span class="gloss">{glyph.gloss}</span>{/if}
 			{#if rad}
 				<a class="radical" href="/radicals?r={rad.radical.n}" onclick={onClose}>
-					<span class="r-char" lang={language === 'zh' ? 'zh-Hans' : 'ja'}>{rad.radical.char}</span>
+					<span class="r-char" lang={scriptLangTag(language, $zhScript)}>{rad.radical.char}</span>
 					Radical {rad.radical.n} · {rad.radical.meaning}{rad.residual ? ` · +${rad.residual}` : ''}
 				</a>
 			{/if}
@@ -53,8 +56,8 @@
 	</header>
 
 	{#if drawLang}
-		{#key glyph.char}
-			<StrokePad char={glyph.char} lang={drawLang} size={240} />
+		{#key shownChar}
+			<StrokePad char={shownChar} lang={drawLang} size={240} />
 		{/key}
 	{/if}
 
