@@ -16,17 +16,27 @@
 	import type { MergeSummary } from '$lib/db/merge';
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
 	import { localModelStatus } from '$lib/inference/local-models';
-	import { asrModelId, loadAsr } from '$lib/inference/providers/asr-local';
+	import { ASR_MODELS, asrDevice, hasWebGpu, loadAsr, type AsrModel } from '$lib/inference/providers/asr-local';
 	import { readingOf, toZhScript, zhLangTag, zhScript, ZH_READINGS, ZH_SCRIPTS } from '$lib/chinese';
 
 	let s = $derived($settings);
 
 	// --- On-device speech recognition ---
-	const ASR_MODELS = [
+	const ASR_SIZES = [
 		{ value: 'base', label: 'Base', note: '≈ 130 MB · a few seconds per take' },
 		{ value: 'small', label: 'Small', note: '≈ 300 MB · slower, more accurate, incl. Hebrew' }
 	] as const;
-	const asrStatus = $derived($localModelStatus[`asr:${asrModelId(s)}`] ?? { state: 'idle' as const });
+	const statusOf = (task: string, id: string) => $localModelStatus[`${task}:${id}`] ?? { state: 'idle' as const };
+	const sizeModel = $derived(ASR_MODELS[s.localAsrModel]);
+	const asrStatus = $derived(statusOf('asr', sizeModel.id));
+	const yueStatus = $derived(statusOf('asr', ASR_MODELS.cantonese.id));
+	/** "Loaded for this session (GPU)" — where a loaded model runs. */
+	const ranOn = (m: AsrModel) => ($asrDevice[m.id] === 'webgpu' ? ' on the GPU' : $asrDevice[m.id] === 'wasm' ? ' on the CPU' : '');
+	// Whether this browser offers WebGPU (checked once, lazily).
+	let gpuAvailable = $state<boolean | null>(null);
+	$effect(() => {
+		if (s.localAsr && gpuAvailable === null) void hasWebGpu().then((ok) => (gpuAvailable = ok));
+	});
 
 	// --- Sync ---
 	const syncConfigured = $derived(isSyncConfigured(s));
@@ -207,7 +217,7 @@
 	</label>
 	{#if s.localAsr}
 		<div class="lang-row asr-models">
-			{#each ASR_MODELS as m (m.value)}
+			{#each ASR_SIZES as m (m.value)}
 				<button class="lang" class:active={s.localAsrModel === m.value} onclick={() => updateSettings({ localAsrModel: m.value })}>
 					<span class="native">{m.label}</span>
 					<span class="name">{m.note}</span>
@@ -215,14 +225,35 @@
 			{/each}
 		</div>
 		<div class="backup-row">
-			<button class="action" onclick={() => void loadAsr(s).catch(() => {})} disabled={asrStatus.state === 'loading' || asrStatus.state === 'ready'}>
+			<button class="action" onclick={() => void loadAsr(s, undefined).catch(() => {})} disabled={asrStatus.state === 'loading' || asrStatus.state === 'ready'}>
 				<Download size={16} /> {asrStatus.state === 'ready' ? 'Ready' : 'Download now'}
 			</button>
 			<span class="sync-status" class:error={asrStatus.state === 'error'} role="status">
-				{#if asrStatus.state === 'loading'}Downloading… {Math.round(asrStatus.progress)}%{:else if asrStatus.state === 'error'}{asrStatus.error}{:else if asrStatus.state === 'ready'}Loaded for this session.{:else}Downloads on first use, then works offline.{/if}
+				{#if asrStatus.state === 'loading'}Downloading… {Math.round(asrStatus.progress)}%{:else if asrStatus.state === 'error'}{asrStatus.error}{:else if asrStatus.state === 'ready'}Loaded for this session{ranOn(sizeModel)}.{:else}Downloads on first use, then works offline.{/if}
 			</span>
 		</div>
 		{#if s.localAsrModel === 'base'}<p class="muted">Hebrew needs the larger model; with Base, Hebrew recordings use OpenAI only.</p>{/if}
+		<label class="check">
+			<input type="checkbox" checked={s.localAsrGpu} onchange={(e) => updateSettings({ localAsrGpu: e.currentTarget.checked })} />
+			<span>
+				Run it on the graphics card (WebGPU) when the browser can — several times faster; falls back to the CPU otherwise.
+				{#if gpuAvailable === false}<em class="muted">This browser has no WebGPU, so it runs on the CPU.</em>{:else if gpuAvailable}<em class="muted">WebGPU is available here.</em>{/if}
+			</span>
+		</label>
+		<label class="check">
+			<input type="checkbox" checked={s.localAsrCantonese} onchange={(e) => updateSettings({ localAsrCantonese: e.currentTarget.checked })} />
+			<span>Cantonese: use a Whisper trained on Hong Kong Cantonese (≈ 300 MB). It writes what you say — 係, 嘅, 咗 — where the general model writes standard Chinese.</span>
+		</label>
+		{#if s.localAsrCantonese}
+			<div class="backup-row asr-yue">
+				<button class="action" onclick={() => void loadAsr(s, 'yue').catch(() => {})} disabled={yueStatus.state === 'loading' || yueStatus.state === 'ready'}>
+					<Download size={16} /> {yueStatus.state === 'ready' ? 'Ready' : 'Download now'}
+				</button>
+				<span class="sync-status" class:error={yueStatus.state === 'error'} role="status">
+					{#if yueStatus.state === 'loading'}Downloading… {Math.round(yueStatus.progress)}%{:else if yueStatus.state === 'error'}{yueStatus.error}{:else if yueStatus.state === 'ready'}Loaded for this session{ranOn(ASR_MODELS.cantonese)}.{:else}Downloads on the first Cantonese recording.{/if}
+				</span>
+			</div>
+		{/if}
 	{/if}
 </section>
 

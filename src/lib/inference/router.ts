@@ -28,10 +28,13 @@ import type {
 	AnnotateResult
 } from './types';
 
+// Built on use, not at module load: the providers share chunks (chinese.ts,
+// svelte/store) with pages that import them directly, and a chunk cycle can
+// leave an import still undefined while this module initializes.
 // Order matters: TTS prefers the first provider that succeeds.
-const PROVIDERS: InferenceProvider[] = [ttsLocalProvider, openaiProvider];
+const providers = (): InferenceProvider[] => [ttsLocalProvider, openaiProvider];
 // Transcription: the remote model first, then the on-device one.
-const TRANSCRIBERS: InferenceProvider[] = [openaiProvider, asrLocalProvider];
+const transcribers = (): InferenceProvider[] => [openaiProvider, asrLocalProvider];
 
 /** Synthesize speech, trying each capable provider until one succeeds. */
 export async function synthesize(
@@ -39,7 +42,7 @@ export async function synthesize(
 	settings: ManabiSettings
 ): Promise<InferenceResult<TtsResult>> {
 	let lastError = 'No TTS provider available';
-	for (const p of PROVIDERS) {
+	for (const p of providers()) {
 		if (!p.tts || !p.capabilities(settings).tts) continue;
 		const result = await p.tts(input, settings);
 		if (result.ok) return result;
@@ -53,7 +56,7 @@ export async function generateItems(
 	input: GenerateItemsInput,
 	settings: ManabiSettings
 ): Promise<InferenceResult<GenerateItemsResult>> {
-	for (const p of PROVIDERS) {
+	for (const p of providers()) {
 		if (!p.generateItems || !p.capabilities(settings).generate) continue;
 		return p.generateItems(input, settings);
 	}
@@ -65,7 +68,7 @@ export async function generatePassages(
 	input: GeneratePassagesInput,
 	settings: ManabiSettings
 ): Promise<InferenceResult<GeneratePassagesResult>> {
-	for (const p of PROVIDERS) {
+	for (const p of providers()) {
 		if (!p.generatePassages || !p.capabilities(settings).generate) continue;
 		return p.generatePassages(input, settings);
 	}
@@ -77,7 +80,7 @@ export async function diacritize(
 	input: DiacritizeInput,
 	settings: ManabiSettings
 ): Promise<InferenceResult<DiacritizeResult>> {
-	for (const p of PROVIDERS) {
+	for (const p of providers()) {
 		if (!p.diacritize || !p.capabilities(settings).diacritize) continue;
 		return p.diacritize(input, settings);
 	}
@@ -90,7 +93,7 @@ export async function transcribe(
 	settings: ManabiSettings
 ): Promise<InferenceResult<TranscribeResult>> {
 	let last: InferenceResult<TranscribeResult> | null = null;
-	for (const p of TRANSCRIBERS) {
+	for (const p of transcribers()) {
 		if (!p.transcribe || !p.capabilities(settings).transcribe) continue;
 		last = await p.transcribe(input, settings);
 		if (last.ok) return last;
@@ -105,7 +108,7 @@ export async function annotate(
 	input: AnnotateInput,
 	settings: ManabiSettings
 ): Promise<InferenceResult<AnnotateResult>> {
-	for (const p of PROVIDERS) {
+	for (const p of providers()) {
 		if (!p.annotate || !p.capabilities(settings).generate) continue;
 		return p.annotate(input, settings);
 	}
@@ -113,17 +116,17 @@ export async function annotate(
 }
 
 export function canDiacritize(settings: ManabiSettings): boolean {
-	return PROVIDERS.some((p) => p.diacritize && p.capabilities(settings).diacritize);
+	return providers().some((p) => p.diacritize && p.capabilities(settings).diacritize);
 }
 
 export function canTranscribe(settings: ManabiSettings): boolean {
-	return TRANSCRIBERS.some((p) => p.transcribe && p.capabilities(settings).transcribe);
+	return transcribers().some((p) => p.transcribe && p.capabilities(settings).transcribe);
 }
 
 export function canGenerate(settings: ManabiSettings): boolean {
-	return PROVIDERS.some((p) => p.generateItems && p.capabilities(settings).generate);
+	return providers().some((p) => p.generateItems && p.capabilities(settings).generate);
 }
 
 export function canSynthesize(settings: ManabiSettings): boolean {
-	return PROVIDERS.some((p) => p.tts && p.capabilities(settings).tts);
+	return providers().some((p) => p.tts && p.capabilities(settings).tts);
 }

@@ -14,6 +14,16 @@ test('on-device speech recognition: opt-in with a model choice', async ({ page }
 	await expect(page.locator('main')).not.toContainText('Hebrew needs the larger model');
 	await page.reload();
 	await expect(page.locator('.asr-models .lang.active')).toContainText('Small');
+
+	// The GPU is used when there is a real one (on by default); headless has only a
+	// software adapter, which doesn't count.
+	const gpu = page.locator('label.check', { hasText: 'graphics card' });
+	await expect(gpu.locator('input')).toBeChecked();
+	await expect(gpu).toContainText('This browser has no WebGPU');
+	// The Cantonese model is its own opt-in download.
+	await expect(page.locator('.asr-yue')).toHaveCount(0);
+	await page.locator('label.check', { hasText: 'Cantonese: use a Whisper' }).locator('input').check();
+	await expect(page.locator('.asr-yue .sync-status')).toHaveText('Downloads on the first Cantonese recording.');
 });
 
 test('typed recall can be switched off', async ({ page }) => {
