@@ -2,7 +2,7 @@ import { test, expect, useLanguage } from './fixtures';
 
 const ROUTES = ['/', '/about', '/path', '/review', '/read', '/library', '/scripts', '/radicals', '/roots', '/names', '/vocab', '/items', '/lessons', '/dashboard', '/workbench', '/settings'];
 
-for (const lang of ['中文', '日本語', '한국어', 'עברית'] as const) {
+for (const lang of ['中文', '廣東話', '日本語', '한국어', 'עברית'] as const) {
 	test(`every page renders in ${lang}`, async ({ page }) => {
 		await useLanguage(page, lang);
 		for (const route of ROUTES) {

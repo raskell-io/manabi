@@ -14,6 +14,8 @@
 
 	const lang = $derived<Language>($settings.activeLanguage);
 	const drawLang = $derived(strokeLang(lang));
+	// The character set the counts come from (the Scripts page's leveled table).
+	const charSet = $derived(lang === 'zh' ? 'HSK 1–3' : lang === 'yue' ? 'Cantonese starter' : 'JLPT N5–N3');
 	const scriptLang = $derived(scriptLangTag(lang, $zhScript));
 	// Characters as read: Traditional forms (語, filed under 言) when that script is picked.
 	const shown = (text: string) => displayText(text, lang, $toZhScript);
@@ -107,7 +109,7 @@
 
 	<h2 class="members-h">{total} {total === 1 ? 'character' : 'characters'} built on {selected.char}</h2>
 	{#if total === 0}
-		<p class="muted">None in the {lang === 'zh' ? 'HSK 1–3' : 'JLPT N5–N3'} set or your items yet.</p>
+		<p class="muted">None in the {charSet} set or your items yet.</p>
 	{/if}
 	{#each members as g (g.residual)}
 		<h3 class="residual">{g.residual === 0 ? 'The radical itself' : `+${g.residual} ${g.residual === 1 ? 'stroke' : 'strokes'}`}</h3>
@@ -126,8 +128,8 @@
 	<header class="head">
 		<h1>Radicals</h1>
 		<p class="muted">
-			The 214 building blocks of {lang === 'zh' ? 'hanzi' : 'kanji'}. Spot the radical and you can often guess a character’s
-			meaning and look it up. Numbers show how many {lang === 'zh' ? 'HSK 1–3' : 'JLPT N5–N3'} characters use each one.
+			The 214 building blocks of {lang === 'ja' ? 'kanji' : 'hanzi'}. Spot the radical and you can often guess a character’s
+			meaning and look it up. Numbers show how many {charSet} characters use each one.
 		</p>
 	</header>
 

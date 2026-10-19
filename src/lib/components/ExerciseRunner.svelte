@@ -42,7 +42,7 @@
 	}
 
 	// With readings above the characters, the prompt's reading line would repeat them.
-	const promptRuby = $derived(exercise.language === 'zh' && !!$rubyOf(exercise.promptScript ?? '', exercise.promptReading));
+	const promptRuby = $derived(!!$rubyOf(exercise.promptScript ?? '', exercise.promptReading, exercise.language));
 
 	// Readings (prompt, choices, cloze, reveal) as pinyin or Zhuyin.
 	const rd = (reading: string) => $readingOf(reading, item.target, exercise.language);

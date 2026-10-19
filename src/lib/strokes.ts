@@ -32,9 +32,9 @@ export function hanChars(text: string): string[] {
 	return [...new Set([...text].filter((c) => HAN.test(c)))];
 }
 
-/** Which data set a language draws from (Korean/Hebrew have none). */
+/** Which data set a language draws from (Cantonese shares Chinese's; Korean/Hebrew have none). */
 export function strokeLang(language: Language): StrokeLang | null {
-	return language === 'zh' ? 'zh' : language === 'ja' ? 'ja' : null;
+	return language === 'zh' || language === 'yue' ? 'zh' : language === 'ja' ? 'ja' : null;
 }
 
 export function isBundled(lang: StrokeLang, char: string): boolean {
@@ -56,13 +56,17 @@ export interface StrokeData {
 
 const cache = new Map<string, Promise<StrokeData>>();
 
+/** Thrown when a character has no stroke data at all (as opposed to a failed fetch). */
+export class NoStrokeData extends Error {}
+
 /** Load (and memoize) one character's stroke data. Rejects when there is none. */
 export function loadStrokes(lang: StrokeLang, char: string): Promise<StrokeData> {
 	const key = `${lang}:${char}`;
 	let p = cache.get(key);
 	if (!p) {
 		p = fetch(strokeUrl(lang, char)).then(async (r) => {
-			if (!r.ok) throw new Error(`No stroke data for ${char}`);
+			if (r.status === 404) throw new NoStrokeData(`No stroke data for ${char}`);
+			if (!r.ok) throw new Error(`Stroke data for ${char}: ${r.status}`);
 			return (await r.json()) as StrokeData;
 		});
 		p.catch(() => cache.delete(key)); // allow a retry (e.g. once back online)

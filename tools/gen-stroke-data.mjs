@@ -53,7 +53,11 @@ const addZh = (text) => {
 };
 for (const g of [...sd.HANZI_HSK1, ...sd.HANZI_HSK2, ...sd.HANZI_HSK3]) addZh(g.char);
 for (const g of [...sd.KANJI_N5, ...sd.KANJI_N4, ...sd.KANJI_N3]) add('ja', g.char);
-for (const it of seedItems()) if (it.language === 'zh') addZh(it.target); else if (it.language === 'ja') add('ja', it.target);
+for (const it of seedItems()) {
+	if (it.language === 'zh') addZh(it.target);
+	else if (it.language === 'yue') for (const t of [it.target, ...it.examples.map((e) => e.target)]) add('zh', t); // already Traditional
+	else if (it.language === 'ja') add('ja', it.target);
+}
 for (const r of RADICALS) for (const lang of ['zh', 'ja']) add(lang, r.char + r.variants.join(''));
 
 async function fetchOne(lang, c) {

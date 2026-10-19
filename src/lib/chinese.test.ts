@@ -86,11 +86,13 @@ describe('per-item variants, readings and ruby', () => {
 	});
 
 	it('ruby only when switched on and the syllables line up', () => {
-		expect(get(rubyOf)('今天', 'jīntiān')).toBeNull();
+		expect(get(rubyOf)('今天', 'jīntiān', 'zh')).toBeNull();
 		setZhRuby(true);
-		expect(get(rubyOf)('今天', 'jīntiān')).toEqual([{ text: '今', rt: 'jīn' }, { text: '天', rt: 'tiān' }]);
-		expect(get(rubyOf)('今天', 'jīn')).toBeNull();
-		expect(get(rubyOf)('今天', undefined)).toBeNull();
+		expect(get(rubyOf)('今天', 'jīntiān', 'zh')).toEqual([{ text: '今', rt: 'jīn' }, { text: '天', rt: 'tiān' }]);
+		expect(get(rubyOf)('今天', 'jīn', 'zh')).toBeNull();
+		expect(get(rubyOf)('今日', 'gam1 jat6', 'yue')).toEqual([{ text: '今', rt: 'gam1' }, { text: '日', rt: 'jat6' }]);
+		expect(get(rubyOf)('오늘', 'oneul', 'ko')).toBeNull();
+		expect(get(rubyOf)('今天', undefined, 'zh')).toBeNull();
 		setZhRuby(false);
 	});
 });

@@ -8,7 +8,7 @@
 	const REPO = 'https://github.com/raskell-io/manabi';
 
 	const PRINCIPLES = [
-		{ icon: BookOpen, title: 'Reading first', text: 'Real script from day one — pinyin and Zhuyin, kana, Hangul, vowelled Hebrew — and real conversations and texts to read, with every word one tap from the dictionary.' },
+		{ icon: BookOpen, title: 'Reading first', text: 'Real script from day one — pinyin and Zhuyin, Jyutping, kana, Hangul, vowelled Hebrew — and real conversations and texts to read, with every word one tap from the dictionary.' },
 		{ icon: Layers, title: 'Five skills per word', text: 'Recognising, hearing, saying, using and recalling a word are scheduled separately, so each comes back just before you would forget it.' },
 		{ icon: HardDrive, title: 'Yours, on your device', text: 'No account. Everything lives in this browser and works offline; sync to your own GitHub repository if you like.' },
 		{ icon: Sparkles, title: 'AI as a helper', text: 'With an OpenAI key, AI drafts new words and texts — you decide what to keep. Nothing it writes goes in unseen.' }
@@ -20,6 +20,7 @@
 			title: 'Dictionaries & word lists',
 			items: [
 				{ name: 'CC-CEDICT', href: 'https://cc-cedict.org', what: 'Chinese dictionary (export by MDBG)', licence: 'CC BY-SA 4.0' },
+				{ name: 'CC-Canto', href: 'https://cantonese.org', what: 'Cantonese dictionary and Jyutping readings for CC-CEDICT, by Pleco', licence: 'CC BY-SA 3.0' },
 				{ name: 'JMdict & KANJIDIC2', href: 'https://www.edrdg.org/edrdg/licence.html', what: 'Japanese dictionary and kanji data, by the EDRDG (via jmdict-simplified and kanji-data)', licence: 'CC BY-SA 4.0' },
 				{ name: 'English Wiktionary', href: 'https://kaikki.org', what: 'Korean and Hebrew dictionaries, extracted by Wiktextract / kaikki.org', licence: 'CC BY-SA 4.0 / GFDL' },
 				{ name: 'complete-hsk-vocabulary', href: 'https://github.com/drkameleon/complete-hsk-vocabulary', what: 'HSK 3.0 word lists' },
@@ -38,7 +39,7 @@
 		{
 			title: 'Voices & models',
 			items: [
-				{ name: 'Microsoft neural voices', href: 'https://github.com/rany2/edge-tts', what: 'The recorded pronunciations (Xiaoxiao, Nanami, SunHi, Hila), generated with edge-tts' },
+				{ name: 'Microsoft neural voices', href: 'https://github.com/rany2/edge-tts', what: 'The recorded pronunciations (Xiaoxiao, HiuMaan, Nanami, SunHi, Hila), generated with edge-tts' },
 				{ name: 'Whisper', href: 'https://github.com/openai/whisper', what: 'On-device speech recognition (ONNX weights by onnx-community)', licence: 'MIT' },
 				{ name: 'MMS', href: 'https://huggingface.co/facebook/mms-tts-kor', what: 'On-device Korean voice, by Meta', licence: 'CC BY-NC 4.0' }
 			]
@@ -63,7 +64,7 @@
 	<div class="nabi"><Mascot size={104} mood="happy" /></div>
 	<div class="hero-text">
 		<h1>Manabi <span class="kanji" lang="ja">学び</span></h1>
-		<p class="tagline">A local-first, reading-first way to learn Chinese, Japanese, Korean and Hebrew.</p>
+		<p class="tagline">A local-first, reading-first way to learn Chinese, Cantonese, Japanese, Korean and Hebrew.</p>
 		<p class="build" title="Version · commit · build date">v{version} · {commit} · {built}</p>
 		<div class="links">
 			<a class="btn3d" href="/path"><Route size={17} /> How Manabi works</a>

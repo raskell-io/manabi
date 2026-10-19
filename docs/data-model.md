@@ -25,6 +25,7 @@ interface ManabiDocument {
   passageDrafts:        Record<string, PassageDraft>;        // AI reading drafts
   seededIds:            Record<string, boolean>;             // which seeds were applied
   passageReads?:        Record<string, number>;              // passage id → first read to the end (ms)
+  xpSessions?:          Record<string, XpSession>;           // points per finished review session
   settings:             ManabiSettings;
 }
 ```
@@ -42,7 +43,8 @@ demand:
 - **Dictionaries** (`static/dict/<lang>/<bucket>.json`) — see
   [content](./content.md#dictionaries--toolsgen-dictmjs).
 - **Traditional Chinese** — never stored: Chinese text is stored Simplified and converted for
-  display ([below](#chinese-script-and-readings)).
+  display ([below](#chinese-script-and-readings)). (Cantonese is the exception: `yue` text is
+  stored in Hong Kong Traditional as written.)
 - **Script tables** (`src/lib/scripts-data.ts`) — generated reference data.
 
 Only when you *start studying* a word/glyph does a `LearningItem` get created in the doc.
@@ -54,10 +56,10 @@ Only when you *start studying* a word/glyph does a `LearningItem` get created in
 ```ts
 interface LearningItem {
   id: string;
-  language: 'zh' | 'ja' | 'ko' | 'he';
+  language: 'zh' | 'yue' | 'ja' | 'ko' | 'he';
   kind: 'word' | 'phrase' | 'sentence' | 'grammar' | 'character';
-  target: string;          // the script: 今天 / 食べる / שָׁלוֹם
-  reading: string;         // pinyin / kana / vowelled Hebrew
+  target: string;          // the script: 今天 / 多謝 / 食べる / שָׁלוֹם
+  reading: string;         // pinyin / Jyutping / kana / vowelled Hebrew
   transliteration?: string;// optional latin form (esp. Hebrew)
   meaning: string;         // English gloss
   tags: string[];          // ['time','HSK1','A1'] — HSK/JLPT/CEFR are metadata, not structure
@@ -128,6 +130,11 @@ See [SRS](./srs.md) for how these advance.
 - `PronunciationAttempt` — a recording ref + a `bad | okay | good` self-rating, plus the
   optional `transcript` and 0–100 `score` from speech recognition.
 - `Lesson` — `{ title, language, itemIds[] }`, a named bundle.
+- `XpSession` — `{ at, xp, language }`: the points of one finished review session (10 per right
+  answer, +5 while on a run of three or more), written by `recordXp` when the summary appears.
+  Keyed by a random id in the optional `xpSessions` map; `xpSummary` in
+  [`srs/stats.ts`](../src/lib/srs/stats.ts) totals them (all time, today, last 7 days) for the
+  session summary and Progress.
 - `ContentDraft` / `PassageDraft` — AI-generated candidates awaiting approval; see
   [AI workbench](./ai-workbench.md).
 
@@ -146,7 +153,7 @@ interface ManabiSettings {
   hideHebrewVowels;
   zhScript;                           // 'simplified' | 'traditional-tw' | 'traditional-hk'
   zhReading;                          // 'pinyin' | 'zhuyin'
-  zhRuby;                             // Chinese: reading above each character
+  zhRuby;                             // Chinese / Cantonese: reading above each character
   gradeButtons; typedRecall;
   theme: 'system' | 'light' | 'dark';
   reminderTime;                       // 'HH:MM' for the daily calendar reminder
@@ -174,9 +181,16 @@ fed by the root layout from settings and items:
 - `$readingOf(reading, target, language)` — the Taiwan reading when reading Taiwan
   Traditional, as Zhuyin when picked ([`zhuyin.ts`](../src/lib/zhuyin.ts)); non-hanzi targets
   (the bopomofo chart, the tone drill) keep their pinyin.
-- `$rubyOf(text, reading)` — one syllable per hanzi for ruby above the characters when
+- `$rubyOf(text, reading, language)` — one syllable per hanzi for ruby above the characters when
   `zhRuby` is on and the syllables line up (`readingSyllables` / `rubySegments`), else `null`.
+  For Cantonese it draws the Jyutping as is (`jyutpingRuby` in
+  [`cantonese.ts`](../src/lib/cantonese.ts)); other languages get `null`.
   `ScriptText` and `TapText` take a `reading` prop for this.
+
+Cantonese (`yue`) sits outside the script options: it is stored in **Hong Kong Traditional** with
+**Jyutping** readings (tone digits, one syllable per character), `displayText` leaves it alone,
+and `scriptLangTag('yue')` is always `zh-Hant-HK`. Only `zhRuby` applies to it. See
+[Cantonese](./cantonese.md).
 
 ## Persistence
 
@@ -211,7 +225,8 @@ Reads are exposed as derived Svelte stores so components stay declarative:
 `settings`, `activeLanguage`, `allItems`, `activeItems` (active language, published),
 `lessons`, `passages`, `passageReads`, `pathData`, `contentDrafts`, `passageDrafts`,
 `exerciseAttempts`, `pronunciationAttempts`, `practiceTimes` (every answer and recording, any
-language — feeds the streak and the practice calendar), `skillMemories`, `reviewSummary` (the
+language — feeds the streak and the practice calendar), `xpSessions` (every banked session, any
+language), `skillMemories`, `reviewSummary` (the
 due counts), `languageCounts` and `lessonCounts`. `snapshotQueue()` returns a stable queue
 for a review session.
 
@@ -219,7 +234,7 @@ for a review session.
 
 CRUD and domain operations all live in `store.ts`, e.g. `createItem`, `updateItem`,
 `deleteItem`, `gradeItem`, `recordPronunciationAttempt`, `createLesson`, `createPassage`,
-`deletePassage`, `markPassageRead`, `studyScriptChar`, `studyVocabWord` (also used by the
+`deletePassage`, `markPassageRead`, `recordXp`, `studyScriptChar`, `studyVocabWord` (also used by the
 dictionary sheet's **Add to reviews**), `addVocabWords` (bulk = one change), `studyPassageLine`
 (sentence mining), the draft operations (`addDrafts`, `approveDraft`, …), and the sync
 Markdown hooks `renderContentFile` / `applyContentFile` ([sync](./sync.md#markdown-round-trip)). Components
@@ -266,6 +281,7 @@ The merge is therefore **semantic**, collection by collection:
 | `contentDrafts`, `passageDrafts` | a decision (approved / rejected) beats `pending` |
 | `exerciseAttempts`, `pronunciationAttempts`, `seededIds` | union by id |
 | `passageReads` | union; the earlier read time wins |
+| `xpSessions` | union by id (a session's points never change), so totals add up across devices |
 | `settings` | never touched |
 
 An import **never deletes** anything, and merging the same file twice is a no-op
@@ -321,8 +337,9 @@ repurpose an existing field destructively — old documents in users' browsers s
 | 12 | `zhRuby`; `LearningItem.zhVariants`, backfilled for seed words from `SEED_ZH_VARIANTS` |
 | 13 | `reminderTime` (daily reminder) |
 
-(`passageReads` and `pathChoice` arrived without a bump: the collection is optional and the
-setting is filled from the defaults on the next migration.)
+(`passageReads`, `xpSessions` and `pathChoice` arrived without a bump: the collections are optional
+and the setting is filled from the defaults on the next migration. Adding Cantonese needed no bump
+either: `yue` is just a new `Language` value.)
 
 A backup or sync snapshot whose `schemaVersion` is newer than the app's is refused with a
 message to update first.

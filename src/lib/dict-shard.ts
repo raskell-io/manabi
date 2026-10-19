@@ -30,7 +30,7 @@ export interface DictManifest {
 	[lang: string]: { buckets: number[]; entries: number; source: string; license: string };
 }
 
-export const DICT_LANGUAGES: Language[] = ['zh', 'ja', 'ko', 'he'];
+export const DICT_LANGUAGES: Language[] = ['zh', 'yue', 'ja', 'ko', 'he'];
 
 const BUCKETS = 64;
 

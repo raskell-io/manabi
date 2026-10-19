@@ -7,6 +7,10 @@ licensed separately from Manabi's code, under the terms of their sources
 - `zh/` — **CC-CEDICT** (https://cc-cedict.org, export by MDBG,
   https://www.mdbg.net/chinese/dictionary?page=cc-cedict), derived from CEDICT
   © Paul Denisowski. Licence: Creative Commons Attribution-ShareAlike 4.0.
+- `yue/` — **CC-Canto** © 2015–17 Pleco Inc. (https://cantonese.org), licence
+  CC BY-SA 3.0, together with CC-CEDICT (above) and Pleco's Cantonese readings
+  for it (cccedict-canto-readings, CC BY-SA 3.0). A few entries the sources
+  lack were written for Manabi.
 - `ja/` — **JMdict** by the Electronic Dictionary Research and Development
   Group (https://www.edrdg.org/edrdg/licence.html), via
   scriptin/jmdict-simplified. Licence: CC BY-SA 4.0.

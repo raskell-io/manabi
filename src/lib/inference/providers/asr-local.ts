@@ -11,7 +11,7 @@
 
 import type { ManabiSettings } from '$lib/db/types';
 import { loadPipeline } from '../local-models';
-import { toSimplified } from '$lib/chinese';
+import { toHongKong, toSimplified } from '$lib/chinese';
 import { cleanTranscript, maxTokensFor, WHISPER_LANGUAGE } from '../asr-text';
 import type { InferenceProvider, InferenceResult, ProviderCapabilities, TranscribeInput, TranscribeResult } from '../types';
 
@@ -84,6 +84,7 @@ export const asrLocalProvider: InferenceProvider = {
 			});
 			let text = cleanTranscript(out.text ?? '');
 			if (input.language === 'zh' && text) text = await toSimplified(text);
+			if (input.language === 'yue' && text) text = await toHongKong(text);
 			return { ok: true, value: { text }, providerId: 'asr-local', target: 'local' };
 		} catch (err) {
 			return fail(err instanceof Error ? err.message : 'On-device recognition failed');

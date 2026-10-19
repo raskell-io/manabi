@@ -34,7 +34,7 @@ export default defineConfig({
 				id: '/',
 				name: 'Manabi — Language Learning',
 				short_name: 'Manabi',
-				description: 'A local-first, reading-first language learning app for Chinese, Japanese, Korean & Hebrew',
+				description: 'A local-first, reading-first language learning app for Chinese, Cantonese, Japanese, Korean & Hebrew',
 				lang: 'en',
 				dir: 'ltr',
 				categories: ['education'],

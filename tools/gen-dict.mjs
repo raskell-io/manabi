@@ -5,10 +5,12 @@
  * src/lib/dictionary.ts reads it). Run manually (needs network; downloads are
  * cached in .cache/dict/, ~300 MB):
  *
- *   node tools/gen-dict.mjs [zh] [ja] [ko] [he]
+ *   node tools/gen-dict.mjs [zh] [yue] [ja] [ko] [he]
  *
  * Sources (all CC BY-SA; see static/dict/LICENSE.md):
  *  - zh: CC-CEDICT (MDBG) — every entry, pinyin converted to tone marks
+ *  - yue: CC-Canto (Pleco) — Cantonese words first, then CC-CEDICT with its
+ *        Cantonese readings (cccedict-canto-readings); keyed by Traditional, Jyutping
  *  - ja: JMdict via scriptin/jmdict-simplified — common words plus every
  *        word in Manabi's lists; JMdict part-of-speech codes kept for deinflection
  *  - ko, he: English Wiktionary via kaikki.org (Wiktextract) — lemmas, plus an
@@ -149,6 +151,88 @@ async function buildZh() {
 	return write('zh', entries, null, { source: 'CC-CEDICT (MDBG)', license: 'CC BY-SA 4.0' });
 }
 
+// --- Cantonese: CC-Canto + CC-CEDICT with Jyutping readings ---------------------
+
+/** One text file out of a cached zip download. */
+async function zipText(url, name) {
+	const zip = await cached(url, name);
+	return execFileSync('unzip', ['-p', zip], { maxBuffer: 64 * 1024 * 1024 }).toString('utf8');
+}
+
+// trad simp [pinyin] {jyutping} /senses/ # comment — the last three optional.
+const CEDICT_LINE = /^(\S+) (\S+) \[([^\]]*)\](?: \{([^}]*)\})?(?: \/(.*)\/)?\s*(?:#.*)?$/;
+
+/** CC-CEDICT senses worth showing (no classifiers, variant or cross-references). */
+function cedictSenses(defs) {
+	return (defs ?? '')
+		.split('/')
+		.filter((d) => d && !/^CL:/.test(d) && !/^(old )?variant of /.test(d) && !/^see [^ ]+\|/.test(d))
+		.slice(0, MAX_SENSES)
+		.map((x) => (x.length > 90 ? x.slice(0, 89) + '…' : x));
+}
+
+/**
+ * Readings to list first where the sources lead with a rare one (嘅 koi3 "to
+ * sigh" before ge3, the possessive particle).
+ */
+const YUE_FIRST = { 嘅: 'ge3', 靚: 'leng3', 呢: 'ni1', 去: 'heoi3', 飲: 'jam2', 啦: 'laa1', 呀: 'aa3', 喇: 'laa3', 平: 'peng4', 嚟: 'lai4', 行: 'haang4' };
+
+/** Everyday Cantonese the 2015-17 sources lack (written for Manabi). */
+const YUE_EXTRA = [
+	{ w: '喺', r: 'hai2', g: ['to be at; in; on (Cantonese, Mandarin 在)'] }
+];
+
+async function buildYue() {
+	const canto = await zipText('https://www.cantonese.org/cccanto-170202.zip', 'cccanto-170202.zip');
+	const readings = await zipText('https://www.cantonese.org/cccedict-canto-readings-150923.zip', 'cccedict-canto-readings-150923.zip');
+	const cedictPath = await cached('https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz', 'cedict.txt.gz');
+	const cedict = gunzipSync(readFileSync(cedictPath)).toString('utf8');
+
+	// Senses per word and reading, from three sources in rank order: the
+	// readings file's own Cantonese senses (係 "(Cantonese) to be"), CC-CEDICT
+	// under its Cantonese reading, then CC-Canto (slang and extra senses).
+	const senses = new Map(); // trad → Map(jyutping → [rank, gloss][])
+	const put = (trad, r, rank, g) => {
+		const byReading = senses.get(trad) ?? new Map();
+		senses.set(trad, byReading);
+		const list = byReading.get(r) ?? [];
+		byReading.set(r, list);
+		for (const x of g) if (!list.some(([, y]) => y === x)) list.push([rank, x]);
+	};
+	const jyutOf = new Map(); // "trad [pinyin]" → Jyutping
+	for (const line of readings.split('\n')) {
+		const m = CEDICT_LINE.exec(line);
+		if (!m || !m[4]) continue;
+		jyutOf.set(`${m[1]} [${m[3].toLowerCase()}]`, m[4].trim());
+		put(m[1], m[4].trim(), 0, cedictSenses(m[5]));
+	}
+	for (const line of cedict.split('\n')) {
+		const m = CEDICT_LINE.exec(line);
+		if (!m) continue;
+		const [, trad, , pinyin, , defs] = m;
+		const r = jyutOf.get(`${trad} [${pinyin.toLowerCase()}]`);
+		// Long proper names, as for Mandarin.
+		if (!r || (/^[A-Z]/.test(pinyin) && [...trad].length > 3)) continue;
+		put(trad, r, /^[A-Z]/.test(pinyin) ? 3 : 1, cedictSenses(defs)); // surnames and places last
+	}
+	for (const line of canto.split('\n')) {
+		const m = CEDICT_LINE.exec(line);
+		if (m && m[4]) put(m[1], m[4].trim(), 2, cedictSenses(m[5]));
+	}
+	for (const e of YUE_EXTRA) put(e.w, e.r, 0, e.g);
+
+	const entries = new Map();
+	for (const [trad, byReading] of senses) {
+		// Readings in the order of their best source; a listed reading first.
+		const list = [...byReading]
+			.filter(([, g]) => g.length)
+			.map(([r, g]) => ({ r, rank: Math.min(...g.map(([k]) => k)), g: g.sort((a, b) => a[0] - b[0]).map(([, x]) => x).slice(0, MAX_SENSES) }))
+			.sort((a, b) => Number(b.r === YUE_FIRST[trad]) - Number(a.r === YUE_FIRST[trad]) || a.rank - b.rank);
+		for (const { r, g } of list) add(entries, trad, { w: trad, r, g });
+	}
+	return write('yue', entries, null, { source: 'CC-Canto (Pleco) + CC-CEDICT (MDBG) with Cantonese readings', license: 'CC BY-SA 3.0 / 4.0' });
+}
+
 // --- Japanese: JMdict (jmdict-simplified) ---------------------------------------------
 
 async function buildJa() {
@@ -250,10 +334,10 @@ async function buildKaikki(lang, name) {
 
 // --- Main -----------------------------------------------------------------------
 
-const want = process.argv.slice(2).length ? process.argv.slice(2) : ['zh', 'ja', 'ko', 'he'];
+const want = process.argv.slice(2).length ? process.argv.slice(2) : ['zh', 'yue', 'ja', 'ko', 'he'];
 const manifestPath = join(OUT, 'index.json');
 const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : {};
-const BUILD = { zh: buildZh, ja: buildJa, ko: () => buildKaikki('ko', 'Korean'), he: () => buildKaikki('he', 'Hebrew') };
+const BUILD = { zh: buildZh, yue: buildYue, ja: buildJa, ko: () => buildKaikki('ko', 'Korean'), he: () => buildKaikki('he', 'Hebrew') };
 for (const lang of want) manifest[lang] = await BUILD[lang]();
 writeFileSync(manifestPath, JSON.stringify(manifest, null, '\t') + '\n');
 console.log(`wrote ${manifestPath}`);

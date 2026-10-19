@@ -34,6 +34,7 @@
 
 	const BLURB: Record<Language, string> = {
 		zh: 'Chinese writes foreign places by sound or by meaning, and people’s names family-first.',
+		yue: 'Hong Kong names some places its own way (Australia is 澳洲, not 澳大利亞); names go family-first, and many people add an English given name.',
 		ja: 'Japan writes most foreign places in katakana, and its own places and people in kanji with readings you simply have to know.',
 		ko: 'Korean writes most places by sound in Hangul; family names come first and a few cover most of the country.',
 		he: 'Hebrew has its own names for many countries — some straight from the Bible — and given names that are often everyday words.'

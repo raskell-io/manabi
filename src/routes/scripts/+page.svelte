@@ -57,7 +57,7 @@
 	</div>
 	<p class="muted">
 		{langName} writing systems.
-		{#if drawable}Tap a kanji or hanzi to watch its stroke order and practise writing it; tap {lang === 'zh' ? 'bopomofo' : 'kana'} to add them to your reviews.{:else}Tap any glyph to add it to your reviews.{/if}
+		{#if lang === 'yue'}Tap a character to watch its stroke order, practise writing it or add it to your reviews.{:else if drawable}Tap a kanji or hanzi to watch its stroke order and practise writing it; tap {lang === 'zh' ? 'bopomofo' : 'kana'} to add them to your reviews.{:else}Tap any glyph to add it to your reviews.{/if}
 	</p>
 </header>
 

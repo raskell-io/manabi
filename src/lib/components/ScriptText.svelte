@@ -17,11 +17,11 @@
 		muted?: boolean;
 		/** Always keep Hebrew niqqud, ignoring the hide-vowels setting (e.g. editor preview). */
 		forceVowels?: boolean;
-		/** Chinese: the text's reading, shown above each character when that option is on. */
+		/** Chinese / Cantonese: the text's reading, shown above each character when that option is on. */
 		reading?: string;
 	} = $props();
 
-	const ruby = $derived(language === 'zh' ? $rubyOf(text, reading) : null);
+	const ruby = $derived($rubyOf(text, reading, language));
 
 	const dir = $derived(languageDir(language));
 	const langAttr = $derived(scriptLangTag(language, $zhScript));
@@ -53,6 +53,8 @@
 	rt {
 		font-family: var(--font-sans, inherit);
 		font-size: 0.5em;
+		/* Keeps neighbouring syllables apart (Jyutping: nei5 hou2, not nei5hou2). */
+		padding-inline: 0.2em;
 		font-weight: 600;
 		line-height: 1.1;
 		color: var(--color-text-muted);

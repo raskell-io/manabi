@@ -85,7 +85,7 @@ test.describe('Home → session → summary', () => {
 		await expect(page.locator('.next')).toHaveAttribute('href', '/review?mode=reading');
 		await expect(page.locator('.also')).toContainText(/Listening · \d+/);
 		const chips = (await page.locator('.langs .lang-chip').allInnerTexts()).map(squish);
-		expect(chips).toHaveLength(4);
+		expect(chips).toHaveLength(5);
 		expect(chips[0]).toMatch(/中文 \d+/);
 
 		await page.locator('.next').click();

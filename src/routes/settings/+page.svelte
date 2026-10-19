@@ -239,7 +239,7 @@
 	</div>
 	<label class="check ruby-toggle">
 		<input type="checkbox" checked={s.zhRuby} onchange={(e) => updateSettings({ zhRuby: e.currentTarget.checked })} />
-		<span>Show the reading above each character (on words and sentences whose reading is known).</span>
+		<span>Show the reading above each character (on words and sentences whose reading is known) — also Jyutping for Cantonese, which is always written in Hong Kong characters.</span>
 	</label>
 	<p class="preview-row">
 		<span class="muted">Preview:</span>

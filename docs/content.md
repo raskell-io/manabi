@@ -16,7 +16,8 @@ covered in [audio](./audio.md).
 ## Built-in seed
 
 [`src/lib/db/seed.ts`](../src/lib/db/seed.ts) defines a small leveled set tuned to the
-target learner: Chinese A1→A2 (HSK 1–3), a Japanese B1 refresher (N4/N3 grammar), and
+target learner: Chinese A1→A2 (HSK 1–3), Cantonese A1→A2 (63 everyday words and phrases, Hong
+Kong usage), a Japanese B1 refresher (N4/N3 grammar), and
 Korean A1 (TOPIK I basics in polite -요 forms), Hebrew A1 (alef-bet, numbers, phrases —
 vowelled). It also seeds natural reading passages
 (modern conversations + short non-fiction) for `/read`.
@@ -45,6 +46,10 @@ Exports:
   version is bumped (see [data model → Chinese](./data-model.md#chinese-script-and-readings)).
 - Readings should split one syllable per hanzi (`zhuyin.ts` `readingSyllables`), or ruby and
   Zhuyin fall back; `zhuyin.test.ts` checks every seed word lines up.
+- Cantonese is written as **colloquial Cantonese in Hong Kong Traditional characters** (係 嘅 唔
+  咗, stored that way — no Simplified storage, no `zhVariants`) with **Jyutping** readings: tone
+  digits, one syllable per character, separated by spaces (`nei5 hou2`). `seed.test.ts` checks
+  every Cantonese seed syllable against the `yue` dictionary. See [Cantonese](./cantonese.md).
 - Optional fields must be omitted, not `undefined` (the doc's
   [`stripUndefined`](./data-model.md#the-undefined-gotcha) handles writes, but keep seed
   literals clean).
@@ -79,7 +84,10 @@ Sources (attribution is written into the file header and shown on the page):
 
 `scripts-data.ts` is **generated — do not hand-edit it**; rerun the generator. The kana
 grids and Hebrew alef-bet are defined directly in
-[`src/lib/scripts.ts`](../src/lib/scripts.ts), which also assembles the tabbed sections the
+[`src/lib/scripts.ts`](../src/lib/scripts.ts) — so are the Cantonese sections, derived rather than
+generated: **Characters** (Starter / Everyday, the characters of the A1 / A2 seed words with their
+Jyutping; `CANTONESE_BASE_TONE` gives a character's own tone where the word changes it, 話 *waa6* in
+廣東話 *waa2*) and the six **Jyutping tones** on *si1*–*si6*. `scripts.ts` also assembles the tabbed sections the
 `/scripts` page renders (`scriptSections`, `sectionGlyphs`, `blockGlyphs`). Tapping a glyph
 calls `studyScriptChar` → a `character` `LearningItem`.
 
@@ -98,7 +106,7 @@ node tools/gen-vocab-data.mjs
   [`jamsinclair/open-anki-jlpt-decks`](https://github.com/jamsinclair/open-anki-jlpt-decks)
   (expression / reading / meaning, derived from JMdict and Tanos lists).
 
-Each word list entry is compact (`{ t: target, r: reading, m: meaning }`). The `/vocab`
+There are no Cantonese, Korean or Hebrew word lists (`/vocab` says so). Each word list entry is compact (`{ t: target, r: reading, m: meaning }`). The `/vocab`
 page **fetches the active language's levels on demand** — these files are deliberately
 **not** bundled and **not** in the Automerge document, because ~19k words would bloat both.
 Only words you tap **＋ Add** become `LearningItem`s, via `studyVocabWord` (single) or
@@ -129,7 +137,7 @@ All of these create published `LearningItem`s, which `buildQueue` then schedules
 | Refresh kanji/hanzi tables | `node tools/gen-scripts-data.mjs`, commit `scripts-data.ts`. |
 | Refresh HSK/JLPT word lists | `node tools/gen-vocab-data.mjs`, commit `static/wordlists/`. |
 | Refresh radicals / stroke data | `node tools/gen-radicals-data.mjs`, then `node tools/gen-stroke-data.mjs`; commit the outputs. |
-| Refresh the dictionaries | `node tools/gen-dict.mjs [zh] [ja] [ko] [he]`, commit `static/dict/`. |
+| Refresh the dictionaries | `node tools/gen-dict.mjs [zh] [yue] [ja] [ko] [he]`, commit `static/dict/`. |
 | Add audio for new content | Re-run the [audio pipeline](./audio.md#regenerating). |
 | Generate items/passages with AI | Use the [workbench](./ai-workbench.md). |
 
@@ -163,7 +171,7 @@ data tool is needed. Not native-proofread yet.
 
 Per language, five sections: countries, places where the language is spoken, world cities, family names
 and given names (each given name marked male / female / both), with an optional literal meaning
-(`北京` “northern capital”). Readings follow the seed: pinyin, kana + romaji, Revised Romanization,
+(`北京` “northern capital”). Readings follow the seed: pinyin, Jyutping, kana + romaji, Revised Romanization,
 transliterated vowelled Hebrew. Added items are tagged `name`, `place`/`person` and `names-<section>`,
 and their meaning says the kind of name (“Wang (family name)”). `names.test.ts` checks the conventions.
 
@@ -171,12 +179,16 @@ and their meaning says the kind of name (“Wang (family name)”). `names.test.
 
 Downloads [Hanzi Writer](https://github.com/chanind/hanzi-writer) stroke data for every hanzi/kanji on
 the Scripts page, in the seed and in the radical table — Chinese also bundles the Traditional forms
-(Taiwan + Hong Kong, via opencc-js) of that text — into `static/strokes/{zh,ja}/<code-point>.json`,
+(Taiwan + Hong Kong, via opencc-js) of that text, and the Cantonese seed words and examples (already
+Traditional) go into the Chinese set — into `static/strokes/{zh,ja}/<code-point>.json`,
 and writes `src/lib/strokes-index.ts` (what is bundled). Chinese uses `hanzi-writer-data@2.0.1` (Make Me a
 Hanzi); Japanese uses `hanzi-writer-data-jp@0.0.1` (AnimCJK — Japanese glyph shapes and stroke order).
 Both are Arphic Public License (+ LGPL for AnimCJK); see `static/strokes/README.md`. Re-runs resume and
 skip files already present; run it after the radicals generator. Other characters load from the same
-pinned CDN at runtime; the service worker caches both (`manabi-strokes`).
+pinned CDN at runtime; the service worker caches both (`manabi-strokes`). Make Me a Hanzi has no
+data for some colloquial Cantonese characters (咗 佢 冇 啲 喺 哋 嚟 嗰 攰): the CDN answers 404,
+`loadStrokes` throws `NoStrokeData`, and StrokePad says the open data lacks the character instead
+of "you may be offline".
 
 ```
 node tools/gen-stroke-data.mjs
@@ -191,7 +203,10 @@ loaded lazily as its own chunk once a Traditional script is picked). The convers
 matches its pinyin and audio. Per-item exceptions live in `zhVariants`. What *does* depend on the
 conversion is the generated radical index and bundled stroke files above — rerun both generators
 after adding Chinese text, so its Traditional characters are covered. Zhuyin is likewise computed
-(`zhuyin.ts`, pinyin → bopomofo against the standard syllable table); no data file.
+(`zhuyin.ts`, pinyin → bopomofo against the standard syllable table); no data file. Cantonese is
+outside all this: it is stored in Hong Kong Traditional, `displayText` passes it through, and
+`scriptLangTag('yue')` is always `zh-Hant-HK`; `toHongKong()` only normalizes speech-recognition
+output.
 
 ### Dictionaries — `tools/gen-dict.mjs`
 
@@ -203,7 +218,7 @@ buckets by the first code point of the lookup key (Hebrew keys drop niqqud), so 
 small file. Korean and Hebrew shards also carry an inflected-form → lemma map (`f`).
 
 ```
-node tools/gen-dict.mjs [zh] [ja] [ko] [he]   # no args = all four
+node tools/gen-dict.mjs [zh] [yue] [ja] [ko] [he]   # no args = all five
 ```
 
 Needs network; downloads are cached in `.cache/dict/` (~300 MB, gitignored). Sources, all
@@ -212,6 +227,7 @@ Needs network; downloads are cached in `.cache/dict/` (~300 MB, gitignored). Sou
 | Language | Source | Notes |
 | --- | --- | --- |
 | zh | **CC-CEDICT** (MDBG export) | ~111k entries keyed by Simplified headword; pinyin converted to tone marks; long proper names dropped |
+| yue | **CC-Canto** (Pleco) + **CC-CEDICT** with Pleco's Cantonese readings (`cccedict-canto-readings`) | ~113k keys (~10 MB) by Traditional headword, Jyutping readings; senses ranked: the readings file's Cantonese senses, then CC-CEDICT, then CC-Canto extras, surnames and places last; `YUE_FIRST` puts the everyday reading first for a few words (嘅 *ge3*), `YUE_EXTRA` adds what the sources lack (喺); CC BY-SA 3.0 / 4.0 |
 | ja | **JMdict** via `scriptin/jmdict-simplified` | ~53k: words marked common plus every word in Manabi's JLPT lists and seed; JMdict part-of-speech codes kept for deinflection |
 | ko | English **Wiktionary** via kaikki.org (Wiktextract) | ~32k lemmas + inflected forms from the conjugation / declension tables |
 | he | English **Wiktionary** via kaikki.org | ~10k lemmas (vowelled headwords) + inflected forms |
@@ -221,7 +237,7 @@ At runtime [`dictionary.ts`](../src/lib/dictionary.ts) fetches the manifest and 
 [`lookup.ts`](../src/lib/lookup.ts) `createLookup(loader)` does the matching — pure apart from the
 injected loader, and tested against the real data:
 
-- **Chinese** — longest dictionary match starting at the tapped character (so 学习 is one tap
+- **Chinese and Cantonese** — longest dictionary match starting at the tapped character (so 学习 is one tap
   even if `Intl.Segmenter` split it).
 - **Japanese** — the same, also trying every deinflection of each span with
   [`deinflect-ja.ts`](../src/lib/deinflect-ja.ts) (食べました → 食べる, "polite · past"), checked
@@ -232,7 +248,7 @@ injected loader, and tested against the real data:
   prefix letters peeled (וּבַבַּיִת → ו + ב + בית).
 
 The UI is `TapText` (every word of a passage line is tappable; it also handles ruby) and
-`LookupSheet` (headword, reading — pinyin or Zhuyin, kana, RR, transliteration — glosses, how the
+`LookupSheet` (headword, reading — pinyin or Zhuyin, Jyutping, kana, RR, transliteration — glosses, how the
 tapped form relates, audio, **Add to reviews** → `studyVocabWord`).
 
 ## The learner's own texts
@@ -241,7 +257,8 @@ tapped form relates, audio, **Add to reviews** → `studyVocabWord`).
 text into a passage (up to 80 lines). Pasted Chinese is converted to Simplified first
 (`toSimplified` in `chinese.ts`, OpenCC t2cn) — content is stored Simplified, and the script
 setting shows it as Traditional again. `splitSentences` splits it, and `dictionaryReading` works out
-readings offline from the dictionary — pinyin word by word (zh), kana including inflected forms
+readings offline from the dictionary — pinyin or Jyutping word by word (zh / yue; pasted Cantonese
+is kept as typed, not converted), kana including inflected forms
 (`inflectedKana`, ja), approximate Revised Romanization (`romanizeHangul`, ko); Hebrew gets none
 (unvowelled text has no reliable reading). With an OpenAI key and the AI option on, the router's
 `annotate` task adds a reading and an English translation per line

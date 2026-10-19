@@ -21,7 +21,7 @@ import subprocess
 
 import edge_tts
 
-VOICE = {"zh": "zh-CN-XiaoxiaoNeural", "ja": "ja-JP-NanamiNeural", "ko": "ko-KR-SunHiNeural", "he": "he-IL-HilaNeural"}
+VOICE = {"zh": "zh-CN-XiaoxiaoNeural", "yue": "zh-HK-HiuMaanNeural", "ja": "ja-JP-NanamiNeural", "ko": "ko-KR-SunHiNeural", "he": "he-IL-HilaNeural"}
 CACHE = "tools/.audio-cache"
 GAP = f"{CACHE}/_gap.mp3"
 OUT = "static/audio"

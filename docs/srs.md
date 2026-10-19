@@ -147,6 +147,13 @@ Listening/Speaking pools are the scope's published items that have a clip. `&mod
 back to the whole-collection review; the query is read reactively, so switching never needs
 a reload.
 
+**XP.** Every right answer earns 10 XP, 15 while on a run of three or more (`XP_RIGHT`,
+`XP_COMBO_BONUS` in the review page). When a session ends, its total is banked with
+`recordXp(xp, language)` as one `XpSession` in the document ([data model](./data-model.md)); the
+summary shows "N XP in total · M today" and Progress shows total / this week / today, both from
+`xpSummary` in [`srs/stats.ts`](../src/lib/srs/stats.ts). XP is a reward layer only: it never
+touches scheduling.
+
 ## Exercises
 
 [`exercises/templates.ts`](../src/lib/exercises/templates.ts) defines the exercise shapes
@@ -202,12 +209,13 @@ type the word in its own script or romanized:
 | Language | Accepted |
 | --- | --- |
 | zh | hanzi (Simplified, or the displayed Traditional form, passed as `alternatives`), or pinyin with tone marks or tone numbers (`mǎ` / `ma3`; `v` for ü) |
+| yue | the Hong Kong Traditional characters, or Jyutping with tone digits (`nei5 hou2`; `splitJyutping` in `cantonese.ts`) |
 | ja | kanji / kana as written, the kana reading (katakana treated as hiragana), or romaji (the item's `transliteration`) |
 | ko | Hangul or Revised Romanization |
 | he | Hebrew with or without niqqud, or the `transliteration` |
 
 `checkTyped` returns a `Verdict`: `exact`, `close` or `wrong`. **Close** counts as correct but
-says "Almost!" and shows the answer: pinyin with the right letters but missing or wrong tones
+says "Almost!" and shows the answer: pinyin or Jyutping with the right letters but missing or wrong tones
 ("add the tones" / "check the tones"), or a small typo (Levenshtein distance 1 for 4–7
 characters, 2 for 8+). **I don't know** reveals the answer and grades it as wrong.
 
@@ -234,6 +242,11 @@ transcript and score are stored on the `PronunciationAttempt`.
 
 For Chinese, transcript and word are both converted to the **displayed** script before
 comparing (`displayText(…, $toZhScript)`), so a transcript in either script scores the same.
+For Cantonese, recognition tends to write standard written Chinese (是 for 係, 的 for 嘅), so
+`colloquialize(transcript, target)` ([`cantonese.ts`](../src/lib/cantonese.ts)) first swaps each
+written word for its colloquial one — only where the target actually uses the colloquial word, so
+a 是 that is meant stays. Both transcribers return Hong Kong Traditional for Cantonese
+(`toHongKong`).
 Known limit: Japanese homophone kanji can lower a correct take's score — the transcript is
 shown precisely so the learner can judge.
 
@@ -257,6 +270,10 @@ works offline. Details that matter:
 - [`asr-text.ts`](../src/lib/inference/asr-text.ts) `cleanTranscript` drops known
   hallucinated subtitle lines ("thanks for watching", 谢谢观看, ご視聴ありがとうございました…).
 - Chinese output is normalized to Simplified (opencc-js `t2cn`).
+- **Cantonese** runs as `'chinese'`: Whisper base and small have no Cantonese token (only
+  large-v3 knows `yue`), so the output is often Mandarin-flavoured written Chinese; it is
+  converted to Hong Kong Traditional and colloquialized before scoring. OpenAI transcription
+  likewise sends `language: 'zh'` with a Cantonese prompt (以下係廣東話嘅句子，用香港繁體字寫。).
 - **Hebrew needs `small`**; with base, Hebrew recordings fail locally (and use OpenAI only).
 - WebGPU is untested; WASM only so far.
 

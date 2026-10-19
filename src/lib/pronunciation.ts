@@ -6,6 +6,7 @@
  */
 
 import { stripNiqqud, type Language, type PronunciationAttempt, type SelfRating } from '$lib/db/types';
+import { colloquialize } from '$lib/cantonese';
 
 /** What speech recognition heard, and how close it was. Stored on the attempt. */
 export interface AsrResult {
@@ -62,12 +63,15 @@ export interface PronunciationScore {
 /**
  * Score a transcript against the item: its script, and for Japanese also its
  * kana reading (recognition may return 食べる or たべる for the same word).
+ * Cantonese transcripts often come back in written Chinese (是 for 係), so
+ * those words are mapped to the colloquial ones first.
  */
 export function scorePronunciation(
 	transcript: string,
 	item: { target: string; reading: string; language: Language }
 ): PronunciationScore {
-	const heard = normalizeForCompare(transcript, item.language);
+	const said = item.language === 'yue' ? colloquialize(transcript, item.target) : transcript;
+	const heard = normalizeForCompare(said, item.language);
 	const candidates: [PronunciationScore['matched'], string][] = [['target', item.target]];
 	if (item.language === 'ja' && item.reading) candidates.push(['reading', item.reading]);
 	let best: PronunciationScore = { score: 0, matched: 'target' };

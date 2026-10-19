@@ -17,6 +17,7 @@
 import { derived, writable, type Readable } from 'svelte/store';
 import type { Language } from './db/types';
 import { pinyinToZhuyin, readingSyllables, rubySegments } from './zhuyin';
+import { jyutpingRuby } from './cantonese';
 
 export type ZhScript = 'simplified' | 'traditional-tw' | 'traditional-hk';
 
@@ -31,9 +32,9 @@ export function zhLangTag(script: ZhScript): string {
 	return script === 'traditional-tw' ? 'zh-Hant-TW' : script === 'traditional-hk' ? 'zh-Hant-HK' : 'zh-Hans';
 }
 
-/** The `lang` attribute for script text in any language. */
+/** The `lang` attribute for script text in any language (Cantonese: Hong Kong glyph forms). */
 export function scriptLangTag(language: Language, script: ZhScript): string {
-	return language === 'zh' ? zhLangTag(script) : language;
+	return language === 'zh' ? zhLangTag(script) : language === 'yue' ? 'zh-Hant-HK' : language;
 }
 
 export type Convert = (text: string) => string;
@@ -98,6 +99,14 @@ let simplifier: Promise<Convert> | null = null;
 export async function toSimplified(text: string): Promise<string> {
 	simplifier ??= import('opencc-js/t2cn').then((OpenCC) => OpenCC.Converter({ from: 't', to: 'cn' }));
 	return (await simplifier)(text);
+}
+
+/**
+ * Any Chinese → Hong Kong Traditional, Cantonese's stored form (speech
+ * recognition may answer in Simplified). Reuses the display converter.
+ */
+export async function toHongKong(text: string): Promise<string> {
+	return (await build('traditional-hk'))(text);
 }
 
 /** Convert text in `language` for display (non-Chinese text passes through). */
@@ -177,14 +186,19 @@ export const readingOf: Readable<(reading: string, target: string, language: Lan
 );
 
 /**
- * Ruby for Chinese text with a known reading (each hanzi with its syllable
- * above), when that option is on and the syllables line up; else null.
+ * Ruby for Chinese or Cantonese text with a known reading (each character
+ * with its syllable above: pinyin / Zhuyin, or Jyutping), when that option is
+ * on and the syllables line up; else null.
  */
-export const rubyOf: Readable<(text: string, reading: string | undefined) => { text: string; rt?: string }[] | null> = derived(
+export const rubyOf: Readable<
+	(text: string, reading: string | undefined, language: Language) => { text: string; rt?: string }[] | null
+> = derived(
 	[active, variants, readingMode, ruby, toZhScript],
 	([$a, $v, $mode, $ruby, $convert]) =>
-		(text: string, reading: string | undefined) => {
+		(text: string, reading: string | undefined, language: Language) => {
 			if (!$ruby || !reading) return null;
+			if (language === 'yue') return jyutpingRuby(text, reading);
+			if (language !== 'zh') return null;
 			const r = ($a.script === 'traditional-tw' && $v.get(text)?.twReading) || reading;
 			return rubySegments($convert(text), readingSyllables(r, $mode));
 		}

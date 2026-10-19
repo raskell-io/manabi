@@ -30,7 +30,7 @@ export async function boot(page: Page): Promise<void> {
 }
 
 /** Switch the active language from Home. */
-export async function useLanguage(page: Page, native: '中文' | '日本語' | '한국어' | 'עברית'): Promise<void> {
+export async function useLanguage(page: Page, native: '中文' | '廣東話' | '日本語' | '한국어' | 'עברית'): Promise<void> {
 	await boot(page);
 	await page.locator('.langs .lang-chip', { hasText: native }).click();
 }

@@ -10,6 +10,7 @@
  */
 
 import type { GeneratedItem, GeneratedPassage, Language, ManabiSettings, PassageLine } from '$lib/db/types';
+import { toHongKong } from '$lib/chinese';
 import type {
 	DiacritizeInput,
 	DiacritizeResult,
@@ -38,8 +39,16 @@ const TRANSCRIBE_MODEL = 'gpt-4o-mini-transcribe';
  * answer — e.g. keep Chinese in Simplified characters, which the items use.
  */
 const TRANSCRIBE_PROMPT: Partial<Record<Language, string>> = {
-	zh: '以下是普通话的句子。'
+	zh: '以下是普通话的句子。',
+	yue: '以下係廣東話嘅句子，用香港繁體字寫。'
 };
+
+const TTS_INSTRUCTIONS: Partial<Record<Language, string>> = {
+	yue: 'Speak Hong Kong Cantonese (粵語), never Mandarin, at a calm learner-friendly pace.'
+};
+
+/** The transcription API takes ISO 639-1 codes: Cantonese goes as Chinese, steered by the prompt. */
+const TRANSCRIBE_LANGUAGE: Partial<Record<Language, string>> = { yue: 'zh' };
 
 function audioFilename(mime: string): string {
 	if (mime.includes('mp4') || mime.includes('m4a') || mime.includes('aac')) return 'recording.m4a';
@@ -60,6 +69,7 @@ function buildDiacritizePrompt(texts: string[]): string {
 
 const READING_GUIDE: Record<Language, string> = {
 	zh: 'reading = Hanyu Pinyin WITH tone marks (e.g. "jīntiān"). Use Simplified characters for target.',
+	yue: 'Language is Cantonese as spoken in Hong Kong. target = colloquial written Cantonese in Hong Kong Traditional characters (係, 嘅, 唔, 咗, 佢, 冇, 喺), not standard written Chinese; reading = Jyutping with tone digits, one syllable per character, separated by spaces (e.g. "nei5 hou2").',
 	ja: 'reading = kana (hiragana/katakana) for the whole target; transliteration = romaji (e.g. "taberu").',
 	ko: 'target = standard Korean in Hangul (no hanja); reading and transliteration = Revised Romanization (e.g. "annyeonghaseyo"). Use polite -요 forms in examples.',
 	he: 'target = fully vowelled (niqqud) Modern Hebrew; reading and transliteration = Latin transcription (e.g. "shalom").'
@@ -266,7 +276,7 @@ export const openaiProvider: InferenceProvider = {
 			const form = new FormData();
 			form.append('file', input.audio, audioFilename(input.audio.type));
 			form.append('model', TRANSCRIBE_MODEL);
-			form.append('language', input.language);
+			form.append('language', TRANSCRIBE_LANGUAGE[input.language] ?? input.language);
 			form.append('response_format', 'json');
 			const prompt = TRANSCRIBE_PROMPT[input.language];
 			if (prompt) form.append('prompt', prompt);
@@ -280,7 +290,9 @@ export const openaiProvider: InferenceProvider = {
 				return { ok: false, error: `OpenAI transcription ${res.status}: ${text.slice(0, 200)}`, providerId: 'openai', target: 'remote' };
 			}
 			const data = (await res.json()) as { text?: string };
-			return { ok: true, value: { text: (data.text ?? '').trim() }, providerId: 'openai', target: 'remote' };
+			let text = (data.text ?? '').trim();
+			if (input.language === 'yue' && text) text = await toHongKong(text);
+			return { ok: true, value: { text }, providerId: 'openai', target: 'remote' };
 		} catch (err) {
 			return { ok: false, error: err instanceof Error ? err.message : 'Transcription failed', providerId: 'openai', target: 'remote' };
 		}
@@ -389,7 +401,14 @@ export const openaiProvider: InferenceProvider = {
 			const res = await fetch(TTS_URL, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-				body: JSON.stringify({ model: 'gpt-4o-mini-tts', voice: 'alloy', input: input.text, response_format: 'mp3' })
+				body: JSON.stringify({
+					model: 'gpt-4o-mini-tts',
+					voice: 'alloy',
+					input: input.text,
+					response_format: 'mp3',
+					// Han characters read as Mandarin unless told otherwise.
+					...(TTS_INSTRUCTIONS[input.language] ? { instructions: TTS_INSTRUCTIONS[input.language] } : {})
+				})
 			});
 			if (!res.ok) {
 				const text = await res.text();

@@ -29,14 +29,22 @@ export function generateId(length: number = 12): string {
 
 // --- Core enums -------------------------------------------------------------
 
-export type Language = 'zh' | 'ja' | 'ko' | 'he';
+export type Language = 'zh' | 'yue' | 'ja' | 'ko' | 'he';
 
 export const LANGUAGES: { code: Language; name: string; native: string; dir: 'ltr' | 'rtl' }[] = [
 	{ code: 'zh', name: 'Chinese', native: '中文', dir: 'ltr' },
+	{ code: 'yue', name: 'Cantonese', native: '廣東話', dir: 'ltr' },
 	{ code: 'ja', name: 'Japanese', native: '日本語', dir: 'ltr' },
 	{ code: 'ko', name: 'Korean', native: '한국어', dir: 'ltr' },
 	{ code: 'he', name: 'Hebrew', native: 'עברית', dir: 'rtl' }
 ];
+
+/** Languages written (mostly) in Han characters: words aren't space-separated. */
+export type HanLanguage = 'zh' | 'yue' | 'ja';
+
+export function isHanLanguage(language: Language): language is HanLanguage {
+	return language === 'zh' || language === 'yue' || language === 'ja';
+}
 
 export function languageDir(language: Language): 'ltr' | 'rtl' {
 	return language === 'he' ? 'rtl' : 'ltr';

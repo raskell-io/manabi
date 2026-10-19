@@ -11,7 +11,7 @@
  *    ילד), else with up to three prefix letters peeled (ובבית → בית).
  */
 
-import type { Language } from './db/types';
+import { isHanLanguage, type HanLanguage, type Language } from './db/types';
 import { deinflect, posMatches } from './deinflect-ja';
 import { bucketOf, dictKey, type DictEntry, type DictShard } from './dict-shard';
 
@@ -82,15 +82,15 @@ export function createLookup(load: ShardLoader) {
 		return null;
 	}
 
-	async function lookupCjk(language: 'zh' | 'ja', text: string, start: number): Promise<DictHit | null> {
-		const ok = language === 'zh' ? HAN : JA_CHAR;
+	async function lookupCjk(language: HanLanguage, text: string, start: number): Promise<DictHit | null> {
+		const ok = language === 'ja' ? JA_CHAR : HAN;
 		if (!ok.test(text[start] ?? '')) return null;
 		let end = start;
 		while (end < text.length && end - start < 12 && ok.test(text[end])) end++;
 		for (let len = end - start; len > 0; len--) {
 			const surface = text.slice(start, start + len);
-			if (language === 'zh') {
-				const e = await entries('zh', surface);
+			if (language !== 'ja') {
+				const e = await entries(language, surface);
 				if (e) return { surface, start, key: surface, entries: e };
 				continue;
 			}
@@ -146,12 +146,12 @@ export function createLookup(load: ShardLoader) {
 		/** The dictionary entry for the word at `index` of `text`, or null. */
 		async lookupAt(language: Language, text: string, index: number): Promise<DictHit | null> {
 			const t = text.normalize('NFC');
-			if (language === 'zh' || language === 'ja') return lookupCjk(language, t, index);
+			if (isHanLanguage(language)) return lookupCjk(language, t, index);
 			if (language === 'ko') return lookupKo(t, index);
 			return lookupHe(t, index);
 		},
-		/** Whole-text segmentation into dictionary words (Chinese / Japanese readings for pasted text). */
-		async segment(language: 'zh' | 'ja', text: string): Promise<{ text: string; hit: DictHit | null }[]> {
+		/** Whole-text segmentation into dictionary words (Chinese / Cantonese / Japanese readings for pasted text). */
+		async segment(language: HanLanguage, text: string): Promise<{ text: string; hit: DictHit | null }[]> {
 			const out: { text: string; hit: DictHit | null }[] = [];
 			let i = 0;
 			while (i < text.length) {

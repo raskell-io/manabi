@@ -13,7 +13,7 @@
 import type { ExampleSentence, ItemKind, ItemStatus, Language, LearningItem, Passage, PassageKind, PassageLine } from './db/types';
 import type { ZhVariants } from './chinese';
 
-const LANGUAGE_NAME: Record<Language, string> = { zh: 'Chinese', ja: 'Japanese', ko: 'Korean', he: 'Hebrew' };
+const LANGUAGE_NAME: Record<Language, string> = { zh: 'Chinese', yue: 'Cantonese', ja: 'Japanese', ko: 'Korean', he: 'Hebrew' };
 const ITEM_KINDS: ItemKind[] = ['word', 'phrase', 'sentence', 'grammar', 'character'];
 
 /** FNV-1a, 32-bit, hex — a short, stable fingerprint of a section body. */

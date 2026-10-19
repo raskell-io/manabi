@@ -11,7 +11,7 @@
 	import { Play, StepForward, RotateCcw, Eye, EyeOff, Lightbulb, PenLine, Clapperboard } from 'lucide-svelte';
 	import type HanziWriter from 'hanzi-writer';
 	import Mascot from './Mascot.svelte';
-	import { loadStrokes, type StrokeLang } from '$lib/strokes';
+	import { loadStrokes, NoStrokeData, type StrokeLang } from '$lib/strokes';
 	import { playCorrect } from '$lib/sounds';
 	import { tapCorrect, tapWrong } from '$lib/haptics';
 
@@ -19,7 +19,7 @@
 
 	let host = $state<HTMLDivElement>();
 	let writer: HanziWriter | null = null;
-	let status = $state<'loading' | 'ready' | 'error'>('loading');
+	let status = $state<'loading' | 'ready' | 'error' | 'missing'>('loading');
 	let mode = $state<'watch' | 'trace'>('watch');
 	let total = $state(0);
 	let step = $state(0); // strokes shown (watch) / strokes written (trace)
@@ -67,8 +67,8 @@
 			status = 'ready';
 			if (mode === 'trace') startTrace();
 			else play();
-		} catch {
-			if (c === char) status = 'error';
+		} catch (err) {
+			if (c === char) status = err instanceof NoStrokeData ? 'missing' : 'error';
 		}
 	}
 
@@ -78,7 +78,7 @@
 		const c = char;
 		void lang;
 		untrack(() => {
-			if (writer || status === 'error') void mount(c);
+			if (writer || status === 'error' || status === 'missing') void mount(c);
 		});
 	});
 	onDestroy(() => writer?.cancelQuiz());
@@ -176,7 +176,9 @@
 		{#if status === 'loading'}
 			<span class="state">Loading strokes…</span>
 		{:else if status === 'error'}
-			<span class="state">No stroke data for {char} — you may be offline.</span>
+			<span class="state">Couldn’t load the strokes for {char} — you may be offline.</span>
+		{:else if status === 'missing'}
+			<span class="state">The open stroke-order data has no {char} (it misses some Cantonese characters).</span>
 		{/if}
 		{#if done}
 			<div class="done">

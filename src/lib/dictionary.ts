@@ -31,6 +31,7 @@ export const dictionary = createLookup(async (language: Language, bucket: number
 /** Attribution line for a language's dictionary. */
 export const DICT_CREDIT: Record<Language, string> = {
 	zh: 'CC-CEDICT (MDBG), CC BY-SA 4.0',
+	yue: 'CC-Canto (Pleco) and CC-CEDICT, CC BY-SA 3.0 / 4.0',
 	ja: 'JMdict (EDRDG), CC BY-SA 4.0',
 	ko: 'English Wiktionary via kaikki.org, CC BY-SA 4.0',
 	he: 'English Wiktionary via kaikki.org, CC BY-SA 4.0'

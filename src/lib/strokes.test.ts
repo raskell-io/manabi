@@ -16,6 +16,7 @@ describe('strokes', () => {
 	});
 	it('maps languages to data sets', () => {
 		expect(strokeLang('zh')).toBe('zh');
+		expect(strokeLang('yue')).toBe('zh');
 		expect(strokeLang('ja')).toBe('ja');
 		expect(strokeLang('ko')).toBeNull();
 		expect(strokeLang('he')).toBeNull();

@@ -7,16 +7,19 @@ to regenerate or extend it.
 
 ## Why prerecorded (not on-device TTS)
 
-On-device TTS cannot cover the four languages: the app's local provider
+On-device TTS cannot cover the five languages: the app's local provider
 ([`providers/tts-local.ts`](../src/lib/inference/providers/tts-local.ts),
 `@huggingface/transformers` MMS) has exactly **one voice, Korean** (`Xenova/mms-tts-kor`).
-MMS has no Mandarin or Japanese voice, and its Hebrew model (`facebook/mms-tts-heb`) exists
+MMS has no Mandarin, Cantonese or Japanese voice, and its Hebrew model (`facebook/mms-tts-heb`) exists
 only as PyTorch, with no ONNX port transformers.js could run; requesting those failed with a
 missing download before falling back, so the provider now fails fast for them. Cloud TTS at
 *runtime* would need network and a key for every play. The solution: synthesize everything
 **once, offline**, with a high-quality voice, and ship static audio that plays instantly and
 offline. Text without a clip (your own items, AI drafts) falls back to on-device TTS for
-Korean, then OpenAI TTS when a key is set ([router](./ai-workbench.md#the-inference-router)).
+Korean, then OpenAI TTS when a key is set ([router](./ai-workbench.md#the-inference-router)). For
+Cantonese the OpenAI request carries an `instructions` string asking for Hong Kong Cantonese, since
+Han characters are otherwise read as Mandarin; whether the model obeys is unverified (see
+[Cantonese](./cantonese.md)).
 
 (The other on-device model, **Whisper**, is speech *recognition* for pronunciation scoring,
 not TTS — see [SRS → pronunciation scoring](./srs.md#pronunciation-scoring-asr).)
@@ -27,6 +30,7 @@ models failed to cover the languages well:
 | Language | Voice |
 | --- | --- |
 | zh | `zh-CN-XiaoxiaoNeural` |
+| yue | `zh-HK-HiuMaanNeural` |
 | ja | `ja-JP-NanamiNeural` |
 | ko | `ko-KR-SunHiNeural` |
 | he | `he-IL-HilaNeural` |
@@ -41,10 +45,10 @@ so one file per clip will not fit. Instead, clips are concatenated into a few hu
 **audio sprite packs** with a small inter-clip gap, and a per-language **manifest** records
 where each clip lives inside its pack.
 
-Current output: **356 WebM/Opus packs (~76 MB)** + four manifests
-(`manifest-zh.json` 11,365 entries, `manifest-ja.json` 8,568, `manifest-ko.json` 352,
-`manifest-he.json` 225). That is ~360 files total — comfortably under the cap, even with the
-dictionary shards (~220 files) and bundled stroke data alongside.
+Current output: **362 WebM/Opus packs (~78 MB)** + five manifests
+(`manifest-zh.json` 11,365 entries, `manifest-yue.json` 212, `manifest-ja.json` 8,568,
+`manifest-ko.json` 352, `manifest-he.json` 225). That is ~370 files total — comfortably under the
+cap, even with the dictionary shards (~290 files) and bundled stroke data alongside.
 
 Format is **Opus 24 kbps mono in a WebM container**. Opus is ~half the size of AAC for
 speech; WebM is the container that plays Opus across Chrome, Firefox, **and Safari/iOS 16.4+**
@@ -75,8 +79,10 @@ node tools/dump-audio-texts.mjs   →  tools/audio-texts.json
 esbuild-bundles `seed.ts` and `scripts.ts` to run them under Node, reads
 `static/wordlists/`, and collects every unique `(language, text)` — seed item targets +
 examples + passage lines + all vocab words + all script glyphs — deduped and **grouped into
-pack buckets** (`{lang}-core`, `{lang}-vocab-{level}`, `{lang}-kanji-{level}`, etc.). Output
-is `[{ lang, text, group }]` (~20,021 entries).
+pack buckets** (`{lang}-core`, `{lang}-vocab-{level}`, `{lang}-kanji-{level}`, etc.; Cantonese
+has `yue-core`, `yue-tones` and `yue-hanzi-{starter,everyday}`). The Zhuyin section of the Scripts
+page is skipped: bare bopomofo symbols give the voice nothing to read. Output
+is `[{ lang, text, group }]` (~20,700 entries).
 
 ### 2. Synthesize + pack — `tools/gen-audio.py`
 
@@ -145,7 +151,7 @@ Korean MMS on-device, else OpenAI) only if there is no clip. A synthesized clip 
 the blob store and attached to the item as `audioRef`.
 
 Clips are keyed by the stored text, so Chinese plays the same clip whether it is displayed
-Simplified or Traditional.
+Simplified or Traditional. Cantonese is stored (and voiced) in Hong Kong Traditional.
 
 The `/review` Listening mode uses `hasPrerecorded` to only offer hear-it cards for words
 that actually have audio.
@@ -175,6 +181,6 @@ env with `edge-tts` + `ffmpeg` works. Commit `static/audio/packs/` and
 ## What is NOT precached
 
 The service worker precaches the app shell but **not** the audio packs ([PWA](./pwa-and-deployment.md)).
-76 MB would make the first install enormous, and Range-request caching in a service worker
+78 MB would make the first install enormous, and Range-request caching in a service worker
 is error-prone. Packs are fetched on demand and held in the browser's HTTP cache, so audio
 works offline after first use.

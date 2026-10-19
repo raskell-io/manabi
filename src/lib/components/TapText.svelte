@@ -8,7 +8,7 @@
 	 */
 	import LookupSheet from './LookupSheet.svelte';
 	import { settings } from '$lib/db/store';
-	import { languageDir, stripNiqqud, type Language } from '$lib/db/types';
+	import { isHanLanguage, languageDir, stripNiqqud, type Language } from '$lib/db/types';
 	import { rubyOf, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { dictionary } from '$lib/dictionary';
 	import type { DictHit } from '$lib/lookup';
@@ -22,15 +22,14 @@
 		text: string;
 		language: Language;
 		size?: 'sm' | 'md' | 'lg';
-		/** Chinese: the line's reading, for syllables above the characters (when on). */
+		/** Chinese / Cantonese: the line's reading, for syllables above the characters (when on). */
 		reading?: string;
 	} = $props();
 
 	// Ruby per character of the original text (conversion keeps one character per
 	// character; when it doesn't, or there are surrogate pairs, no ruby).
 	const ruby = $derived.by(() => {
-		if (language !== 'zh') return null;
-		const segs = $rubyOf(text, reading);
+		const segs = $rubyOf(text, reading, language);
 		return segs && segs.length === text.length ? segs : null;
 	});
 
@@ -40,7 +39,7 @@
 		word: boolean;
 	}
 
-	const LOCALE: Record<Language, string> = { zh: 'zh-Hans', ja: 'ja', ko: 'ko', he: 'he' };
+	const LOCALE: Record<Language, string> = { zh: 'zh-Hans', yue: 'zh-Hant-HK', ja: 'ja', ko: 'ko', he: 'he' };
 
 	const segments = $derived.by<Segment[]>(() => {
 		if (typeof Intl.Segmenter === 'function') {
@@ -48,7 +47,7 @@
 			return [...seg.segment(text)].map((s) => ({ text: s.segment, index: s.index, word: !!s.isWordLike }));
 		}
 		// Old browsers: every character (CJK) or space-separated word is tappable.
-		const parts = language === 'zh' || language === 'ja' ? [...text] : text.split(/(\s+)/);
+		const parts = isHanLanguage(language) ? [...text] : text.split(/(\s+)/);
 		let i = 0;
 		return parts.map((p) => {
 			const s = { text: p, index: i, word: /\p{L}/u.test(p) };
@@ -136,6 +135,8 @@
 	rt {
 		font-family: var(--font-sans, inherit);
 		font-size: 0.5em;
+		/* Keeps neighbouring syllables apart (Jyutping: nei5 hou2, not nei5hou2). */
+		padding-inline: 0.2em;
 		font-weight: 600;
 		line-height: 1.1;
 		color: var(--color-text-muted);

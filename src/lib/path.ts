@@ -224,6 +224,54 @@ function zh(): LearningPath[] {
 	];
 }
 
+function yue(): LearningPath[] {
+	const at = (lvl: string) => (it: LearningItem) => seedOf('yue')(it) && it.level === lvl;
+	const firstChars = level('yue', 'hanzi', 'Starter');
+	return [
+		{
+			id: 'beginner',
+			title: 'Beginner',
+			level: 'A1',
+			blurb: 'New to Cantonese: six tones, Jyutping, your first words and the characters inside them.',
+			stages: [
+				{ id: 'tones', kind: 'script', title: 'The six tones', badge: 'si1', links: [{ href: '/scripts', label: 'Scripts' }],
+					blurb: 'Cantonese has six tones: si1 is a poem, si4 is time, si6 a matter. Jyutping writes each as a digit after the syllable.',
+					entries: glyphEntries(section('yue', 'tones'), 'tones') },
+				{ id: 'words1', kind: 'words', title: 'First words', badge: '你', match: at('A1'), links: [{ href: '/items', label: 'Items' }],
+					blurb: 'Greetings, people, numbers and the little words that make it Cantonese: 係, 嘅, 唔, 咗, 喺.' },
+				{ id: 'chars1', kind: 'script', title: 'Their characters', badge: '字', links: [{ href: '/radicals', label: 'Radicals' }, { href: '/scripts', label: 'Scripts' }],
+					blurb: 'The characters inside your first words, in Hong Kong forms — tap one on Scripts to watch and trace its strokes.',
+					entries: glyphEntries(firstChars, 'chars1') },
+				{ id: 'taste', kind: 'reading', title: 'First conversations', badge: '讀', passages: readingAt('A1'), links: [{ href: '/read', label: 'Read' }],
+					blurb: 'Order at a cha chaan teng and ask the way: short dialogues with audio and Jyutping.' },
+				ears(),
+				recall(),
+				levelUp('You can greet, order and read your first characters. The Refresher path takes you round Hong Kong.')
+			]
+		},
+		{
+			id: 'refresher',
+			title: 'Refresher',
+			level: 'A2',
+			blurb: 'You know the basics: everyday verbs, shopping and getting around, longer conversations.',
+			stages: [
+				{ id: 'words2', kind: 'words', title: 'Everyday words', badge: '買', match: at('A2'), links: [{ href: '/items', label: 'Items' }],
+					blurb: 'Buying, waiting, the MTR and the bus, cheap and expensive — words for a day out in Hong Kong.' },
+				{ id: 'chars2', kind: 'script', title: 'More characters', badge: '漢', links: [{ href: '/radicals', label: 'Radicals' }, { href: '/scripts', label: 'Scripts' }],
+					blurb: 'The new characters inside those words. Their radicals often hint at the meaning.',
+					entries: glyphEntries(level('yue', 'hanzi', 'Everyday'), 'chars2') },
+				placesStage('yue', 'Hong Kong and the Pearl River Delta', '港'),
+				{ id: 'read', kind: 'reading', title: 'Read conversations', badge: '讀', passages: () => true, links: [{ href: '/read', label: 'Read' }],
+					blurb: 'The wet market, a hike on the Dragon’s Back and a text about Hong Kong — read along with the audio.' },
+				ears(),
+				recall(),
+				{ id: 'beyond', kind: 'explore', title: 'Keep going', badge: '', blurb: 'Names of people, the radicals behind every character, your own texts, and AI-made lessons.',
+					links: [{ href: '/names?tab=people', label: 'Names' }, { href: '/radicals', label: 'Radicals' }, { href: '/read/new', label: 'Your own text' }, { href: '/workbench', label: 'Workbench' }] }
+			]
+		}
+	];
+}
+
 function ja(): LearningPath[] {
 	const at = (tag: string) => (it: LearningItem) => seedOf('ja')(it) && hasTag(tag)(it);
 	return [
@@ -391,7 +439,7 @@ function he(): LearningPath[] {
 	];
 }
 
-const BUILDERS: Record<Language, () => LearningPath[]> = { zh, ja, ko, he };
+const BUILDERS: Record<Language, () => LearningPath[]> = { zh, yue, ja, ko, he };
 const cache = new Map<Language, LearningPath[]>();
 
 /** A language's paths, Beginner first. */

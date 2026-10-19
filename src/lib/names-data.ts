@@ -1,6 +1,6 @@
 // Place and people names — hand-curated reference for the Names page.
 //
-// Readings follow the seed's conventions: pinyin with tone marks (zh), kana
+// Readings follow the seed's conventions: pinyin with tone marks (zh), Jyutping (yue), kana
 // plus romaji in `tr` (ja), Revised Romanization (ko), transliteration of
 // vowelled Hebrew (he). `n` is an optional literal meaning or note; `g` marks
 // given names as male, female or unisex (u).
@@ -395,4 +395,82 @@ const HE: NameSection[] = [
 	] }
 ];
 
-export const NAME_SECTIONS: Record<Language, NameSection[]> = { zh: ZH, ja: JA, ko: KO, he: HE };
+const YUE: NameSection[] = [
+	{ id: 'countries', group: 'places', title: 'Countries', note: 'Mostly the same characters as Mandarin, read the Cantonese way — and a few Hong Kong names of its own.', entries: [
+		{ t: '中國', r: 'zung1 gwok3', m: 'China', n: '“middle kingdom”' },
+		{ t: '英國', r: 'jing1 gwok3', m: 'United Kingdom', n: '“hero country”' },
+		{ t: '美國', r: 'mei5 gwok3', m: 'United States', n: '“beautiful country”' },
+		{ t: '加拿大', r: 'gaa1 naa4 daai6', m: 'Canada' },
+		{ t: '澳洲', r: 'ou3 zau1', m: 'Australia', n: 'Mainland: 澳大利亞' },
+		{ t: '新西蘭', r: 'san1 sai1 laan4', m: 'New Zealand', n: 'Taiwan: 紐西蘭' },
+		{ t: '日本', r: 'jat6 bun2', m: 'Japan', n: '“origin of the sun”' },
+		{ t: '韓國', r: 'hon4 gwok3', m: 'South Korea' },
+		{ t: '台灣', r: 'toi4 waan1', m: 'Taiwan' },
+		{ t: '新加坡', r: 'san1 gaa3 bo1', m: 'Singapore' },
+		{ t: '馬來西亞', r: 'maa5 loi4 sai1 aa3', m: 'Malaysia' },
+		{ t: '泰國', r: 'taai3 gwok3', m: 'Thailand' },
+		{ t: '越南', r: 'jyut6 naam4', m: 'Vietnam' },
+		{ t: '菲律賓', r: 'fei1 leot6 ban1', m: 'Philippines' },
+		{ t: '法國', r: 'faat3 gwok3', m: 'France' },
+		{ t: '德國', r: 'dak1 gwok3', m: 'Germany' },
+		{ t: '意大利', r: 'ji3 daai6 lei6', m: 'Italy' },
+		{ t: '葡萄牙', r: 'pou4 tou4 ngaa4', m: 'Portugal', n: 'Macau was Portuguese until 1999' }
+	] },
+	{ id: 'home', group: 'places', title: 'Places in Hong Kong and around', entries: [
+		{ t: '香港', r: 'hoeng1 gong2', m: 'Hong Kong', n: '“fragrant harbour”' },
+		{ t: '九龍', r: 'gau2 lung4', m: 'Kowloon', n: '“nine dragons”' },
+		{ t: '新界', r: 'san1 gaai3', m: 'New Territories', n: '“new border”' },
+		{ t: '中環', r: 'zung1 waan4', m: 'Central' },
+		{ t: '灣仔', r: 'waan1 zai2', m: 'Wan Chai', n: '“little bay”' },
+		{ t: '銅鑼灣', r: 'tung4 lo4 waan1', m: 'Causeway Bay', n: '“gong bay”' },
+		{ t: '尖沙咀', r: 'zim1 saa1 zeoi2', m: 'Tsim Sha Tsui', n: '“sharp sandy point”' },
+		{ t: '旺角', r: 'wong6 gok3', m: 'Mong Kok' },
+		{ t: '沙田', r: 'saa1 tin4', m: 'Sha Tin', n: '“sandy fields”' },
+		{ t: '大嶼山', r: 'daai6 jyu4 saan1', m: 'Lantau Island' },
+		{ t: '澳門', r: 'ou3 mun2', m: 'Macau' },
+		{ t: '廣州', r: 'gwong2 zau1', m: 'Guangzhou', n: 'Cantonese’s home city (Canton)' },
+		{ t: '深圳', r: 'sam1 zan3', m: 'Shenzhen' },
+		{ t: '佛山', r: 'fat6 saan1', m: 'Foshan' }
+	] },
+	{ id: 'world', group: 'places', title: 'World cities', entries: [
+		{ t: '倫敦', r: 'leon4 deon1', m: 'London' },
+		{ t: '紐約', r: 'nau2 joek3', m: 'New York' },
+		{ t: '溫哥華', r: 'wan1 go1 waa4', m: 'Vancouver', n: 'home to a large Hong Kong community' },
+		{ t: '多倫多', r: 'do1 leon4 do1', m: 'Toronto' },
+		{ t: '悉尼', r: 'sik1 nei4', m: 'Sydney' },
+		{ t: '東京', r: 'dung1 ging1', m: 'Tokyo', n: '“eastern capital”' },
+		{ t: '北京', r: 'bak1 ging1', m: 'Beijing', n: '“northern capital”' },
+		{ t: '上海', r: 'soeng6 hoi2', m: 'Shanghai' },
+		{ t: '台北', r: 'toi4 bak1', m: 'Taipei' },
+		{ t: '巴黎', r: 'baa1 lai4', m: 'Paris' }
+	] },
+	{ id: 'family', group: 'people', title: 'Family names', note: 'The family name comes first. Hong Kong spells names its own way, not in Jyutping: 陳 is “Chan”, 張 “Cheung”.', entries: [
+		{ t: '陳', r: 'can4', m: 'Chan', n: 'the most common' },
+		{ t: '李', r: 'lei5', m: 'Lee', n: '“plum”' },
+		{ t: '黃', r: 'wong4', m: 'Wong', n: '“yellow”' },
+		{ t: '王', r: 'wong4', m: 'Wong', n: '“king” — also spelled Wong' },
+		{ t: '張', r: 'zoeng1', m: 'Cheung' },
+		{ t: '梁', r: 'loeng4', m: 'Leung', n: '“beam”' },
+		{ t: '劉', r: 'lau4', m: 'Lau' },
+		{ t: '林', r: 'lam4', m: 'Lam', n: '“forest”' },
+		{ t: '何', r: 'ho4', m: 'Ho' },
+		{ t: '吳', r: 'ng4', m: 'Ng' },
+		{ t: '鄭', r: 'zeng6', m: 'Cheng' },
+		{ t: '周', r: 'zau1', m: 'Chow' },
+		{ t: '馬', r: 'maa5', m: 'Ma', n: '“horse”' }
+	] },
+	{ id: 'given', group: 'people', title: 'Given names', note: 'Usually two characters, written with a hyphen in Hong Kong spelling (Ka-ming); many people also use an English name — Peter Chan, Karen Wong.', entries: [
+		{ t: '家明', r: 'gaa1 ming4', m: 'Ka-ming', n: '“family” + “bright”', g: 'm' },
+		{ t: '志明', r: 'zi3 ming4', m: 'Chi-ming', n: '“ambition” + “bright”', g: 'm' },
+		{ t: '偉文', r: 'wai5 man4', m: 'Wai-man', n: '“great” + “culture”', g: 'm' },
+		{ t: '俊傑', r: 'zeon3 git6', m: 'Chun-kit', n: '“talented” + “outstanding”', g: 'm' },
+		{ t: '浩然', r: 'hou6 jin4', m: 'Ho-yin', n: '“vast”', g: 'm' },
+		{ t: '嘉欣', r: 'gaa1 jan1', m: 'Ka-yan', n: '“fine” + “joyful”', g: 'f' },
+		{ t: '詠詩', r: 'wing6 si1', m: 'Wing-sze', n: '“to chant” + “poem”', g: 'f' },
+		{ t: '美玲', r: 'mei5 ling4', m: 'Mei-ling', n: '“beautiful” + “tinkling jade”', g: 'f' },
+		{ t: '曉晴', r: 'hiu2 cing4', m: 'Hiu-ching', n: '“dawn” + “clear sky”', g: 'f' },
+		{ t: '可兒', r: 'ho2 ji4', m: 'Ho-yi', g: 'f' }
+	] }
+];
+
+export const NAME_SECTIONS: Record<Language, NameSection[]> = { zh: ZH, yue: YUE, ja: JA, ko: KO, he: HE };

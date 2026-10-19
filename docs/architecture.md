@@ -20,7 +20,7 @@ notes app: durable local state, a flashcard scheduler, and a human-in-the-loop A
 | Build/output | **`adapter-static`** (SPA) + **Vite 7** | Ships a static bundle any host can serve; no SSR runtime |
 | PWA | **`@vite-pwa/sveltekit`** (Workbox) | Service worker, precaching, installability |
 | On-device ML | **`@huggingface/transformers`** (MMS TTS, Whisper ASR) | Korean text-to-speech (the only MMS voice with an ONNX port; other languages use the [prerecorded audio](./audio.md)) and opt-in offline speech recognition for pronunciation scoring ([SRS](./srs.md#pronunciation-scoring-asr)) |
-| Chinese script | **`opencc-js`** (lazily loaded) | Display conversion Simplified → Traditional (Taiwan / Hong Kong); content stays Simplified |
+| Chinese script | **`opencc-js`** (lazily loaded) | Display conversion Simplified → Traditional (Taiwan / Hong Kong); content stays Simplified. Also turns Cantonese speech-recognition output into Hong Kong Traditional (`toHongKong`) |
 | Tooling | **mise**, **vitest**, **Playwright**, **svelte-check**, **TypeScript** | Reproducible Node 22, unit tests, browser tests, strict typing |
 
 Runtime: **Node 22** (pinned in `mise.toml` and `.nvmrc`). The build target is `esnext`
@@ -64,7 +64,8 @@ written into it (to keep the doc small and fast):
 - **Vocabulary lists** — per-level JSON in `static/wordlists/`. See [content](./content.md).
 - **Dictionaries** — tap-a-word lookup shards in `static/dict/<lang>/<bucket>.json`, fetched
   as words are tapped and cached by the service worker. See [content](./content.md#dictionaries--toolsgen-dictmjs).
-- **Stroke data** — `static/strokes/{zh,ja}/<hex>.json` for the drawing pad.
+- **Stroke data** — `static/strokes/{zh,ja}/<hex>.json` for the drawing pad (Cantonese uses the
+  `zh` set).
 - **Script tables** — generated into `src/lib/scripts-data.ts` (and `radicals-data.ts`;
   bundled, but treated as static reference data, not user state).
 
@@ -101,7 +102,7 @@ src/
       queue.ts          buildQueue() + isUnlocked() — what is due, in what order
       scope.ts          ?lesson= / ?items= review scopes
       practice.ts       capped, need-ranked Listening / Speaking pools
-      stats.ts          reviewForecast() / activityCalendar() for Progress
+      stats.ts          reviewForecast() / activityCalendar() / xpSummary() for Progress
     exercises/
       templates.ts      Exercise shapes, which dimension each trains
       generate.ts       buildExercise() + distractor selection, dictation pick
@@ -117,8 +118,9 @@ src/
     chinese.ts          Simplified / Traditional display (opencc-js), zhVariants,
                         $toZhScript / $readingOf / $rubyOf stores
     zhuyin.ts           pinyin → Zhuyin, syllable split for ruby
+    cantonese.ts        Jyutping syllables / ruby / tones, colloquialize() for ASR scoring
     dictionary.ts       the app's lookup over static/dict (fetch + cache)
-    lookup.ts           createLookup(): longest match, deinflection, particles, prefixes
+    lookup.ts           createLookup(): longest match (zh / yue / ja), deinflection, particles, prefixes
     deinflect-ja.ts     Japanese deinflector (食べました → 食べる)
     dict-shard.ts       dictionary shard layout, shared with tools/gen-dict.mjs
     own-text.ts         pasted text → passage lines with offline readings
@@ -194,7 +196,9 @@ These are enforced and should stay green:
   [development](./development.md#the-gates)).
 - **Chinese is stored Simplified.** Traditional is a display conversion; render Chinese
   through `ScriptText` / `TapText`, or `displayText(…, $toZhScript)` and
-  `$readingOf(reading, target, language)` when rendering by hand.
+  `$readingOf(reading, target, language)` when rendering by hand. Cantonese (`yue`) is the
+  exception: stored in Hong Kong Traditional with Jyutping, never converted. Code that means "any
+  Han-script language" uses `isHanLanguage` (zh, yue, ja), not `language === 'zh'`.
 
 ## Where to go next
 

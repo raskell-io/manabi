@@ -1,13 +1,14 @@
 /**
  * Checking a typed answer (recall): the learner may type the word in its own
  * script (汉字, 漢字/かな, 한글, Hebrew with or without niqqud) or romanized
- * (pinyin with tone marks or numbers, kana or romaji, Revised Romanization,
- * transliteration). A one-letter slip, or pinyin without tones, is "close":
- * right, but worth a second look.
+ * (pinyin with tone marks or numbers, Jyutping, kana or romaji, Revised
+ * Romanization, transliteration). A one-letter slip, or pinyin / Jyutping
+ * without tones, is "close": right, but worth a second look.
  */
 
 import { levenshtein } from '$lib/pronunciation';
 import { stripNiqqud, type Language } from '$lib/db/types';
+import { splitJyutping } from '$lib/cantonese';
 
 export type Verdict = 'exact' | 'close' | 'wrong';
 
@@ -53,6 +54,11 @@ function plain(s: string): string {
 		.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
 }
 
+/** Tonal romanizations: letters and tones are checked apart. */
+function splitTones(language: Language): ((s: string) => { letters: string; tones: string }) | null {
+	return language === 'zh' ? splitPinyin : language === 'yue' ? splitJyutping : null;
+}
+
 function typoAllowance(len: number): number {
 	return len >= 8 ? 2 : len >= 4 ? 1 : 0;
 }
@@ -64,9 +70,10 @@ export function checkTyped(input: string, key: AnswerKey): TypedCheck {
 	const scripts = [key.target, ...(key.alternatives ?? [])].map(plain).filter(Boolean);
 	if (scripts.includes(typed)) return { verdict: 'exact' };
 
-	if (key.language === 'zh' && key.reading) {
-		const want = splitPinyin(key.reading);
-		const got = splitPinyin(input);
+	const split = splitTones(key.language);
+	if (split && key.reading) {
+		const want = split(key.reading);
+		const got = split(input);
 		if (got.letters && got.letters === want.letters) {
 			if (got.tones === want.tones) return { verdict: 'exact' };
 			return { verdict: 'close', note: got.tones ? 'check the tones' : 'add the tones' };
@@ -77,8 +84,8 @@ export function checkTyped(input: string, key: AnswerKey): TypedCheck {
 	}
 
 	// A small slip in any accepted form.
-	const forms = [...scripts, ...[key.reading, key.transliteration ?? ''].map((r) => (key.language === 'zh' ? splitPinyin(r).letters : plain(r)))];
-	const typedLoose = key.language === 'zh' && /[a-z]/i.test(input) ? splitPinyin(input).letters : typed;
+	const forms = [...scripts, ...[key.reading, key.transliteration ?? ''].map((r) => (split ? split(r).letters : plain(r)))];
+	const typedLoose = split && /[a-z]/i.test(input) ? split(input).letters : typed;
 	for (const f of forms) {
 		if (!f) continue;
 		const allowed = typoAllowance([...f].length);

@@ -13,6 +13,8 @@ import type { Language } from './db/types';
 // (KANJIDIC2 / Tanos JLPT, complete-hsk-vocabulary, makemeahanzi).
 // Regenerate with `node tools/gen-scripts-data.mjs`.
 import { KANJI_N5, KANJI_N4, KANJI_N3, HANZI_HSK1, HANZI_HSK2, HANZI_HSK3 } from './scripts-data';
+import { JYUTPING_TONES, jyutpingRuby } from './cantonese';
+import { seedItems } from './db/seed';
 
 /** One glyph: the character, its reading (romaji / letter name / pinyin), and an optional gloss. */
 export interface Glyph {
@@ -113,6 +115,42 @@ const ZHUYIN: Glyph[] = [
 		['ㄡ', 'ou'], ['ㄢ', 'an'], ['ㄣ', 'en'], ['ㄤ', 'ang'], ['ㄥ', 'eng'], ['ㄦ', 'er']
 	].map(([c, r]) => g(c, r, 'final'))
 ];
+
+// --- Cantonese ----------------------------------------------------------------
+
+// The six tones on the syllable "si" (tone 7–9 of older schemes are 1, 3 and 6
+// on syllables ending in -p, -t, -k).
+const JYUTPING_TONE_GLYPHS: Glyph[] = JYUTPING_TONES.map((t) => g(t.example, t.jyutping, `tone ${t.tone}, ${t.name} · ${t.gloss}`));
+
+/**
+ * Characters whose syllable in a starter word is a changed tone (變調): their
+ * own reading differs (話 is waa6, but 廣東話 says waa2).
+ */
+const CANTONESE_BASE_TONE: Record<string, string> = { 話: 'waa6', 士: 'si6', 企: 'kei5', 拜: 'baai3' };
+
+/**
+ * The characters of the Cantonese starter words, per level, each with its
+ * Jyutping (Cantonese has no HSK-style character list).
+ */
+function cantoneseCharLevels(): ScriptLevel[] {
+	const seen = new Set<string>();
+	const levels: ScriptLevel[] = [
+		{ label: 'Starter', glyphs: [] },
+		{ label: 'Everyday', glyphs: [] }
+	];
+	for (const it of seedItems(0)) {
+		if (it.language !== 'yue') continue;
+		const level = levels[it.level === 'A1' ? 0 : 1];
+		for (const seg of jyutpingRuby(it.target, it.reading) ?? []) {
+			if (!seg.rt || seen.has(seg.text)) continue;
+			seen.add(seg.text);
+			const base = CANTONESE_BASE_TONE[seg.text];
+			const where = [...it.target].length > 1 ? `in ${it.target}${base ? ` (said ${seg.rt})` : ''} · ` : '';
+			level.glyphs.push(g(seg.text, base ?? seg.rt, where + it.meaning));
+		}
+	}
+	return levels;
+}
 
 // --- Korean Hangul ----------------------------------------------------------
 // Jamo (letters) with their names, then syllable blocks: each consonant row ×
@@ -241,6 +279,22 @@ const SECTIONS: Record<Language, ScriptSection[]> = {
 			subtitle: 'ㄅㄆㄇ — bopomofo, the reading aid used in Taiwan. Tones: none = 1st · ˊ 2nd · ˇ 3rd · ˋ 4th · ˙ neutral',
 			kind: 'wrap',
 			glyphs: ZHUYIN
+		}
+	],
+	yue: [
+		{
+			id: 'hanzi',
+			title: 'Characters',
+			subtitle: 'Hong Kong Traditional characters from the starter words, with their Jyutping',
+			kind: 'leveled',
+			levels: cantoneseCharLevels()
+		},
+		{
+			id: 'tones',
+			title: 'Jyutping tones',
+			subtitle: 'Six tones on the syllable “si” — the digit after each syllable is its tone',
+			kind: 'wrap',
+			glyphs: JYUTPING_TONE_GLYPHS
 		}
 	],
 	ko: [

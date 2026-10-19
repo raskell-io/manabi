@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { seedItems, seedsToApply, seedPassages, passagesToApply } from './seed';
 
 const items = seedItems();
@@ -9,6 +10,7 @@ describe('seed content', () => {
 	it('has a healthy corpus per language', () => {
 		const byLang = (l: string) => items.filter((i) => i.language === l).length;
 		expect(byLang('zh')).toBeGreaterThanOrEqual(30);
+		expect(byLang('yue')).toBeGreaterThanOrEqual(50);
 		expect(byLang('ja')).toBeGreaterThanOrEqual(20);
 		expect(byLang('he')).toBeGreaterThanOrEqual(25);
 	});
@@ -83,7 +85,7 @@ describe('seedsToApply (existing-user upgrade path)', () => {
 
 describe('seed passages (conversations & texts)', () => {
 	it('ships several conversations and texts in every language', () => {
-		for (const lang of ['zh', 'ja', 'ko', 'he'] as const) {
+		for (const lang of ['zh', 'yue', 'ja', 'ko', 'he'] as const) {
 			const ps = passages.filter((p) => p.language === lang);
 			expect(ps.filter((p) => p.kind === 'conversation').length, lang).toBeGreaterThanOrEqual(2);
 			expect(ps.filter((p) => p.kind === 'text').length, lang).toBeGreaterThanOrEqual(2);
@@ -128,5 +130,45 @@ describe('seed passages (conversations & texts)', () => {
 		expect(passagesToApply({}).length).toBe(passages.length);
 		const all = Object.fromEntries(passages.map((p) => [p.id, true]));
 		expect(passagesToApply(all)).toHaveLength(0);
+	});
+});
+
+describe('Cantonese seed readings', () => {
+	const HAN = /\p{Script=Han}/u;
+	const shards = new Map<number, Record<string, { r: string }[]>>();
+	const entries = (w: string) => {
+		const b = w.codePointAt(0)! % 64;
+		if (!shards.has(b)) shards.set(b, JSON.parse(readFileSync(`static/dict/yue/${b}.json`, 'utf8')).e);
+		return shards.get(b)![w] ?? [];
+	};
+	/** Every syllable the dictionary gives character `i` of `text`, in any word around it. */
+	const known = (chars: string[], i: number) => {
+		const out = new Set<string>();
+		for (let s = Math.max(0, i - 6); s <= i; s++)
+			for (let e = i + 1; e <= Math.min(chars.length, s + 8); e++) {
+				const word = chars.slice(s, e);
+				if (!word.every((c) => HAN.test(c))) break;
+				for (const x of entries(word.join(''))) {
+					const syl = x.r.toLowerCase().split(/\s+/);
+					if (syl.length === word.length) out.add(syl[i - s]);
+				}
+			}
+		return out;
+	};
+	const lines = [
+		...items.filter((i) => i.language === 'yue').flatMap((i) => [i, ...i.examples]),
+		...passages.filter((p) => p.language === 'yue').flatMap((p) => p.lines)
+	];
+
+	it('has a Jyutping syllable the dictionary knows for every character', () => {
+		const wrong: string[] = [];
+		for (const { target, reading } of lines) {
+			const chars = [...target];
+			const han = chars.flatMap((c, i) => (HAN.test(c) ? [i] : []));
+			const syl = reading.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+			if (syl.length !== han.length) wrong.push(`${target}: ${han.length} characters, ${syl.length} syllables`);
+			else han.forEach((ci, k) => known(chars, ci).has(syl[k]) || wrong.push(`${target}: ${chars[ci]} ${syl[k]}`));
+		}
+		expect(wrong).toEqual([]);
 	});
 });

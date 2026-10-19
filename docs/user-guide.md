@@ -1,6 +1,6 @@
 # User guide
 
-Manabi is a personal language-learning app for reading **Chinese, Japanese, Korean, and Hebrew**.
+Manabi is a personal language-learning app for reading **Chinese (Mandarin), Cantonese, Japanese, Korean, and Hebrew**.
 The philosophy: you want to *recognize words, pronounce them correctly, understand them in
 context, and gradually read real material*. Handwriting is there only as optional practice
 (watch a character's stroke order and trace it on the drawing pad); it is never part of your
@@ -34,7 +34,7 @@ download the first time you use them, then stay cached.
 
 ## Choosing a language
 
-The language chips at the top of the **home screen** (`/`) — **中文 / 日本語 / 한국어 / עברית** —
+The language chips at the top of the **home screen** (`/`) — **中文 / 廣東話 / 日本語 / 한국어 / עברית** —
 switch the active language (Settings has the same choice). Each shows how many items are due in
 that language, so you can see at a glance where work is waiting. Everything — your due queue,
 vocabulary, scripts, and reading material — is scoped to the active language, and your
@@ -105,12 +105,14 @@ nothing). On a desktop the same destinations sit in the sidebar.
   show readings (pinyin/kana/romanization/vowels) and translations for every line.
   **Read your own text** adds your own material (see [below](#reading-your-own-text)).
 - **Scripts (`/scripts`)** — reference tables for the writing systems: hiragana &
-  katakana, kanji (tabbed by JLPT level), hanzi (tabbed by HSK level), pinyin tones, and
-  the Hebrew alef-bet. Tap a glyph to hear it and add it to your reviews, or add a whole
+  katakana, kanji (tabbed by JLPT level), hanzi (tabbed by HSK level), pinyin tones, the
+  Cantonese characters of the starter words (Starter / Everyday, with Jyutping) and the six
+  Jyutping tones, and the Hebrew alef-bet. Tap a glyph to hear it and add it to your reviews, or add a whole
   set at once.
 - **Vocab (`/vocab`)** — browse the full official word lists (HSK for Chinese, JLPT for
   Japanese). Search or browse by level; the reading sits above each word; tap **＋ Add** to
-  start studying it, or add an entire level.
+  start studying it, or add an entire level. There are no word lists for Cantonese, Korean or
+  Hebrew yet.
 - **Items (`/items`)** — every item you are studying. Search, edit, or delete. Each item has
   a play button for its audio, and **Review these** runs a session over exactly the items
   currently listed (e.g. everything matching "HSK2"). An item's page also lists your recent
@@ -118,7 +120,7 @@ nothing). On a desktop the same destinations sit in the sidebar.
 - **Lessons (`/lessons`)** — group items into named bundles. Each card shows what's new
   and due inside it, and its **Review** button runs any review mode over just that lesson's
   items. Daily limits don't apply inside a lesson — you get all of it.
-- **Progress (`/dashboard`)** — **Coming up**: how many skill reviews fall due on each of the
+- **Progress (`/dashboard`)** — your **XP**: total, this week and today; **Coming up**: how many skill reviews fall due on each of the
   next 14 days in this language (anything overdue counts as today); **Practice**: how many
   answers and recordings you made on each day of the last 18 weeks, as a calendar from light to
   dark. Hover or tap a day for its count; both charts also have a table view. Then your weak
@@ -149,7 +151,9 @@ A session opens with a short card from Nabi (tap to skip). Every right answer ea
 (15 while you are on a run of three or more), floating off the progress bar; the bar heats up
 on a run, and 3, 5, 10… in a row get a cheer. The first session that counts each day lights
 your **streak** — a flame screen with the week so far — before the summary, where the numbers
-count up. All of it is still when your device asks for reduced motion.
+count up. Points are banked when a session ends: the summary shows **N XP in total · M today**,
+and **Progress** keeps your total, this week's and today's XP (all languages together; they
+travel with backups and sync). All of it is still when your device asks for reduced motion.
 
 ## Typing answers
 
@@ -158,28 +162,29 @@ script or romanized:
 
 - **Chinese** — characters (Simplified or Traditional), or pinyin with tone marks or numbers
   (`mǎ` or `ma3`).
+- **Cantonese** — characters, or Jyutping with tone digits (`nei5 hou2`).
 - **Japanese** — kanji or kana, or romaji.
 - **Korean** — Hangul or romanization.
 - **Hebrew** — with or without vowel points, or transliterated.
 
-Pinyin without tones (or with the wrong ones), or a one-letter slip, counts as right but says
+Pinyin or Jyutping without tones (or with the wrong ones), or a one-letter slip, counts as right but says
 **Almost!** and shows the answer so you can take a second look. **I don't know** reveals the
 answer.
 
 ## Looking up words
 
 In **Read**, every word is tappable. A sheet shows the dictionary entry — the word, its reading
-(pinyin or Zhuyin, kana, romanization, transliteration), up to three meanings, how the form you
+(pinyin or Zhuyin, Jyutping, kana, romanization, transliteration), up to three meanings, how the form you
 tapped relates to it (食べました is the polite past of 食べる; 학교에서 is 학교 + a particle; וּבַבַּיִת
-is ו + ב + בית), a play button, and **Add to reviews**. The dictionaries (CC-CEDICT, JMdict and
-English Wiktionary, under CC BY-SA) are downloaded piece by piece as you tap and then work
+is ו + ב + בית), a play button, and **Add to reviews**. The dictionaries (CC-CEDICT, CC-Canto,
+JMdict and English Wiktionary, under CC BY-SA) are downloaded piece by piece as you tap and then work
 offline.
 
 ## Reading your own text
 
 **Read → Read your own text** turns anything you paste — an article, a message, a story — into
 a text you read like the built-in ones: split into lines, every word tappable. Readings are
-worked out on your device (pinyin, kana, Korean romanization; Hebrew gets none). With an
+worked out on your device (pinyin, Jyutping, kana, Korean romanization; Hebrew gets none). With an
 OpenAI key you can also have the AI add a reading and an English translation to every line;
 lines with a translation can be sent to your reviews. Your own texts can be deleted from their
 page.
@@ -196,6 +201,22 @@ Where Taiwan or Hong Kong write a word differently, or Taiwan says it differentl
 網路 *wǎnglù* in Taiwan), an item can carry its own **Taiwan form**, **Hong Kong form** and
 **Taiwan reading**; edit them on the item's page. Radicals and the drawing pad work on the
 Traditional characters too.
+
+## Cantonese
+
+Cantonese is its own language in Manabi, not a setting of Chinese: it has its own words,
+progress, readings and audio. It is written the way Hong Kong writes it — colloquial Cantonese
+(係, 嘅, 唔, 咗) in **Hong Kong Traditional characters** — and read in **Jyutping**, one
+syllable per character with the tone as a digit (你好 *nei5 hou2*). The Chinese script and
+Zhuyin options don't apply to it, but **Show the reading above each character** does: it puts
+the Jyutping over every character. **Scripts** has the six tones and the characters of the
+starter words; tapping a character opens the drawing pad, though the open stroke data lacks a
+few Cantonese-only characters (咗 佢 冇 啲 喺 哋 嚟 嗰 攰) and says so.
+
+Speech recognition hears Cantonese less reliably than the other languages: it tends to write
+standard Chinese (是 for 係), so Manabi maps those words back before scoring — your rating is
+the one that counts. Words you add yourself have no recording; with an OpenAI key they are read
+by OpenAI's voice, asked for Hong Kong Cantonese, which may still sound Mandarin.
 
 ## Speech recognition on your device
 

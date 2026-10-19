@@ -1,6 +1,7 @@
 /**
  * Built-in starter content — a hand-verified seed per language, tuned to the
- * learner's levels: Chinese A1→A2 (HSK1-2), Japanese B1 refresher (N4/N3),
+ * learner's levels: Chinese A1→A2 (HSK1-2), Cantonese A1→A2 (Hong Kong,
+ * colloquial, Jyutping), Japanese B1 refresher (N4/N3),
  * Korean A1 (TOPIK I basics, polite forms), Hebrew A1 (alef-bet, numbers,
  * everyday phrases, vowelled).
  *
@@ -228,6 +229,158 @@ const ZH: SeedSpec[] = [
 		examples: [{ target: '我们打出租车去吧。', reading: 'Wǒmen dǎ chūzūchē qù ba.', meaning: 'Let’s take a taxi there.' }] },
 	{ id: 'seed-zh-bike', target: '自行车', reading: 'zìxíngchē', meaning: 'bicycle', tags: ['transport', 'travel', 'HSK3'], level: 'A2',
 		examples: [{ target: '他每天骑自行车。', reading: 'Tā měitiān qí zìxíngchē.', meaning: 'He rides a bicycle every day.' }] }
+];
+
+// ---------------------------------------------------------------------------
+// Cantonese — A1 → A2: everyday Hong Kong Cantonese, written colloquially in
+// Hong Kong Traditional characters, readings in Jyutping (tone digits 1–6)
+// ---------------------------------------------------------------------------
+const YUE: SeedSpec[] = [
+	// — greetings & politeness —
+	{ id: 'seed-yue-hello', target: '你好', reading: 'nei5 hou2', meaning: 'hello', tags: ['greeting', 'daily'], level: 'A1',
+		examples: [{ target: '你好，陳生。', reading: 'nei5 hou2, can4 saang1.', meaning: 'Hello, Mr Chan.' }] },
+	{ id: 'seed-yue-morning', target: '早晨', reading: 'zou2 san4', meaning: 'good morning', tags: ['greeting', 'daily'], level: 'A1',
+		examples: [{ target: '早晨！你食咗早餐未呀？', reading: 'zou2 san4! nei5 sik6 zo2 zou2 caan1 mei6 aa3?', meaning: 'Good morning! Have you had breakfast yet?' }] },
+	{ id: 'seed-yue-mgoi', target: '唔該', reading: 'm4 goi1', meaning: 'please; thanks (for a service); excuse me', tags: ['greeting', 'daily'], level: 'A1',
+		examples: [{ target: '唔該，埋單。', reading: 'm4 goi1, maai4 daan1.', meaning: 'The bill, please.' }] },
+	{ id: 'seed-yue-thanks', target: '多謝', reading: 'do1 ze6', meaning: 'thank you (for a gift or a compliment)', tags: ['greeting', 'daily'], level: 'A1',
+		examples: [{ target: '多謝你嘅禮物。', reading: 'do1 ze6 nei5 ge3 lai5 mat6.', meaning: 'Thank you for your present.' }] },
+	{ id: 'seed-yue-sorry', target: '對唔住', reading: 'deoi3 m4 zyu6', meaning: 'sorry', kind: 'phrase', tags: ['greeting', 'daily'], level: 'A1',
+		examples: [{ target: '對唔住，我遲到咗。', reading: 'deoi3 m4 zyu6, ngo5 ci4 dou3 zo2.', meaning: 'Sorry, I’m late.' }] },
+	{ id: 'seed-yue-bye', target: '拜拜', reading: 'baai1 baai3', meaning: 'bye-bye', tags: ['greeting', 'daily'], level: 'A1',
+		examples: [{ target: '拜拜，聽日見！', reading: 'baai1 baai3, ting1 jat6 gin3!', meaning: 'Bye, see you tomorrow!' }] },
+	{ id: 'seed-yue-noproblem', target: '冇問題', reading: 'mou5 man6 tai4', meaning: 'no problem', kind: 'phrase', tags: ['daily'], level: 'A1',
+		examples: [{ target: '冇問題，我幫你。', reading: 'mou5 man6 tai4, ngo5 bong1 nei5.', meaning: 'No problem, I’ll help you.' }] },
+
+	// — people —
+	{ id: 'seed-yue-i', target: '我', reading: 'ngo5', meaning: 'I; me', tags: ['people', 'pronoun'], level: 'A1',
+		examples: [{ target: '我叫阿明。', reading: 'ngo5 giu3 aa3 ming4.', meaning: 'My name is Ming.' }] },
+	{ id: 'seed-yue-you', target: '你', reading: 'nei5', meaning: 'you', tags: ['people', 'pronoun'], level: 'A1',
+		examples: [{ target: '你係邊個呀？', reading: 'nei5 hai6 bin1 go3 aa3?', meaning: 'Who are you?' }] },
+	{ id: 'seed-yue-keoi', target: '佢', reading: 'keoi5', meaning: 'he; she; it', tags: ['people', 'pronoun'], level: 'A1',
+		examples: [{ target: '佢係我朋友。', reading: 'keoi5 hai6 ngo5 pang4 jau5.', meaning: 'He’s my friend.' }] },
+	{ id: 'seed-yue-we', target: '我哋', reading: 'ngo5 dei6', meaning: 'we; us', tags: ['people', 'pronoun'], level: 'A1',
+		examples: [{ target: '我哋一齊去。', reading: 'ngo5 dei6 jat1 cai4 heoi3.', meaning: 'Let’s go together.' }] },
+	{ id: 'seed-yue-friend', target: '朋友', reading: 'pang4 jau5', meaning: 'friend', tags: ['people', 'daily'], level: 'A1',
+		examples: [{ target: '佢係我好朋友。', reading: 'keoi5 hai6 ngo5 hou2 pang4 jau5.', meaning: 'She’s my good friend.' }] },
+	{ id: 'seed-yue-home', target: '屋企', reading: 'uk1 kei2', meaning: 'home; family', tags: ['people', 'place', 'daily'], level: 'A1',
+		examples: [{ target: '我而家喺屋企。', reading: 'ngo5 ji4 gaa1 hai2 uk1 kei2.', meaning: 'I’m at home now.' }] },
+
+	// — the little words of Cantonese —
+	{ id: 'seed-yue-hai6', target: '係', reading: 'hai6', meaning: 'to be; yes', tags: ['verb', 'grammar'], level: 'A1',
+		examples: [{ target: '我係學生。', reading: 'ngo5 hai6 hok6 saang1.', meaning: 'I’m a student.' }] },
+	{ id: 'seed-yue-m4hai6', target: '唔係', reading: 'm4 hai6', meaning: 'no; not to be', kind: 'phrase', tags: ['grammar', 'daily'], level: 'A1',
+		examples: [{ target: '唔係，佢係老師。', reading: 'm4 hai6, keoi5 hai6 lou5 si1.', meaning: 'No, he’s a teacher.' }] },
+	{ id: 'seed-yue-ge3', target: '嘅', reading: 'ge3', meaning: 'particle: ’s (possession), which (describing)', kind: 'grammar', tags: ['grammar', 'particle'], level: 'A1',
+		examples: [{ target: '呢本係我嘅書。', reading: 'ni1 bun2 hai6 ngo5 ge3 syu1.', meaning: 'This is my book.' }] },
+	{ id: 'seed-yue-m4', target: '唔', reading: 'm4', meaning: 'not', kind: 'grammar', tags: ['grammar', 'particle'], level: 'A1',
+		examples: [{ target: '我唔食辣。', reading: 'ngo5 m4 sik6 laat6.', meaning: 'I don’t eat spicy food.' }] },
+	{ id: 'seed-yue-zo2', target: '咗', reading: 'zo2', meaning: 'particle: completed action', kind: 'grammar', tags: ['grammar', 'particle'], level: 'A1',
+		examples: [{ target: '我食咗飯喇。', reading: 'ngo5 sik6 zo2 faan6 laa3.', meaning: 'I’ve already eaten.' }] },
+	{ id: 'seed-yue-hai2', target: '喺', reading: 'hai2', meaning: 'to be at; in; on', tags: ['verb', 'grammar'], level: 'A1',
+		examples: [{ target: '你喺邊度呀？', reading: 'nei5 hai2 bin1 dou6 aa3?', meaning: 'Where are you?' }] },
+	{ id: 'seed-yue-mou5', target: '冇', reading: 'mou5', meaning: 'not to have; there isn’t', tags: ['verb', 'grammar'], level: 'A1',
+		examples: [{ target: '我冇錢。', reading: 'ngo5 mou5 cin2.', meaning: 'I don’t have any money.' }] },
+	{ id: 'seed-yue-this', target: '呢', reading: 'ni1', meaning: 'this', tags: ['grammar', 'daily'], level: 'A1',
+		examples: [{ target: '呢個幾多錢呀？', reading: 'ni1 go3 gei2 do1 cin2 aa3?', meaning: 'How much is this one?' }] },
+	{ id: 'seed-yue-that', target: '嗰', reading: 'go2', meaning: 'that', tags: ['grammar', 'daily'], level: 'A1',
+		examples: [{ target: '嗰個人係邊個？', reading: 'go2 go3 jan4 hai6 bin1 go3?', meaning: 'Who is that person?' }] },
+
+	// — questions —
+	{ id: 'seed-yue-what', target: '乜嘢', reading: 'mat1 je5', meaning: 'what', tags: ['question', 'daily'], level: 'A1',
+		examples: [{ target: '你做緊乜嘢呀？', reading: 'nei5 zou6 gan2 mat1 je5 aa3?', meaning: 'What are you doing?' }] },
+	{ id: 'seed-yue-where', target: '邊度', reading: 'bin1 dou6', meaning: 'where', tags: ['question', 'daily'], level: 'A1',
+		examples: [{ target: '洗手間喺邊度呀？', reading: 'sai2 sau2 gaan1 hai2 bin1 dou6 aa3?', meaning: 'Where is the toilet?' }] },
+	{ id: 'seed-yue-howmuch', target: '幾多', reading: 'gei2 do1', meaning: 'how much; how many', tags: ['question', 'shopping'], level: 'A1',
+		examples: [{ target: '幾多錢呀？', reading: 'gei2 do1 cin2 aa3?', meaning: 'How much is it?' }] },
+	{ id: 'seed-yue-why', target: '點解', reading: 'dim2 gaai2', meaning: 'why', tags: ['question'], level: 'A2',
+		examples: [{ target: '點解你咁開心？', reading: 'dim2 gaai2 nei5 gam3 hoi1 sam1?', meaning: 'Why are you so happy?' }] },
+	{ id: 'seed-yue-when', target: '幾時', reading: 'gei2 si4', meaning: 'when', tags: ['question', 'time'], level: 'A2',
+		examples: [{ target: '你幾時返嚟？', reading: 'nei5 gei2 si4 faan1 lai4?', meaning: 'When are you coming back?' }] },
+
+	// — verbs —
+	{ id: 'seed-yue-eat', target: '食', reading: 'sik6', meaning: 'to eat', tags: ['verb', 'food'], level: 'A1',
+		examples: [{ target: '我哋去食飯啦。', reading: 'ngo5 dei6 heoi3 sik6 faan6 laa1.', meaning: 'Let’s go and eat.' }] },
+	{ id: 'seed-yue-drink', target: '飲', reading: 'jam2', meaning: 'to drink', tags: ['verb', 'food'], level: 'A1',
+		examples: [{ target: '你想飲咩呀？', reading: 'nei5 soeng2 jam2 me1 aa3?', meaning: 'What would you like to drink?' }] },
+	{ id: 'seed-yue-go', target: '去', reading: 'heoi3', meaning: 'to go', tags: ['verb', 'travel'], level: 'A1',
+		examples: [{ target: '我聽日去香港。', reading: 'ngo5 ting1 jat6 heoi3 hoeng1 gong2.', meaning: 'I’m going to Hong Kong tomorrow.' }] },
+	{ id: 'seed-yue-come', target: '嚟', reading: 'lai4', meaning: 'to come', tags: ['verb', 'travel'], level: 'A1',
+		examples: [{ target: '你嚟唔嚟呀？', reading: 'nei5 lai4 m4 lai4 aa3?', meaning: 'Are you coming?' }] },
+	{ id: 'seed-yue-look', target: '睇', reading: 'tai2', meaning: 'to look; to watch; to read', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: '我鍾意睇戲。', reading: 'ngo5 zung1 ji3 tai2 hei3.', meaning: 'I like watching films.' }] },
+	{ id: 'seed-yue-speak', target: '講', reading: 'gong2', meaning: 'to speak; to say', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: '你識唔識講廣東話？', reading: 'nei5 sik1 m4 sik1 gong2 gwong2 dung1 waa2?', meaning: 'Can you speak Cantonese?' }] },
+	{ id: 'seed-yue-know', target: '識', reading: 'sik1', meaning: 'to know (how to); can', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: '我識少少。', reading: 'ngo5 sik1 siu2 siu2.', meaning: 'I know a little.' }] },
+	{ id: 'seed-yue-like', target: '鍾意', reading: 'zung1 ji3', meaning: 'to like', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: '我好鍾意飲奶茶。', reading: 'ngo5 hou2 zung1 ji3 jam2 naai5 caa4.', meaning: 'I really like milk tea.' }] },
+	{ id: 'seed-yue-want', target: '想', reading: 'soeng2', meaning: 'to want to; to think', tags: ['verb', 'daily'], level: 'A1',
+		examples: [{ target: '我想買呢件衫。', reading: 'ngo5 soeng2 maai5 ni1 gin6 saam1.', meaning: 'I want to buy this top.' }] },
+	{ id: 'seed-yue-buy', target: '買', reading: 'maai5', meaning: 'to buy', tags: ['verb', 'shopping'], level: 'A2',
+		examples: [{ target: '我去超市買嘢。', reading: 'ngo5 heoi3 ciu1 si5 maai5 je5.', meaning: 'I’m going to the supermarket to buy some things.' }] },
+	{ id: 'seed-yue-give', target: '畀', reading: 'bei2', meaning: 'to give', tags: ['verb', 'daily'], level: 'A2',
+		examples: [{ target: '唔該畀杯水我。', reading: 'm4 goi1 bei2 bui1 seoi2 ngo5.', meaning: 'A glass of water, please.' }] },
+	{ id: 'seed-yue-wait', target: '等', reading: 'dang2', meaning: 'to wait', tags: ['verb', 'daily'], level: 'A2',
+		examples: [{ target: '等我一陣。', reading: 'dang2 ngo5 jat1 zan6.', meaning: 'Wait for me a moment.' }] },
+	{ id: 'seed-yue-work', target: '返工', reading: 'faan1 gung1', meaning: 'to go to work', tags: ['verb', 'routine'], level: 'A2',
+		examples: [{ target: '我朝早九點返工。', reading: 'ngo5 ziu1 zou2 gau2 dim2 faan1 gung1.', meaning: 'I start work at nine in the morning.' }] },
+	{ id: 'seed-yue-sleep', target: '瞓覺', reading: 'fan3 gaau3', meaning: 'to sleep', tags: ['verb', 'routine'], level: 'A2',
+		examples: [{ target: '我好眼瞓，想瞓覺。', reading: 'ngo5 hou2 ngaan5 fan3, soeng2 fan3 gaau3.', meaning: 'I’m really sleepy, I want to go to bed.' }] },
+
+	// — time —
+	{ id: 'seed-yue-today', target: '今日', reading: 'gam1 jat6', meaning: 'today', tags: ['time', 'daily'], level: 'A1',
+		examples: [{ target: '今日好熱。', reading: 'gam1 jat6 hou2 jit6.', meaning: 'It’s very hot today.' }] },
+	{ id: 'seed-yue-tomorrow', target: '聽日', reading: 'ting1 jat6', meaning: 'tomorrow', tags: ['time', 'daily'], level: 'A1',
+		examples: [{ target: '聽日見。', reading: 'ting1 jat6 gin3.', meaning: 'See you tomorrow.' }] },
+	{ id: 'seed-yue-yesterday', target: '琴日', reading: 'kam4 jat6', meaning: 'yesterday', tags: ['time', 'daily'], level: 'A1',
+		examples: [{ target: '我琴日好攰。', reading: 'ngo5 kam4 jat6 hou2 gui6.', meaning: 'I was very tired yesterday.' }] },
+	{ id: 'seed-yue-now', target: '而家', reading: 'ji4 gaa1', meaning: 'now', tags: ['time', 'daily'], level: 'A1',
+		examples: [{ target: '而家幾點呀？', reading: 'ji4 gaa1 gei2 dim2 aa3?', meaning: 'What time is it now?' }] },
+
+	// — numbers & money —
+	{ id: 'seed-yue-num-1', target: '一', reading: 'jat1', meaning: 'one', tags: ['number'], level: 'A1',
+		examples: [{ target: '一杯奶茶，唔該。', reading: 'jat1 bui1 naai5 caa4, m4 goi1.', meaning: 'One milk tea, please.' }] },
+	{ id: 'seed-yue-num-2', target: '兩', reading: 'loeng5', meaning: 'two (of something)', tags: ['number'], level: 'A1',
+		examples: [{ target: '兩位，唔該。', reading: 'loeng5 wai2, m4 goi1.', meaning: 'A table for two, please.' }] },
+	{ id: 'seed-yue-num-3', target: '三', reading: 'saam1', meaning: 'three', tags: ['number'], level: 'A1',
+		examples: [{ target: '而家三點鐘。', reading: 'ji4 gaa1 saam1 dim2 zung1.', meaning: 'It’s three o’clock now.' }] },
+	{ id: 'seed-yue-num-10', target: '十', reading: 'sap6', meaning: 'ten', tags: ['number'], level: 'A1',
+		examples: [{ target: '十蚊一個。', reading: 'sap6 man1 jat1 go3.', meaning: 'Ten dollars each.' }] },
+	{ id: 'seed-yue-dollar', target: '蚊', reading: 'man1', meaning: 'dollar (spoken)', tags: ['number', 'shopping'], level: 'A1',
+		examples: [{ target: '一杯咖啡三十五蚊。', reading: 'jat1 bui1 gaa3 fe1 saam1 sap6 ng5 man1.', meaning: 'A coffee is thirty-five dollars.' }] },
+
+	// — food & drink —
+	{ id: 'seed-yue-water', target: '水', reading: 'seoi2', meaning: 'water', tags: ['food', 'noun'], level: 'A1',
+		examples: [{ target: '我想飲水。', reading: 'ngo5 soeng2 jam2 seoi2.', meaning: 'I’d like to drink some water.' }] },
+	{ id: 'seed-yue-milktea', target: '奶茶', reading: 'naai5 caa4', meaning: 'milk tea (Hong Kong style)', tags: ['food', 'noun'], level: 'A1',
+		examples: [{ target: '一杯凍奶茶，唔該。', reading: 'jat1 bui1 dung3 naai5 caa4, m4 goi1.', meaning: 'An iced milk tea, please.' }] },
+	{ id: 'seed-yue-rice', target: '飯', reading: 'faan6', meaning: 'rice; a meal', tags: ['food', 'noun'], level: 'A1',
+		examples: [{ target: '你食咗飯未呀？', reading: 'nei5 sik6 zo2 faan6 mei6 aa3?', meaning: 'Have you eaten yet? (a common greeting)' }] },
+	{ id: 'seed-yue-yumcha', target: '飲茶', reading: 'jam2 caa4', meaning: 'to have dim sum (“drink tea”)', tags: ['food', 'verb'], level: 'A2',
+		examples: [{ target: '星期日我哋去飲茶。', reading: 'sing1 kei4 jat6 ngo5 dei6 heoi3 jam2 caa4.', meaning: 'On Sunday we go for dim sum.' }] },
+	{ id: 'seed-yue-tasty', target: '好食', reading: 'hou2 sik6', meaning: 'tasty', tags: ['food', 'adjective'], level: 'A2',
+		examples: [{ target: '呢度啲點心好好食。', reading: 'ni1 dou6 di1 dim2 sam1 hou2 hou2 sik6.', meaning: 'The dim sum here is really good.' }] },
+
+	// — describing things —
+	{ id: 'seed-yue-good', target: '好', reading: 'hou2', meaning: 'good; very', tags: ['adjective', 'daily'], level: 'A1',
+		examples: [{ target: '今日天氣好好。', reading: 'gam1 jat6 tin1 hei3 hou2 hou2.', meaning: 'The weather is really nice today.' }] },
+	{ id: 'seed-yue-pretty', target: '靚', reading: 'leng3', meaning: 'pretty; nice; good-looking', tags: ['adjective'], level: 'A2',
+		examples: [{ target: '呢件衫好靚。', reading: 'ni1 gin6 saam1 hou2 leng3.', meaning: 'This top is really nice.' }] },
+	{ id: 'seed-yue-expensive', target: '貴', reading: 'gwai3', meaning: 'expensive', tags: ['adjective', 'shopping'], level: 'A2',
+		examples: [{ target: '太貴喇！', reading: 'taai3 gwai3 laa3!', meaning: 'That’s too expensive!' }] },
+	{ id: 'seed-yue-cheap', target: '平', reading: 'peng4', meaning: 'cheap', tags: ['adjective', 'shopping'], level: 'A2',
+		examples: [{ target: '呢度啲嘢好平。', reading: 'ni1 dou6 di1 je5 hou2 peng4.', meaning: 'Things here are really cheap.' }] },
+
+	// — getting around —
+	{ id: 'seed-yue-mtr', target: '地鐵', reading: 'dei6 tit3', meaning: 'the MTR; underground', tags: ['transport', 'travel'], level: 'A2',
+		examples: [{ target: '我搭地鐵返工。', reading: 'ngo5 daap3 dei6 tit3 faan1 gung1.', meaning: 'I take the MTR to work.' }] },
+	{ id: 'seed-yue-bus', target: '巴士', reading: 'baa1 si2', meaning: 'bus', tags: ['transport', 'travel'], level: 'A2',
+		examples: [{ target: '巴士站喺嗰度。', reading: 'baa1 si2 zaam6 hai2 go2 dou6.', meaning: 'The bus stop is over there.' }] },
+	{ id: 'seed-yue-taxi', target: '的士', reading: 'dik1 si2', meaning: 'taxi', tags: ['transport', 'travel'], level: 'A2',
+		examples: [{ target: '我哋搭的士啦。', reading: 'ngo5 dei6 daap3 dik1 si2 laa1.', meaning: 'Let’s take a taxi.' }] },
+	{ id: 'seed-yue-cantonese', target: '廣東話', reading: 'gwong2 dung1 waa2', meaning: 'Cantonese (the language)', tags: ['language', 'daily'], level: 'A1',
+		examples: [{ target: '我學緊廣東話。', reading: 'ngo5 hok6 gan2 gwong2 dung1 waa2.', meaning: 'I’m learning Cantonese.' }] }
 ];
 
 // ---------------------------------------------------------------------------
@@ -623,7 +776,7 @@ const KO: SeedSpec[] = [
 		examples: [{ target: '이거 얼마예요?', reading: 'igeo eolmayeyo?', meaning: 'How much is this?' }] }
 ];
 
-const SEED: Record<Language, SeedSpec[]> = { zh: ZH, ja: JA, ko: KO, he: HE };
+const SEED: Record<Language, SeedSpec[]> = { zh: ZH, yue: YUE, ja: JA, ko: KO, he: HE };
 
 /**
  * Which seed items still need applying to a document — those whose id isn't yet
@@ -978,6 +1131,106 @@ const ZH_PASSAGES: PassageSpec[] = [
 			{ speaker: '职员', target: '请填一下这张表，然后在这里签字。', reading: 'Qǐng tián yíxià zhè zhāng biǎo, ránhòu zài zhèlǐ qiānzì.', meaning: 'Please fill in this form, then sign here.' },
 			{ speaker: '顾客', target: '我可以同时办一张银行卡吗？', reading: 'Wǒ kěyǐ tóngshí bàn yì zhāng yínhángkǎ ma?', meaning: 'Can I get a bank card at the same time?' },
 			{ speaker: '职员', target: '可以，十分钟就好。', reading: 'Kěyǐ, shí fēnzhōng jiù hǎo.', meaning: 'Yes, it’ll be ready in ten minutes.' }
+		]
+	}
+];
+
+const YUE_PASSAGES: PassageSpec[] = [
+	{
+		id: 'pass-yue-chachaanteng',
+		kind: 'conversation',
+		title: '茶餐廳 — At a cha chaan teng',
+		level: 'A1',
+		tags: ['daily', 'food'],
+		intro: 'Ordering lunch at a Hong Kong diner: 唔該 opens and closes almost every request.',
+		lines: [
+			{ speaker: '伙計', target: '你好，食乜嘢呀？', reading: 'nei5 hou2, sik6 mat1 je5 aa3?', meaning: 'Hello, what will you have?' },
+			{ speaker: '客人', target: '唔該，一個餐蛋麵，一杯凍奶茶。', reading: 'm4 goi1, jat1 go3 caan1 daan2 min6, jat1 bui1 dung3 naai5 caa4.', meaning: 'Luncheon meat and egg noodles and an iced milk tea, please.' },
+			{ speaker: '伙計', target: '奶茶少甜定正常呀？', reading: 'naai5 caa4 siu2 tim4 ding6 zing3 soeng4 aa3?', meaning: 'The milk tea less sweet, or normal?' },
+			{ speaker: '客人', target: '少甜，唔該。', reading: 'siu2 tim4, m4 goi1.', meaning: 'Less sweet, please.' },
+			{ speaker: '伙計', target: '好，等一陣。', reading: 'hou2, dang2 jat1 zan6.', meaning: 'Sure, just a moment.' },
+			{ speaker: '客人', target: '唔該，埋單。', reading: 'm4 goi1, maai4 daan1.', meaning: 'The bill, please.' },
+			{ speaker: '伙計', target: '四十二蚊。', reading: 'sei3 sap6 ji6 man1.', meaning: 'Forty-two dollars.' }
+		]
+	},
+	{
+		id: 'pass-yue-day',
+		kind: 'text',
+		title: '我嘅一日 — My day',
+		level: 'A1',
+		tags: ['daily', 'routine'],
+		intro: 'A working day in Hong Kong, from the MTR to yum cha at lunch.',
+		lines: [
+			{ target: '我朝早七點起身。', reading: 'ngo5 ziu1 zou2 cat1 dim2 hei2 san1.', meaning: 'I get up at seven in the morning.' },
+			{ target: '食完早餐，我就搭地鐵返工。', reading: 'sik6 jyun4 zou2 caan1, ngo5 zau6 daap3 dei6 tit3 faan1 gung1.', meaning: 'After breakfast I take the MTR to work.' },
+			{ target: '中午我同同事去飲茶。', reading: 'zung1 ng5 ngo5 tung4 tung4 si6 heoi3 jam2 caa4.', meaning: 'At lunchtime I go for dim sum with colleagues.' },
+			{ target: '我六點放工。', reading: 'ngo5 luk6 dim2 fong3 gung1.', meaning: 'I finish work at six.' },
+			{ target: '夜晚我喺屋企睇電視。', reading: 'je6 maan5 ngo5 hai2 uk1 kei2 tai2 din6 si6.', meaning: 'In the evening I watch TV at home.' },
+			{ target: '十一點我就瞓覺。', reading: 'sap6 jat1 dim2 ngo5 zau6 fan3 gaau3.', meaning: 'At eleven I go to bed.' }
+		]
+	},
+	{
+		id: 'pass-yue-directions',
+		kind: 'conversation',
+		title: '問路 — Asking the way',
+		level: 'A1',
+		tags: ['travel', 'directions'],
+		intro: 'Finding the MTR station — and the two kinds of “thank you”.',
+		lines: [
+			{ speaker: 'A', target: '唔好意思，請問地鐵站喺邊度呀？', reading: 'm4 hou2 ji3 si1, cing2 man6 dei6 tit3 zaam6 hai2 bin1 dou6 aa3?', meaning: 'Excuse me, where is the MTR station?' },
+			{ speaker: 'B', target: '一直行，見到銀行轉左就係。', reading: 'jat1 zik6 haang4, gin3 dou3 ngan4 hong4 zyun3 zo2 zau6 hai6.', meaning: 'Go straight on, and turn left at the bank — it’s right there.' },
+			{ speaker: 'A', target: '遠唔遠呀？', reading: 'jyun5 m4 jyun5 aa3?', meaning: 'Is it far?' },
+			{ speaker: 'B', target: '唔遠，行五分鐘就到。', reading: 'm4 jyun5, haang4 ng5 fan1 zung1 zau6 dou3.', meaning: 'Not far — five minutes’ walk.' },
+			{ speaker: 'A', target: '唔該晒！', reading: 'm4 goi1 saai3!', meaning: 'Thanks a lot!' },
+			{ speaker: 'B', target: '唔使客氣。', reading: 'm4 sai2 haak3 hei3.', meaning: 'You’re welcome.' }
+		]
+	},
+	{
+		id: 'pass-yue-market',
+		kind: 'conversation',
+		title: '街市買生果 — Fruit at the market',
+		level: 'A2',
+		tags: ['shopping', 'food'],
+		intro: 'Prices at a wet market stall, with 蚊 for dollars and 啲 for “some”.',
+		lines: [
+			{ speaker: '客人', target: '老闆，啲蘋果點賣呀？', reading: 'lou5 baan2, di1 ping4 gwo2 dim2 maai6 aa3?', meaning: 'How much are the apples?' },
+			{ speaker: '老闆', target: '十蚊三個。', reading: 'sap6 man1 saam1 go3.', meaning: 'Three for ten dollars.' },
+			{ speaker: '客人', target: '好平喎！我要六個。', reading: 'hou2 peng4 wo3! ngo5 jiu3 luk6 go3.', meaning: 'That’s cheap! I’ll take six.' },
+			{ speaker: '老闆', target: '仲要唔要橙呀？', reading: 'zung6 jiu3 m4 jiu3 caang2 aa3?', meaning: 'Would you like some oranges too?' },
+			{ speaker: '客人', target: '唔使喇，夠喇。', reading: 'm4 sai2 laa3, gau3 laa3.', meaning: 'No need, that’s enough.' },
+			{ speaker: '老闆', target: '一共二十蚊。', reading: 'jat1 gung6 ji6 sap6 man1.', meaning: 'Twenty dollars altogether.' }
+		]
+	},
+	{
+		id: 'pass-yue-weekend',
+		kind: 'conversation',
+		title: '去行山 — A hike at the weekend',
+		level: 'A2',
+		tags: ['daily', 'plans'],
+		intro: 'Two friends plan a hike on the Dragon’s Back, Hong Kong Island’s favourite trail.',
+		lines: [
+			{ speaker: 'A', target: '你星期六得唔得閒呀？', reading: 'nei5 sing1 kei4 luk6 dak1 m4 dak1 haan4 aa3?', meaning: 'Are you free on Saturday?' },
+			{ speaker: 'B', target: '得閒呀。做乜嘢？', reading: 'dak1 haan4 aa3. zou6 mat1 je5?', meaning: 'Yes, I am. What’s up?' },
+			{ speaker: 'A', target: '不如我哋去行山啦。', reading: 'bat1 jyu4 ngo5 dei6 heoi3 haang4 saan1 laa1.', meaning: 'How about we go hiking?' },
+			{ speaker: 'B', target: '好呀！去邊度行呀？', reading: 'hou2 aa3! heoi3 bin1 dou6 haang4 aa3?', meaning: 'Great! Where shall we go?' },
+			{ speaker: 'A', target: '去龍脊，啲風景好靚。', reading: 'heoi3 lung4 zek3, di1 fung1 ging2 hou2 leng3.', meaning: 'The Dragon’s Back — the views are beautiful.' },
+			{ speaker: 'B', target: '好，朝早九點喺筲箕灣地鐵站等。', reading: 'hou2, ziu1 zou2 gau2 dim2 hai2 saau1 gei1 waan1 dei6 tit3 zaam6 dang2.', meaning: 'OK — let’s meet at Shau Kei Wan MTR station at nine in the morning.' }
+		]
+	},
+	{
+		id: 'pass-yue-hongkong',
+		kind: 'text',
+		title: '香港 — Hong Kong',
+		level: 'A2',
+		tags: ['culture', 'travel'],
+		intro: 'A short text about the city where most of the world’s Cantonese is written.',
+		lines: [
+			{ target: '香港喺中國南邊。', reading: 'hoeng1 gong2 hai2 zung1 gwok3 naam4 bin1.', meaning: 'Hong Kong is in the south of China.' },
+			{ target: '大部分香港人講廣東話。', reading: 'daai6 bou6 fan6 hoeng1 gong2 jan4 gong2 gwong2 dung1 waa2.', meaning: 'Most people in Hong Kong speak Cantonese.' },
+			{ target: '好多人都識講英文。', reading: 'hou2 do1 jan4 dou1 sik1 gong2 jing1 man2.', meaning: 'Many people can also speak English.' },
+			{ target: '香港有好多高樓大廈，亦都有好多山同海灘。', reading: 'hoeng1 gong2 jau5 hou2 do1 gou1 lau4 daai6 haa6, jik6 dou1 jau5 hou2 do1 saan1 tung4 hoi2 taan1.', meaning: 'Hong Kong has lots of skyscrapers, and lots of hills and beaches too.' },
+			{ target: '搭地鐵、巴士同天星小輪都好方便。', reading: 'daap3 dei6 tit3, baa1 si2 tung4 tin1 sing1 siu2 leon4 dou1 hou2 fong1 bin6.', meaning: 'The MTR, buses and the Star Ferry are all very convenient.' },
+			{ target: '好多人鍾意喺茶樓飲茶，食點心。', reading: 'hou2 do1 jan4 zung1 ji3 hai2 caa4 lau4 jam2 caa4, sik6 dim2 sam1.', meaning: 'Many people like going to a teahouse for tea and dim sum.' }
 		]
 	}
 ];
@@ -1817,7 +2070,7 @@ const KO_PASSAGES: PassageSpec[] = [
 	}
 ];
 
-const PASSAGE_SEED: Record<Language, PassageSpec[]> = { zh: ZH_PASSAGES, ja: JA_PASSAGES, ko: KO_PASSAGES, he: HE_PASSAGES };
+const PASSAGE_SEED: Record<Language, PassageSpec[]> = { zh: ZH_PASSAGES, yue: YUE_PASSAGES, ja: JA_PASSAGES, ko: KO_PASSAGES, he: HE_PASSAGES };
 
 /** All seed passages as fully-formed `Passage`s with stable ids. */
 export function seedPassages(now: number = Date.now()): Passage[] {

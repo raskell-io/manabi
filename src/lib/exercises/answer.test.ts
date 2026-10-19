@@ -25,6 +25,15 @@ describe('checkTyped', () => {
 		expect(checkTyped('nv3er2', nv).verdict).toBe('exact');
 		expect(checkTyped("nǚ'ér", nv).verdict).toBe('exact');
 	});
+	it('Jyutping: with tone digits is exact; without, or with a wrong tone, is close', () => {
+		const key = { language: 'yue' as const, target: '唔該', reading: 'm4 goi1' };
+		expect(checkTyped('唔該', key).verdict).toBe('exact');
+		expect(checkTyped('m4goi1', key).verdict).toBe('exact');
+		expect(checkTyped('m goi', key)).toEqual({ verdict: 'close', note: 'add the tones' });
+		expect(checkTyped('m4 goi3', key)).toEqual({ verdict: 'close', note: 'check the tones' });
+		expect(checkTyped('ng goi', key).verdict).toBe('wrong');
+	});
+
 	it('kana, katakana and romaji', () => {
 		expect(checkTyped('たべる', ja).verdict).toBe('exact');
 		expect(checkTyped('タベル', ja).verdict).toBe('exact');

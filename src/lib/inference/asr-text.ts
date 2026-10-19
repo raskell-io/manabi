@@ -26,9 +26,14 @@ export function cleanTranscript(text: string): string {
 	return HALLUCINATIONS.some((re) => re.test(t)) ? '' : t;
 }
 
-/** Whisper's language names (transformers.js accepts these or ISO codes). */
+/**
+ * Whisper's language names (transformers.js accepts these or ISO codes).
+ * Only large-v3 knows Cantonese as its own language; base and small take it as
+ * Chinese.
+ */
 export const WHISPER_LANGUAGE: Record<Language, string> = {
 	zh: 'chinese',
+	yue: 'chinese',
 	ja: 'japanese',
 	ko: 'korean',
 	he: 'hebrew'

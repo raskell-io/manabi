@@ -64,8 +64,8 @@ export function romanizeHangul(text: string): string {
 }
 
 /**
- * A line's reading worked out offline: pinyin word by word from the
- * dictionary (zh), kana (ja), Revised Romanization (ko). Hebrew needs the AI
+ * A line's reading worked out offline: pinyin / Jyutping word by word from
+ * the dictionary (zh / yue), kana (ja), Revised Romanization (ko). Hebrew needs the AI
  * (unvowelled text has no reliable reading), so it stays empty.
  */
 export async function dictionaryReading(language: Language, line: string, lookup: Lookup): Promise<string> {
@@ -73,11 +73,11 @@ export async function dictionaryReading(language: Language, line: string, lookup
 	if (language === 'he') return '';
 	const parts = await lookup.segment(language, line);
 	const words = parts.map((p) => {
-		if (!p.hit) return language === 'zh' ? (CJK_PUNCT[p.text] ?? p.text) : p.text;
+		if (!p.hit) return language !== 'ja' ? (CJK_PUNCT[p.text] ?? p.text) : p.text;
 		const e = p.hit.entries[0];
 		return language === 'ja' && p.hit.key !== p.text ? inflectedKana(p.text, e.w, e.r) : e.r;
 	});
-	return language === 'zh' ? words.join(' ').replace(/ ([,.!?:;"])/g, '$1') : words.join('');
+	return language !== 'ja' ? words.join(' ').replace(/ ([,.!?:;"])/g, '$1') : words.join('');
 }
 
 /** Lines for a passage from pasted text, readings from the dictionary. */

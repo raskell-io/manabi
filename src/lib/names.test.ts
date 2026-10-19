@@ -32,6 +32,11 @@ describe('name data', () => {
 			expect(e.t, e.t).toMatch(/^\p{Script=Han}+$/u);
 			expect(e.r, e.r).toMatch(tone);
 		}
+		for (const e of nameSections('yue').flatMap((s) => s.entries)) {
+			expect(e.t, e.t).toMatch(/^\p{Script=Han}+$/u);
+			expect(e.r.split(' ').length, e.t).toBe([...e.t].length);
+			expect(e.r, e.t).toMatch(/^([a-z]+[1-6] ?)+$/);
+		}
 		for (const e of nameSections('ja').flatMap((s) => s.entries)) {
 			expect(e.r, e.t).toMatch(/^[\p{Script=Hiragana}\p{Script=Katakana}ー]+$/u);
 			expect(e.tr, e.t).toMatch(/^[A-Za-zāīūēōĀĪŪĒŌ ]+$/);

@@ -1,7 +1,7 @@
 # Manabi (学び)
 
-A local-first, reading-first language learning PWA for Chinese (zh), Japanese (ja),
-Korean (ko), and Hebrew (he). Trains reading and speaking. Handwriting exists only as optional
+A local-first, reading-first language learning PWA for Chinese (zh), Cantonese (yue),
+Japanese (ja), Korean (ko), and Hebrew (he). Trains reading and speaking. Handwriting exists only as optional
 practice (stroke-order animation + tracing on the drawing pad) and is **never an SRS skill**. Same
 stack as kurumi: SvelteKit 2 + Svelte 5 runes, Tailwind 4, Automerge over IndexedDB,
 transformers.js + OpenAI behind an inference router, adapter-static PWA.
@@ -10,9 +10,10 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 1. **Items, not lessons.** `LearningItem` is the atomic unit; lessons are bundles.
 2. **Five skills, tracked separately.** recognition · pronunciation · listening ·
    context · recall — each has its own SM-2 schedule; recall/context unlock later.
-3. **Reading-first.** pinyin tone marks, kana, Hangul + Revised Romanization, vowelled
+3. **Reading-first.** pinyin tone marks, Jyutping (tone digits), kana, Hangul + Revised Romanization, vowelled
    (niqqud) Hebrew + RTL. Adding a language = `Language` + `LANGUAGES` in types.ts, then
-   every `Record<Language, …>` (seed, scripts, reading guide, gen-audio VOICE; an MMS voice in tts-local.ts only if an ONNX port exists).
+   every `Record<Language, …>` (seed, scripts, names, paths, reading guide, gen-audio VOICE, dump-audio-texts,
+   DICT_LANGUAGES + gen-dict; an MMS voice in tts-local.ts only if an ONNX port exists) — svelte-check lists them.
 4. **Human-in-the-loop AI.** Workbench generates *drafts*; user approves to publish.
 5. **Local-first.** All state in IndexedDB. svelte-check must be 0/0.
 
@@ -20,7 +21,8 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 - One Automerge doc (`SCHEMA_VERSION` 13; forward-only `migrate()` in store.ts) persisted to IndexedDB via idb-keyval.
   Collections: `learningItems`, `lessons`, `srsStates` (keyed by itemId),
   `exerciseAttempts`, `pronunciationAttempts`, `contentDrafts`, `settings`,
-  optional `passageReads` (passage id → first read to the end; unioned on merge).
+  optional `passageReads` (passage id → first read to the end; unioned on merge),
+  optional `xpSessions` (one {at, xp, language} per finished review session; unioned → totals add up across devices).
 - Persistence pattern (from kurumi): `Automerge.change` → `docStore.set` →
   fire-and-forget `saveDoc`; a page-hide stash in localStorage covers a write still
   in flight (merged back by `initDB` — same history, so `Automerge.merge` is safe
@@ -40,18 +42,21 @@ src/lib/
   inference/  types.ts · router.ts · local-models.ts · providers/{tts-local,openai}.ts
   audio.ts    synthesize → blob cache → play
   sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO); with settings.syncMarkdown also content/<lang>/{items,passages}.md (content-md.ts: render/parse, per-section hash → only hand-edited sections apply back, never deletes)
-  strokes.ts  drawing-pad data: bundled static/strokes/{zh,ja}/<hex>.json (strokes-index.ts) else pinned jsDelivr CDN
-  chinese.ts  Chinese script option (settings.zhScript: Simplified · Traditional TW/HK): content stays Simplified, display converts via lazily loaded opencc-js (`toZhScript`, `scriptLangTag`; awaited at boot); an item's own `zhVariants` (Taiwan / HK form, Taiwan reading) win over conversion; readings via the `$readingOf(reading, target, language)` store (pinyin or Zhuyin, zhuyin.ts); `$rubyOf` puts syllables above characters (settings.zhRuby; ScriptText / TapText `reading` prop)
+  strokes.ts  drawing-pad data: bundled static/strokes/{zh,ja}/<hex>.json (strokes-index.ts) else pinned jsDelivr CDN; yue uses zh's set (some colloquial characters have none → NoStrokeData)
+  cantonese.ts Cantonese (yue): colloquial Hong Kong Traditional, stored as such (the zh script option never applies);
+              Jyutping helpers (jyutpingSyllables / jyutpingRuby / splitJyutping), JYUTPING_TONES, colloquialize
+              (是→係 in a transcript, only where the target says 係) before pronunciation scoring
+  chinese.ts  Chinese script option (settings.zhScript: Simplified · Traditional TW/HK): content stays Simplified, display converts via lazily loaded opencc-js (`toZhScript`, `scriptLangTag`; awaited at boot); an item's own `zhVariants` (Taiwan / HK form, Taiwan reading) win over conversion; readings via the `$readingOf(reading, target, language)` store (pinyin or Zhuyin, zhuyin.ts); `$rubyOf(text, reading, language)` puts syllables above characters — pinyin/Zhuyin, or Jyutping for yue (settings.zhRuby; ScriptText / TapText `reading` prop); `toHongKong` for Cantonese ASR output
   radicals.ts 214 Kangxi radicals + radicalOf / radicalMembers / searchRadicals over generated radicals-data.ts
   roots.ts    Hebrew roots: rootOfWord / searchRoots / splitByRoot (highlight) over hand-curated roots-data.ts
   path.ts     learning paths: per language a Beginner and a Refresher path (pathsFor), each ordered stages (script · words · reading · skills · explore) over existing content; progress derived (pathState / stageProgress), never stored; the pick lives in settings.pathChoice (else suggestedPath)
-  dictionary.ts tap-a-word lookup: lookup.ts (longest match zh/ja + deinflect-ja.ts; ko particles/endings + form map; he prefixes + form map) over static/dict shards (dict-shard.ts layout, built by tools/gen-dict.mjs from CC-CEDICT / JMdict / Wiktionary; CC BY-SA, see static/dict/LICENSE.md), fetched lazily + SW-cached
+  dictionary.ts tap-a-word lookup: lookup.ts (longest match zh/yue/ja + deinflect-ja.ts; ko particles/endings + form map; he prefixes + form map) over static/dict shards (dict-shard.ts layout, built by tools/gen-dict.mjs from CC-CEDICT / CC-Canto / JMdict / Wiktionary; CC BY-SA, see static/dict/LICENSE.md), fetched lazily + SW-cached
   own-text.ts "Read your own text": splitSentences, offline readings (pinyin / kana / romanizeHangul), AI readings + translations via router `annotate`
   names.ts    place & people names per language (countries · home · world · family · given) over hand-curated names-data.ts
   components/ Splash (launch screen; full animation once per browser session) · LessonIntro (pre-session card) · StreakCelebration (first session of the day) · CountUp · TapText (tappable words → LookupSheet) · PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep; `still` for the nav logo — one animated Nabi per screen) · Confetti
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
-  srs/stats.ts reviewForecast (due skill reviews per coming day) · activityCalendar (answers per day, Monday-first weeks) → dashboard ReviewForecast / ActivityCalendar
+  srs/stats.ts reviewForecast (due skill reviews per coming day) · activityCalendar (answers per day, Monday-first weeks) → dashboard ReviewForecast / ActivityCalendar · xpSummary (total / today / week, from xpSessions)
   reminder.ts daily practice reminder as a repeating .ics event (no server for push)
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
   haptics.ts  tapCorrect / tapWrong (navigator.vibrate; Android only, iOS ignores)
@@ -68,12 +73,12 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
 - `exercises/generate.ts` — `buildExercise(item, dimension, pool, {audio, typed, rng})`;
   distractors prefer same kind/level/tags. `rng` injectable for deterministic tests.
   Recall is a typing card when `settings.typedRecall` (checked by `exercises/answer.ts`:
-  script or romanized, pinyin tones, "close" for a slip); listening is a dictation
+  script or romanized, pinyin / Jyutping tones, "close" for a slip); listening is a dictation
   (rebuild a 2–8 word example from tiles) about half the time when one exists.
 - `inference/router.ts` — TTS is local-first (MMS, Korean only) then OpenAI; transcription
   is OpenAI first, then on-device Whisper (`providers/asr-local.ts`, opt-in `settings.localAsr`,
   WASM; int8 decoders fail in onnxruntime-web, so base = q8 encoder + fp16 decoder; Chinese
-  normalized to Simplified; `asr-text.ts` drops hallucinated stock phrases) —
+  normalized to Simplified, Cantonese (run as 'chinese' — base/small have no yue token) to HK Traditional; `asr-text.ts` drops hallucinated stock phrases) —
   `lib/pronunciation.ts` scores it and the learner confirms. Generation, line annotation and
   Hebrew diacritization (`lib/hebrew.ts` — accepts a result only if the letters are unchanged)
   are OpenAI-only.

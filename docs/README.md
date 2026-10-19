@@ -1,7 +1,7 @@
 # Manabi documentation
 
 Manabi (学び, "learning") is a local-first, reading-first language-learning PWA for
-**Chinese (zh)**, **Japanese (ja)**, **Korean (ko)**, and **Hebrew (he)**. It trains recognition,
+**Chinese (zh)**, **Cantonese (yue)**, **Japanese (ja)**, **Korean (ko)**, and **Hebrew (he)**. It trains recognition,
 pronunciation, listening, reading, and recall. Handwriting exists only as optional practice
 (stroke-order animation and tracing on the drawing pad) and is **never an SRS skill**.
 Everything runs in the browser: all state lives in IndexedDB, there is no backend
@@ -32,7 +32,7 @@ first, then dive into whichever subsystem you are touching.
 | [PWA & deployment](./pwa-and-deployment.md) | Dev | PWA wiring, offline/service worker, Cloudflare Pages, local hosting |
 | [GitHub sync](./sync.md) | Dev | Multi-device sync of the backup snapshot via the GitHub Contents API, plus the editable Markdown copy of items and passages: the sync round, triggers, security, limits |
 | [Development & extending](./development.md) | Dev | Setup, tasks, unit and browser (Playwright) tests, conventions, and step-by-step extension recipes |
-| [Cantonese](./cantonese.md) | Dev | Cantonese (yue): feasibility notes |
+| [Cantonese](./cantonese.md) | Dev | Cantonese (yue) as built: Hong Kong characters + Jyutping, dictionary, audio, speech-recognition caveats, extending it, open options |
 
 ## The one-paragraph version
 
@@ -43,11 +43,12 @@ review loop builds a due queue, serves generated exercises (multiple choice, clo
 recall, sentence dictation, record-and-compare), grades them, and advances the schedules.
 Content comes from three places: a small hand-verified **seed**, large **generated reference
 sets** (full kana/kanji/hanzi tables, HSK/JLPT word lists, radicals, stroke data, and
-tap-a-word **dictionaries** for all four languages), and an optional **AI workbench** that
+tap-a-word **dictionaries** for all five languages), and an optional **AI workbench** that
 drafts new items for human approval; learners can also paste **their own text** to read.
 Chinese is stored Simplified and displayed in Simplified or Traditional (Taiwan / Hong Kong),
-with pinyin or Zhuyin readings. Audio is **prerecorded** and bundled into a few hundred Opus
+with pinyin or Zhuyin readings; Cantonese is stored in Hong Kong Traditional with Jyutping. Audio is **prerecorded** and bundled into a few hundred Opus
 sprite packs (on-device TTS exists only for Korean); pronunciation is scored by speech
-recognition — OpenAI, or Whisper running in the browser. State is an **Automerge CRDT
+recognition — OpenAI, or Whisper running in the browser. Finished sessions bank **XP**, kept in
+the document so totals follow you across devices. State is an **Automerge CRDT
 document** persisted to IndexedDB, so the app is offline-first; devices sync through a private
 GitHub repository with no server of our own.
