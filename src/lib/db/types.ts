@@ -10,7 +10,7 @@
  * mutating them in place (kurumi idiom).
  */
 
-import type { ZhScript } from '../chinese';
+import type { ZhReading, ZhScript } from '../chinese';
 
 // --- ID generation ----------------------------------------------------------
 
@@ -309,6 +309,7 @@ export interface ManabiSettings {
 	asrScoring: boolean; // score recordings with speech recognition (needs the OpenAI key)
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	zhScript: ZhScript; // Chinese display script; content is stored Simplified (lib/chinese.ts)
+	zhReading: ZhReading; // Chinese reading aid shown; readings are stored as pinyin (lib/zhuyin.ts)
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
 	theme: 'system' | 'light' | 'dark';
 	/** The learning path picked per language ('beginner' | 'refresher'); unset = suggested. */
@@ -330,6 +331,7 @@ export function defaultSettings(): ManabiSettings {
 		asrScoring: true,
 		hideHebrewVowels: false,
 		zhScript: 'simplified',
+		zhReading: 'pinyin',
 		gradeButtons: true,
 		theme: 'light',
 		pathChoice: {}
@@ -338,7 +340,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export interface ManabiDocument {
 	schemaVersion: number;

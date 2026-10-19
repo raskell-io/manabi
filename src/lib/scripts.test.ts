@@ -10,8 +10,15 @@ function section(language: 'zh' | 'ja' | 'he', id: string) {
 describe('script sections', () => {
 	it('has tabbed sections per language', () => {
 		expect(scriptSections('ja').map((s) => s.id)).toEqual(['hiragana', 'katakana', 'kanji']);
-		expect(scriptSections('zh').map((s) => s.id)).toEqual(['hanzi', 'tones']);
+		expect(scriptSections('zh').map((s) => s.id)).toEqual(['hanzi', 'tones', 'zhuyin']);
 		expect(scriptSections('he').map((s) => s.id)).toEqual(['alefbet', 'alefbet-finals']);
+	});
+
+	it('zhuyin lists all 37 bopomofo symbols once', () => {
+		const chars = section('zh', 'zhuyin')!.glyphs!.map((g) => g.char);
+		expect(chars).toHaveLength(37);
+		expect(new Set(chars).size).toBe(37);
+		expect(chars.every((c) => /^\p{Script=Bopomofo}$/u.test(c))).toBe(true);
 	});
 
 	it('kana sections carry base (46) + dakuten (25) blocks', () => {

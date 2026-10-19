@@ -7,11 +7,11 @@
 	import { X, Plus, Check } from 'lucide-svelte';
 	import ScriptText from './ScriptText.svelte';
 	import StrokePad from './StrokePad.svelte';
-	import { allItems, studyScriptChar } from '$lib/db/store';
+	import { allItems, settings, studyScriptChar } from '$lib/db/store';
 	import type { Language } from '$lib/db/types';
 	import { isHan, strokeLang } from '$lib/strokes';
 	import { radicalOf } from '$lib/radicals';
-	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { displayReading, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 
 	let {
 		glyph,
@@ -44,7 +44,7 @@
 	<header>
 		<span class="big"><ScriptText text={glyph.char} {language} size="xl" /></span>
 		<div class="meta">
-			<span class="roman">{glyph.roman}</span>
+			<span class="roman">{displayReading(glyph.roman, glyph.char, language, $settings.zhReading)}</span>
 			{#if glyph.gloss}<span class="gloss">{glyph.gloss}</span>{/if}
 			{#if rad}
 				<a class="radical" href="/radicals?r={rad.radical.n}" onclick={onClose}>

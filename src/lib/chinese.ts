@@ -9,11 +9,14 @@
  * characters only — never vocabulary (软件 stays 軟件, not 軟體) — so the
  * displayed word always matches its pinyin and audio. The dictionaries are
  * ~1 MB, so they load lazily, only once a Traditional script is picked.
-
+ *
+ * Readings are likewise stored as pinyin and can be shown as Zhuyin
+ * (bopomofo), independently of the script.
  */
 
 import { derived, writable, type Readable } from 'svelte/store';
 import type { Language } from './db/types';
+import { pinyinToZhuyin } from './zhuyin';
 
 export type ZhScript = 'simplified' | 'traditional-tw' | 'traditional-hk';
 
@@ -92,4 +95,22 @@ export const toZhScript: Readable<Convert> = derived(active, ($a) => $a.convert)
 /** Convert text in `language` for display (non-Chinese text passes through). */
 export function displayText(text: string, language: Language, convert: Convert): string {
 	return language === 'zh' ? convert(text) : text;
+}
+
+export type ZhReading = 'pinyin' | 'zhuyin';
+
+export const ZH_READINGS: { value: ZhReading; native: string; label: string }[] = [
+	{ value: 'pinyin', native: 'pīnyīn', label: 'Pinyin' },
+	{ value: 'zhuyin', native: 'ㄅㄆㄇ', label: 'Zhuyin (bopomofo)' }
+];
+
+const HAN = /\p{Script=Han}/u;
+
+/**
+ * A reading for display: Zhuyin when picked, for Chinese text written in
+ * hanzi. `target` is what the reading belongs to — bopomofo glyphs and the
+ * pinyin tone drills keep their pinyin.
+ */
+export function displayReading(reading: string, target: string, language: Language, mode: ZhReading): string {
+	return language === 'zh' && mode === 'zhuyin' && HAN.test(target) ? pinyinToZhuyin(reading) : reading;
 }

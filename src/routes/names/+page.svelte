@@ -6,6 +6,7 @@
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import { allItems, settings, studyItems } from '$lib/db/store';
 	import { stripNiqqud, type Language } from '$lib/db/types';
+	import { displayReading } from '$lib/chinese';
 	import { genderLabel, nameItem, nameSections, searchNames, type NameEntry, type NameGroup, type NameSection } from '$lib/names';
 
 	const lang = $derived<Language>($settings.activeLanguage);
@@ -86,7 +87,7 @@
 				{@const id = mine.get(key(e.t))}
 				<div class="card" class:mine={!!id}>
 					<span class="c-script"><ScriptText text={e.t} language={lang} size="lg" /></span>
-					<span class="c-read">{e.r}{#if e.tr && e.tr !== e.r} · {e.tr}{/if}</span>
+					<span class="c-read">{displayReading(e.r, e.t, lang, $settings.zhReading)}{#if e.tr && e.tr !== e.r} · {e.tr}{/if}</span>
 					<span class="c-en">
 						{e.m}
 						{#if e.g}<span class="g g-{e.g}" title={genderLabel(e.g)}>{e.g === 'u' ? 'm/f' : e.g}</span>{/if}

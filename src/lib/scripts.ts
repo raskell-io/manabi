@@ -100,6 +100,20 @@ const PINYIN_TONES: Glyph[] = [
 	g('ma', 'neutral', 'question particle (吗)')
 ];
 
+// Zhuyin (bopomofo), Taiwan's reading aid: 21 initials, 3 medials, 13 finals.
+const ZHUYIN: Glyph[] = [
+	...[
+		['ㄅ', 'b'], ['ㄆ', 'p'], ['ㄇ', 'm'], ['ㄈ', 'f'], ['ㄉ', 'd'], ['ㄊ', 't'], ['ㄋ', 'n'],
+		['ㄌ', 'l'], ['ㄍ', 'g'], ['ㄎ', 'k'], ['ㄏ', 'h'], ['ㄐ', 'j'], ['ㄑ', 'q'], ['ㄒ', 'x'],
+		['ㄓ', 'zh'], ['ㄔ', 'ch'], ['ㄕ', 'sh'], ['ㄖ', 'r'], ['ㄗ', 'z'], ['ㄘ', 'c'], ['ㄙ', 's']
+	].map(([c, r]) => g(c, r, 'initial')),
+	g('ㄧ', 'i / y', 'medial'), g('ㄨ', 'u / w', 'medial'), g('ㄩ', 'ü / yu', 'medial'),
+	...[
+		['ㄚ', 'a'], ['ㄛ', 'o'], ['ㄜ', 'e'], ['ㄝ', 'ê'], ['ㄞ', 'ai'], ['ㄟ', 'ei'], ['ㄠ', 'ao'],
+		['ㄡ', 'ou'], ['ㄢ', 'an'], ['ㄣ', 'en'], ['ㄤ', 'ang'], ['ㄥ', 'eng'], ['ㄦ', 'er']
+	].map(([c, r]) => g(c, r, 'final'))
+];
+
 // --- Korean Hangul ----------------------------------------------------------
 // Jamo (letters) with their names, then syllable blocks: each consonant row ×
 // the ten basic vowels, split into two 5-column blocks like the kana grids.
@@ -220,6 +234,13 @@ const SECTIONS: Record<Language, ScriptSection[]> = {
 			subtitle: 'The four tones (+ neutral) on the syllable “ma”',
 			kind: 'wrap',
 			glyphs: PINYIN_TONES
+		},
+		{
+			id: 'zhuyin',
+			title: 'Zhuyin',
+			subtitle: 'ㄅㄆㄇ — bopomofo, the reading aid used in Taiwan. Tones: none = 1st · ˊ 2nd · ˇ 3rd · ˋ 4th · ˙ neutral',
+			kind: 'wrap',
+			glyphs: ZHUYIN
 		}
 	],
 	ko: [

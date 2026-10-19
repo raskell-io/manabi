@@ -6,7 +6,7 @@
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import StrokePad from '$lib/components/StrokePad.svelte';
 	import { hanChars, strokeLang } from '$lib/strokes';
-	import { displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { displayReading, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { radicalOf } from '$lib/radicals';
 	import { rootLabel, rootOfWord, splitByRoot } from '$lib/roots';
 	import { deleteItem, getItem, pronunciationAttempts, settings, updateItem } from '$lib/db/store';
@@ -119,7 +119,7 @@
 	<header class="head">
 		<div class="preview">
 			<ScriptText text={form.target || '—'} language={form.language as Language} size="lg" forceVowels />
-			<span class="muted">{form.reading}</span>
+			<span class="muted">{displayReading(form.reading, form.target, form.language as Language, $settings.zhReading)}</span>
 			{#if form.target}
 				<AudioButton text={form.target} language={form.language as Language} audioRef={form.audioRef} itemId={form.id} />
 			{/if}

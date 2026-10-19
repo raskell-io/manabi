@@ -18,6 +18,7 @@
 	import { canGenerate, generateItems, generatePassages } from '$lib/inference/router';
 	import { diacritizeItems, diacritizePassages } from '$lib/hebrew';
 	import { PASSAGE_KIND_LABELS, type ItemKind, type PassageKind } from '$lib/db/types';
+	import { displayReading } from '$lib/chinese';
 
 	type Mode = 'vocab' | 'reading';
 	let mode = $state<Mode>('vocab');
@@ -205,7 +206,7 @@
 				<div class="d-main">
 					<div class="d-lead">
 						<ScriptText text={d.item.target} language={d.language} size="md" />
-						<span class="reading">{d.item.reading}{d.item.transliteration ? ' · ' + d.item.transliteration : ''}</span>
+						<span class="reading">{displayReading(d.item.reading, d.item.target, d.language, $settings.zhReading)}{d.item.transliteration ? ' · ' + d.item.transliteration : ''}</span>
 					</div>
 					<div class="d-meaning">{d.item.meaning}</div>
 					{#if d.item.examples[0]}

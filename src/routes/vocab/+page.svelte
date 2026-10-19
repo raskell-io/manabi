@@ -5,7 +5,7 @@
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import { addVocabWords, studyVocabWord, settings, type VocabWord } from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
-	import { toZhScript } from '$lib/chinese';
+	import { displayReading, toZhScript } from '$lib/chinese';
 
 	type LevelMeta = { level: string; file: string; count: number };
 	type Manifest = Record<string, LevelMeta[]>;
@@ -31,6 +31,7 @@
 			(w) =>
 				w.t.includes(q) ||
 				(lang === 'zh' && $toZhScript(w.t).includes(q)) ||
+				displayReading(w.r, w.t, lang, $settings.zhReading).includes(q) ||
 				w.r.toLowerCase().includes(q) ||
 				w.m.toLowerCase().includes(q)
 		);
@@ -120,7 +121,7 @@
 			{#each shown as w (w.t)}
 				<li>
 					<div class="word-col">
-						{#if w.r}<span class="reading">{w.r}</span>{/if}
+						{#if w.r}<span class="reading">{displayReading(w.r, w.t, lang, $settings.zhReading)}</span>{/if}
 						<ScriptText text={w.t} language={lang} size="lg" />
 					</div>
 					<span class="meaning">{w.m}</span>

@@ -3,7 +3,8 @@
 	import { ArrowLeft, Plus, Check, Eye, Languages } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
-	import { getPassage, markPassageRead, studyPassageLine } from '$lib/db/store';
+	import { getPassage, markPassageRead, settings, studyPassageLine } from '$lib/db/store';
+	import { displayReading } from '$lib/chinese';
 	import { PASSAGE_KIND_LABELS, type Passage } from '$lib/db/types';
 
 	const id = $derived($page.params.id);
@@ -110,7 +111,7 @@
 							</button>
 						</div>
 					</div>
-					{#if showReadingFor(i)}<div class="reading">{line.reading}</div>{/if}
+					{#if showReadingFor(i)}<div class="reading">{displayReading(line.reading, line.target, passage.language, $settings.zhReading)}</div>{/if}
 					{#if showMeaningFor(i)}<div class="meaning">{line.meaning}</div>{/if}
 				</div>
 			</div>

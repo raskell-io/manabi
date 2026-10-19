@@ -13,7 +13,7 @@
 	import { LANGUAGES, stripNiqqud, todayIso, type Language } from '$lib/db/types';
 	import type { MergeSummary } from '$lib/db/merge';
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
-	import { toZhScript, zhLangTag, zhScript, ZH_SCRIPTS } from '$lib/chinese';
+	import { displayReading, toZhScript, zhLangTag, zhScript, ZH_READINGS, ZH_SCRIPTS } from '$lib/chinese';
 
 	let s = $derived($settings);
 
@@ -179,9 +179,21 @@
 			</button>
 		{/each}
 	</div>
+	<p class="muted reading-aid">Reading aid shown with words and sentences.</p>
+	<div class="lang-row">
+		{#each ZH_READINGS as z (z.value)}
+			<button class="lang" class:active={s.zhReading === z.value} onclick={() => updateSettings({ zhReading: z.value })}>
+				<span class="native">{z.native}</span>
+				<span class="name">{z.label}</span>
+			</button>
+		{/each}
+	</div>
 	<p class="preview-row">
 		<span class="muted">Preview:</span>
-		<span class="zh-preview" lang={zhLangTag($zhScript)}>{$toZhScript('我们说汉语。头发、面条、这里')}</span>
+		<span class="zh-preview-block">
+			<span class="zh-preview" lang={zhLangTag($zhScript)}>{$toZhScript('我们说汉语。头发、面条、这里')}</span>
+			<span class="zh-preview-reading">{displayReading('Wǒmen shuō Hànyǔ.', '汉', 'zh', s.zhReading)}</span>
+		</span>
 	</p>
 </section>
 
@@ -305,9 +317,20 @@
 		font-size: 1.4rem;
 		direction: rtl;
 	}
+	.reading-aid {
+		margin-top: 1.1rem;
+	}
+	.zh-preview-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+	}
 	.zh-preview {
 		font-family: var(--font-script);
 		font-size: 1.25rem;
+	}
+	.zh-preview-reading {
+		color: var(--color-text-muted);
 	}
 	input,
 	select {

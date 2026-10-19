@@ -6,7 +6,7 @@
 	import Recorder from './Recorder.svelte';
 	import ScriptText from './ScriptText.svelte';
 	import { settings } from '$lib/db/store';
-	import { scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { displayReading, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { playPrerecorded } from '$lib/audio';
 	import { playCorrect, playWrong } from '$lib/sounds';
 	import { tapCorrect, tapWrong } from '$lib/haptics';
@@ -39,6 +39,9 @@
 		if (exercise.language === 'he' && $settings.hideHebrewVowels) return stripNiqqud(t);
 		return exercise.language === 'zh' ? $toZhScript(t) : t;
 	}
+
+	// Readings (prompt, choices, cloze, reveal) as pinyin or Zhuyin.
+	const rd = (reading: string) => displayReading(reading, item.target, exercise.language, $settings.zhReading);
 
 	// Split the full cloze sentence around the answer so we can fill the blank in
 	// place and highlight the inserted word once answered. The sentence is shown
@@ -150,11 +153,11 @@
 		{:else if exercise.promptMode === 'script'}
 			<ScriptText text={exercise.promptScript ?? ''} language={exercise.language} size="xl" />
 			{#if exercise.promptReading}
-				<div class="reading">{exercise.promptReading}</div>
+				<div class="reading">{rd(exercise.promptReading)}</div>
 			{/if}
 			<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play word" />
 		{:else if exercise.promptMode === 'reading'}
-			<div class="big-reading">{exercise.promptReading}</div>
+			<div class="big-reading">{rd(exercise.promptReading ?? '')}</div>
 			{#if exercise.promptMeaning}<div class="reading">{exercise.promptMeaning}</div>{/if}
 		{:else if exercise.promptMode === 'meaning'}
 			<div class="big-meaning">{exercise.promptMeaning}</div>
@@ -169,7 +172,7 @@
 				<p class="cloze-sentence" dir={languageDir(exercise.language)} lang={scriptLangTag(exercise.language, $zhScript)}>
 					{#if clozeParts}{clozeParts.before}<strong>{clozeParts.word}</strong>{clozeParts.after}{:else}{shown(exercise.clozeFull ?? '')}{/if}
 				</p>
-				{#if exercise.clozeReading}<div class="reading">{exercise.clozeReading}</div>{/if}
+				{#if exercise.clozeReading}<div class="reading">{rd(exercise.clozeReading)}</div>{/if}
 				{#if exercise.clozeTranslit}<div class="translit">{exercise.clozeTranslit}</div>{/if}
 				<AudioButton text={exercise.clozeFull} language={exercise.language} label="Play sentence" />
 			{:else}
@@ -195,10 +198,10 @@
 						{#if exercise.promptMode === 'reading' || exercise.promptMode === 'meaning' || exercise.promptMode === 'audio' || exercise.promptMode === 'cloze'}
 							<ScriptText text={c.label} language={exercise.language} size="md" />
 						{:else}
-							{c.label}
+							{exercise.type === 'word-to-reading' ? rd(c.label) : c.label}
 						{/if}
 					</span>
-					{#if c.sublabel}<span class="choice-sub">{c.sublabel}</span>{/if}
+					{#if c.sublabel}<span class="choice-sub">{rd(c.sublabel)}</span>{/if}
 					{#if answered && c.correct}<Check size={18} class="ic ok" />{/if}
 					{#if answered && selected === c && !c.correct}<X size={18} class="ic no" />{/if}
 				</button>
@@ -216,13 +219,13 @@
 						</p>
 						{#if !selected?.correct}
 							<p class="answer-line">
-								Answer: <ScriptText text={exercise.answer} language={exercise.language} size="sm" />
+								Answer: <ScriptText text={exercise.type === 'word-to-reading' ? rd(exercise.answer) : exercise.answer} language={exercise.language} size="sm" />
 							</p>
 						{/if}
 						<!-- Listening: confirm what the word was by revealing its reading + meaning. -->
 						{#if exercise.type === 'audio-to-word'}
 							<p class="reveal">
-								{#if item.reading}<span class="reveal-reading">{item.reading}</span>{/if}
+								{#if item.reading}<span class="reveal-reading">{rd(item.reading)}</span>{/if}
 								<span class="reveal-meaning">{item.meaning}</span>
 							</p>
 						{/if}
