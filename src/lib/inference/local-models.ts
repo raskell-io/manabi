@@ -1,13 +1,22 @@
 /**
  * Local model manager — wraps transformers.js so callers don't deal with HF
  * pipeline loading/caching. The runtime is dynamically imported so it stays
- * out of the initial bundle; only users who trigger local TTS pay the cost.
+ * out of the initial bundle; only users who trigger local TTS or speech
+ * recognition pay the cost.
  * Models download once into transformers.js's own cache. Ported from kurumi.
  */
 
 import { get, writable, type Writable } from 'svelte/store';
 
-export type LocalTask = 'tts';
+export type LocalTask = 'tts' | 'asr';
+
+const HF_TASK: Record<LocalTask, string> = { tts: 'text-to-speech', asr: 'automatic-speech-recognition' };
+
+/** Extra pipeline options (device, dtype). */
+export interface PipelineOptions {
+	device?: 'webgpu' | 'wasm';
+	dtype?: string | Record<string, string>;
+}
 
 export type ModelStatus =
 	| { state: 'idle' }
@@ -34,7 +43,7 @@ interface ProgressEvent {
 	file?: string;
 }
 
-export async function loadPipeline(task: LocalTask, model: string): Promise<unknown> {
+export async function loadPipeline(task: LocalTask, model: string, options: PipelineOptions = {}): Promise<unknown> {
 	const key = `${task}:${model}`;
 	if (pipelineCache.has(key)) return pipelineCache.get(key);
 	if (pendingLoads.has(key)) return pendingLoads.get(key)!;
@@ -43,8 +52,9 @@ export async function loadPipeline(task: LocalTask, model: string): Promise<unkn
 		setStatus(key, { state: 'loading', progress: 0, phase: 'starting' });
 		try {
 			const { pipeline } = await import('@huggingface/transformers');
-			const hfTask = 'text-to-speech' as Parameters<typeof pipeline>[0];
+			const hfTask = HF_TASK[task] as Parameters<typeof pipeline>[0];
 			const instance = await pipeline(hfTask, model, {
+				...options,
 				progress_callback: (event: ProgressEvent) => {
 					if (event.status === 'progress' && typeof event.progress === 'number') {
 						setStatus(key, { state: 'loading', progress: event.progress, phase: event.file || 'downloading' });

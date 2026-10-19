@@ -68,9 +68,13 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
   Recall is a typing card when `settings.typedRecall` (checked by `exercises/answer.ts`:
   script or romanized, pinyin tones, "close" for a slip); listening is a dictation
   (rebuild a 2–8 word example from tiles) about half the time when one exists.
-- `inference/router.ts` — TTS is local-first (MMS) then OpenAI; generation, Hebrew
-  diacritization (`lib/hebrew.ts` — accepts a result only if the letters are unchanged) and
-  transcription (`lib/pronunciation.ts` scores it; learner confirms) are OpenAI-only.
+- `inference/router.ts` — TTS is local-first (MMS, Korean only) then OpenAI; transcription
+  is OpenAI first, then on-device Whisper (`providers/asr-local.ts`, opt-in `settings.localAsr`,
+  WASM; int8 decoders fail in onnxruntime-web, so base = q8 encoder + fp16 decoder; Chinese
+  normalized to Simplified; `asr-text.ts` drops hallucinated stock phrases) —
+  `lib/pronunciation.ts` scores it and the learner confirms. Generation, line annotation and
+  Hebrew diacritization (`lib/hebrew.ts` — accepts a result only if the letters are unchanged)
+  are OpenAI-only.
 - `db/store.ts` — `gradeItem`, `recordPronunciationAttempt`, `approveDraft`, derived
   stores (`activeItems`, `reviewSummary`, `lessonCounts`, `skillMemories`, …),
   `snapshotQueue(scope?)` for a stable per-session review order.
@@ -102,5 +106,5 @@ the build; every test fails on a page or console error): `npm run test:e2e`, or
 
 ## Deferred (future milestones)
 Markdown round-trip of content in the sync repo (snapshot sync itself ships — `sync.ts`;
-isomorphic-git is out because GitHub's git-over-HTTP has no CORS); on-device models for
-transcription and Hebrew diacritization (both OpenAI-only today).
+isomorphic-git is out because GitHub's git-over-HTTP has no CORS); an on-device model for
+Hebrew diacritization (OpenAI-only today); WebGPU for on-device Whisper (WASM only so far).

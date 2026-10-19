@@ -310,7 +310,9 @@ export interface ManabiSettings {
 	githubSyncToken: string; // fine-grained PAT (Contents: read & write); stored locally
 	syncAuto: boolean; // sync on start, after a review session, and when back online
 	localTtsEnabled: boolean; // synthesize pronunciation on-device
-	asrScoring: boolean; // score recordings with speech recognition (needs the OpenAI key)
+	asrScoring: boolean; // score recordings with speech recognition (OpenAI, or on-device below)
+	localAsr: boolean; // recognize speech on-device with Whisper (transformers.js); opt-in download
+	localAsrModel: 'base' | 'small'; // Whisper size: base ≈ 130 MB, small ≈ 300 MB
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	zhScript: ZhScript; // Chinese display script; content is stored Simplified (lib/chinese.ts)
 	zhReading: ZhReading; // Chinese reading aid shown; readings are stored as pinyin (lib/zhuyin.ts)
@@ -334,6 +336,8 @@ export function defaultSettings(): ManabiSettings {
 		syncAuto: true,
 		localTtsEnabled: true,
 		asrScoring: true,
+		localAsr: false,
+		localAsrModel: 'base',
 		hideHebrewVowels: false,
 		zhScript: 'simplified',
 		zhReading: 'pinyin',
@@ -346,7 +350,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 export interface ManabiDocument {
 	schemaVersion: number;

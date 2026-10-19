@@ -13,9 +13,18 @@
 	import { LANGUAGES, stripNiqqud, todayIso, type Language } from '$lib/db/types';
 	import type { MergeSummary } from '$lib/db/merge';
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
+	import { localModelStatus } from '$lib/inference/local-models';
+	import { asrModelId, loadAsr } from '$lib/inference/providers/asr-local';
 	import { displayReading, toZhScript, zhLangTag, zhScript, ZH_READINGS, ZH_SCRIPTS } from '$lib/chinese';
 
 	let s = $derived($settings);
+
+	// --- On-device speech recognition ---
+	const ASR_MODELS = [
+		{ value: 'base', label: 'Base', note: '≈ 130 MB · a few seconds per take' },
+		{ value: 'small', label: 'Small', note: '≈ 300 MB · slower, more accurate, incl. Hebrew' }
+	] as const;
+	const asrStatus = $derived($localModelStatus[`asr:${asrModelId(s)}`] ?? { state: 'idle' as const });
 
 	// --- Sync ---
 	const syncConfigured = $derived(isSyncConfigured(s));
@@ -168,8 +177,31 @@
 	<h2>Pronunciation</h2>
 	<label class="check">
 		<input type="checkbox" checked={s.asrScoring} onchange={(e) => updateSettings({ asrScoring: e.currentTarget.checked })} />
-		<span>Score recordings with speech recognition (OpenAI transcription; needs the key below). After you record, Manabi transcribes the take, compares it with the word and suggests a rating — you still confirm it.</span>
+		<span>Score recordings with speech recognition. After you record, Manabi transcribes the take, compares it with the word and suggests a rating — you still confirm it. Uses OpenAI when a key is set below, otherwise on-device recognition if it's on.</span>
 	</label>
+	<label class="check">
+		<input type="checkbox" checked={s.localAsr} onchange={(e) => updateSettings({ localAsr: e.currentTarget.checked })} />
+		<span>Recognize speech on this device (Whisper) — works offline and without a key. Less accurate than OpenAI, especially for single words.</span>
+	</label>
+	{#if s.localAsr}
+		<div class="lang-row asr-models">
+			{#each ASR_MODELS as m (m.value)}
+				<button class="lang" class:active={s.localAsrModel === m.value} onclick={() => updateSettings({ localAsrModel: m.value })}>
+					<span class="native">{m.label}</span>
+					<span class="name">{m.note}</span>
+				</button>
+			{/each}
+		</div>
+		<div class="backup-row">
+			<button class="action" onclick={() => void loadAsr(s).catch(() => {})} disabled={asrStatus.state === 'loading' || asrStatus.state === 'ready'}>
+				<Download size={16} /> {asrStatus.state === 'ready' ? 'Ready' : 'Download now'}
+			</button>
+			<span class="sync-status" class:error={asrStatus.state === 'error'} role="status">
+				{#if asrStatus.state === 'loading'}Downloading… {Math.round(asrStatus.progress)}%{:else if asrStatus.state === 'error'}{asrStatus.error}{:else if asrStatus.state === 'ready'}Loaded for this session.{:else}Downloads on first use, then works offline.{/if}
+			</span>
+		</div>
+		{#if s.localAsrModel === 'base'}<p class="muted">Hebrew needs the larger model; with Base, Hebrew recordings use OpenAI only.</p>{/if}
+	{/if}
 </section>
 
 <section class="group">

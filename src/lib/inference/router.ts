@@ -2,13 +2,15 @@
  * Inference router — picks the first capable provider for a task.
  *
  * TTS is local-first (the user's choice): try on-device MMS, fall back to
- * OpenAI when available. Generation, Hebrew diacritization and transcription
- * are OpenAI-only.
+ * OpenAI when available. Transcription prefers OpenAI (more accurate) and
+ * falls back to on-device Whisper when that is switched on (no key, offline).
+ * Generation and Hebrew diacritization are OpenAI-only.
  */
 
 import type { ManabiSettings } from '$lib/db/types';
 import { ttsLocalProvider } from './providers/tts-local';
 import { openaiProvider } from './providers/openai';
+import { asrLocalProvider } from './providers/asr-local';
 import type {
 	DiacritizeInput,
 	DiacritizeResult,
@@ -28,6 +30,8 @@ import type {
 
 // Order matters: TTS prefers the first provider that succeeds.
 const PROVIDERS: InferenceProvider[] = [ttsLocalProvider, openaiProvider];
+// Transcription: the remote model first, then the on-device one.
+const TRANSCRIBERS: InferenceProvider[] = [openaiProvider, asrLocalProvider];
 
 /** Synthesize speech, trying each capable provider until one succeeds. */
 export async function synthesize(
@@ -80,16 +84,20 @@ export async function diacritize(
 	return { ok: false, error: 'No diacritization provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
 }
 
-/** Transcribe a learner's recording (OpenAI only). */
+/** Transcribe a learner's recording: OpenAI, else (or if it fails) on-device Whisper. */
 export async function transcribe(
 	input: TranscribeInput,
 	settings: ManabiSettings
 ): Promise<InferenceResult<TranscribeResult>> {
-	for (const p of PROVIDERS) {
+	let last: InferenceResult<TranscribeResult> | null = null;
+	for (const p of TRANSCRIBERS) {
 		if (!p.transcribe || !p.capabilities(settings).transcribe) continue;
-		return p.transcribe(input, settings);
+		last = await p.transcribe(input, settings);
+		if (last.ok) return last;
 	}
-	return { ok: false, error: 'No transcription provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+	return (
+		last ?? { ok: false, error: 'No speech recognition (set an OpenAI key or turn on on-device recognition)', providerId: 'router', target: 'remote' }
+	);
 }
 
 /** Reading + translation for lines of the learner's own text (OpenAI only). */
@@ -109,7 +117,7 @@ export function canDiacritize(settings: ManabiSettings): boolean {
 }
 
 export function canTranscribe(settings: ManabiSettings): boolean {
-	return PROVIDERS.some((p) => p.transcribe && p.capabilities(settings).transcribe);
+	return TRANSCRIBERS.some((p) => p.transcribe && p.capabilities(settings).transcribe);
 }
 
 export function canGenerate(settings: ManabiSettings): boolean {
