@@ -203,6 +203,8 @@ export type ExerciseType =
 	| 'audio-to-word' // listening
 	| 'cloze' // context
 	| 'meaning-to-word' // recall
+	| 'type-recall' // recall: type the word
+	| 'dictation' // listening: rebuild a heard sentence from word tiles
 	| 'record-compare'; // pronunciation (M3)
 
 export const EXERCISE_DIMENSION: Record<ExerciseType, Dimension> = {
@@ -212,6 +214,8 @@ export const EXERCISE_DIMENSION: Record<ExerciseType, Dimension> = {
 	'audio-to-word': 'listening',
 	cloze: 'context',
 	'meaning-to-word': 'recall',
+	'type-recall': 'recall',
+	dictation: 'listening',
 	'record-compare': 'pronunciation'
 };
 
@@ -311,6 +315,7 @@ export interface ManabiSettings {
 	zhScript: ZhScript; // Chinese display script; content is stored Simplified (lib/chinese.ts)
 	zhReading: ZhReading; // Chinese reading aid shown; readings are stored as pinyin (lib/zhuyin.ts)
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
+	typedRecall: boolean; // recall cards ask you to type the word (vs. pick it)
 	theme: 'system' | 'light' | 'dark';
 	/** The learning path picked per language ('beginner' | 'refresher'); unset = suggested. */
 	pathChoice: Partial<Record<Language, string>>;
@@ -333,6 +338,7 @@ export function defaultSettings(): ManabiSettings {
 		zhScript: 'simplified',
 		zhReading: 'pinyin',
 		gradeButtons: true,
+		typedRecall: true,
 		theme: 'light',
 		pathChoice: {}
 	};
@@ -340,7 +346,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export interface ManabiDocument {
 	schemaVersion: number;

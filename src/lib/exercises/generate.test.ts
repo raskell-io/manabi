@@ -76,4 +76,29 @@ describe('buildExercise', () => {
 		expect(ex!.type).toBe('record-compare');
 		expect(ex!.choices).toBeUndefined();
 	});
+
+	it('makes recall a typing card when typed recall is on', () => {
+		const ex = buildExercise(target, 'recall', pool, { audio: false, typed: true, rng: seededRng(5) });
+		expect(ex!.type).toBe('type-recall');
+		expect(ex!.promptMeaning).toBe('today');
+		expect(ex!.typeKey).toEqual({ language: 'zh', target: '今天', reading: 'jīntiān' });
+		expect(ex!.choices).toBeUndefined();
+		expect(buildExercise(target, 'recall', pool, { audio: false, rng: seededRng(5) })!.type).toBe('meaning-to-word');
+	});
+
+	it('sometimes dictates a short example sentence for listening', () => {
+		const types = new Set<string>();
+		for (let seed = 1; seed <= 20; seed++) {
+			const ex = buildExercise(target, 'listening', pool, { audio: true, rng: seededRng(seed * 2654435761) })!;
+			types.add(ex.type);
+			if (ex.type === 'dictation') {
+				expect(ex.tileAnswer).toEqual(['我', '今天', '很', '忙']);
+				expect([...ex.tiles!].sort()).toEqual([...ex.tileAnswer!].sort());
+				expect(ex.clozeMeaning).toBe('I am very busy today.');
+			}
+		}
+		expect(types).toEqual(new Set(['dictation', 'audio-to-word']));
+		// Without audio, or without a usable example, it stays a word card.
+		expect(buildExercise(item('x'), 'listening', pool, { audio: true, rng: seededRng(1) })!.type).toBe('audio-to-word');
+	});
 });

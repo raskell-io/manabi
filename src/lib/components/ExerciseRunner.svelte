@@ -13,6 +13,7 @@
 	import type { Exercise, Choice } from '$lib/exercises/templates';
 	import { languageDir, stripNiqqud, type LearningItem, type SelfRating } from '$lib/db/types';
 	import type { AsrResult } from '$lib/pronunciation';
+	import { checkTyped, type TypedCheck } from '$lib/exercises/answer';
 
 	export type CompleteResult =
 		| { kind: 'mcq'; quality: number; chosen: string }
@@ -58,6 +59,9 @@
 		return { before: shown(full.slice(0, i)), word, after: shown(full.slice(i + item.target.length)) };
 	});
 
+	// What an audio prompt plays: the word, or the sentence to dictate.
+	const promptAudio = $derived(exercise.type === 'dictation' ? (exercise.promptScript ?? item.target) : item.target);
+
 	// Auto-play the word when it appears (the script prompt of a reading card, or
 	// a listening card) — but not when it would give the answer away (recall /
 	// cloze / record-compare). Runs once per card (keyed remount in the parent).
@@ -65,8 +69,35 @@
 		const autoPlay =
 			exercise.type !== 'record-compare' &&
 			(exercise.promptMode === 'script' || exercise.promptMode === 'audio');
-		if (autoPlay) void playPrerecorded(item.language, item.target);
+		if (autoPlay) void playPrerecorded(item.language, promptAudio);
 	});
+
+	// Type-recall: the typed answer and how it was judged.
+	let typed = $state('');
+	let typedCheck = $state<TypedCheck | null>(null);
+	const TYPE_HINT: Record<string, string> = {
+		zh: 'Hanzi or pinyin (mǎ or ma3)',
+		ja: 'Kanji, kana or romaji',
+		ko: 'Hangul or romanization',
+		he: 'Hebrew or transliteration'
+	};
+	function submitTyped(giveUp: boolean) {
+		if (answered || !exercise.typeKey) return;
+		const key = { ...exercise.typeKey, alternatives: exercise.language === 'zh' ? [$toZhScript(exercise.typeKey.target)] : [] };
+		typedCheck = giveUp ? { verdict: 'wrong' } : checkTyped(typed, key);
+		choose({ key: 'typed', label: typed.trim() || '—', correct: typedCheck.verdict !== 'wrong' });
+	}
+
+	// Dictation: tiles placed so far (indexes into exercise.tiles); checked once all are placed.
+	let placed = $state<number[]>([]);
+	function placeTile(i: number) {
+		if (answered || !exercise.tiles || !exercise.tileAnswer) return;
+		placed = placed.includes(i) ? placed.filter((p) => p !== i) : [...placed, i];
+		if (placed.length === exercise.tiles.length) {
+			const built = placed.map((p) => exercise.tiles![p]);
+			choose({ key: 'tiles', label: built.join(' '), correct: built.join('') === exercise.tileAnswer.join('') });
+		}
+	}
 
 	const PRAISE = ['Nice!', 'Great job!', 'Awesome!', 'You got it!', 'Excellent!', 'Spot on!', 'Perfect!'];
 	const COMFORT = ['Not quite', 'Almost!', 'So close', 'Keep going'];
@@ -75,7 +106,7 @@
 	function choose(c: Choice) {
 		if (answered) return;
 		selected = c;
-		cheer = c.correct ? pick(PRAISE) : pick(COMFORT);
+		cheer = typedCheck?.verdict === 'close' ? 'Almost!' : c.correct ? pick(PRAISE) : pick(COMFORT);
 		if (c.correct) {
 			playCorrect();
 			tapCorrect();
@@ -83,8 +114,8 @@
 			playWrong();
 			tapWrong();
 		}
-		// Cloze: play the full sentence once answered (after the chime rings).
-		if (exercise.type === 'cloze' && exercise.clozeFull) {
+		// Cloze / dictation: play the full sentence once answered (after the chime rings).
+		if ((exercise.type === 'cloze' || exercise.type === 'dictation') && exercise.clozeFull) {
 			const lang = exercise.language;
 			const text = exercise.clozeFull;
 			setTimeout(() => void playPrerecorded(lang, text), 350);
@@ -104,11 +135,12 @@
 	// Keyboard control: number keys pick a choice; once answered, grade keys
 	// advance (1=Hard/Continue, 2/Enter=Good, 3=Easy). Record-compare is mouse-driven.
 	function handleKey(e: KeyboardEvent) {
-		if (!exercise.choices) return;
+		if (!exercise.choices && !(answered && (exercise.typeKey || exercise.tiles))) return;
 		const tag = (e.target as HTMLElement)?.tagName;
 		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
 		if (!answered) {
+			if (!exercise.choices) return;
 			const n = Number(e.key);
 			if (Number.isInteger(n) && n >= 1 && n <= exercise.choices.length) {
 				choose(exercise.choices[n - 1]);
@@ -163,7 +195,11 @@
 			<div class="big-meaning">{exercise.promptMeaning}</div>
 		{:else if exercise.promptMode === 'audio'}
 			<div class="audio-prompt">
-				<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play audio" big />
+				{#if exercise.type === 'dictation'}
+					<AudioButton text={promptAudio} language={item.language} label="Play sentence" big />
+				{:else}
+					<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play audio" big />
+				{/if}
 				<span class="hint">Tap to listen</span>
 			</div>
 		{:else if exercise.promptMode === 'cloze'}
@@ -208,53 +244,192 @@
 			{/each}
 		</div>
 
-		{#if answered}
-			<div class="grade" class:ok={selected?.correct} class:no={!selected?.correct}>
-				<div class="fb-head">
-					<Mascot size={76} mood={selected?.correct ? 'cheer' : 'sad'} />
-					<div class="fb-text">
-						<p class="feedback">
-							{#if selected?.correct}<Check size={22} strokeWidth={3.2} />{:else}<X size={22} strokeWidth={3.2} />{/if}
-							{cheer}
-						</p>
-						{#if !selected?.correct}
-							<p class="answer-line">
-								Answer: <ScriptText text={exercise.type === 'word-to-reading' ? rd(exercise.answer) : exercise.answer} language={exercise.language} size="sm" />
-							</p>
-						{/if}
-						<!-- Listening: confirm what the word was by revealing its reading + meaning. -->
-						{#if exercise.type === 'audio-to-word'}
-							<p class="reveal">
-								{#if item.reading}<span class="reveal-reading">{rd(item.reading)}</span>{/if}
-								<span class="reveal-meaning">{item.meaning}</span>
-							</p>
-						{/if}
-					</div>
-				</div>
+	{/if}
 
-				{#if selected?.correct}
-					{#if $settings.gradeButtons}
-						<div class="grade-row">
-							<button class="btn3d ghost g" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
-							<button class="btn3d success g" onclick={() => finish(4)}>Good <kbd>2</kbd></button>
-							<button class="btn3d easy g" onclick={() => finish(5)}>Easy <kbd>3</kbd></button>
-						</div>
-					{:else}
-						<div class="grade-row">
-							<button class="btn3d success g wide" onclick={() => finish(4)}>Continue <kbd>↵</kbd></button>
-						</div>
+	<!-- Type-recall: type the word -->
+	{#if exercise.typeKey}
+		<form
+			class="typed"
+			onsubmit={(e) => {
+				e.preventDefault();
+				submitTyped(false);
+			}}
+		>
+			<!-- svelte-ignore a11y_autofocus -->
+			<input
+				bind:value={typed}
+				class:ok={answered && selected?.correct}
+				class:no={answered && !selected?.correct}
+				disabled={answered}
+				placeholder={TYPE_HINT[exercise.language]}
+				autocomplete="off"
+				autocapitalize="off"
+				spellcheck="false"
+				dir="auto"
+				lang={scriptLangTag(exercise.language, $zhScript)}
+				autofocus
+			/>
+			{#if !answered}
+				<div class="typed-actions">
+					<button type="button" class="btn3d ghost" onclick={() => submitTyped(true)}>I don't know</button>
+					<button type="submit" class="btn3d" disabled={!typed.trim()}>Check</button>
+				</div>
+			{/if}
+		</form>
+	{/if}
+
+	<!-- Dictation: tap the words in order -->
+	{#if exercise.tiles}
+		<div class="built" dir={languageDir(exercise.language)} lang={scriptLangTag(exercise.language, $zhScript)}>
+			{#each placed as p (p)}
+				<button class="tile placed" disabled={answered} onclick={() => placeTile(p)}>{shown(exercise.tiles[p])}</button>
+			{:else}
+				<span class="built-hint">Tap the words in the order you hear them</span>
+			{/each}
+		</div>
+		<div class="bank" dir={languageDir(exercise.language)} lang={scriptLangTag(exercise.language, $zhScript)}>
+			{#each exercise.tiles as t, i (i)}
+				<button class="tile" class:used={placed.includes(i)} disabled={answered || placed.includes(i)} onclick={() => placeTile(i)}>{shown(t)}</button>
+			{/each}
+		</div>
+	{/if}
+
+	{#if answered}
+		<div class="grade" class:ok={selected?.correct} class:no={!selected?.correct}>
+			<div class="fb-head">
+				<Mascot size={76} mood={selected?.correct ? 'cheer' : 'sad'} />
+				<div class="fb-text">
+					<p class="feedback">
+						{#if selected?.correct}<Check size={22} strokeWidth={3.2} />{:else}<X size={22} strokeWidth={3.2} />{/if}
+						{cheer}
+					</p>
+					{#if exercise.type === 'type-recall' && typedCheck?.verdict !== 'exact'}
+						<p class="answer-line">
+							{#if typedCheck?.note}<span class="almost">{typedCheck.note} ·</span>{/if}
+							<ScriptText text={item.target} language={exercise.language} size="sm" />
+							{#if item.reading}<span class="answer-reading">{rd(item.reading)}</span>{/if}
+						</p>
+					{:else if exercise.type === 'dictation'}
+						<p class="answer-line"><ScriptText text={exercise.clozeFull ?? ''} language={exercise.language} size="sm" /></p>
+						<p class="reveal">
+							{#if exercise.clozeReading}<span class="reveal-reading">{rd(exercise.clozeReading)}</span>{/if}
+							{#if exercise.clozeMeaning}<span class="reveal-meaning">{exercise.clozeMeaning}</span>{/if}
+						</p>
+					{:else if !selected?.correct}
+						<p class="answer-line">
+							Answer: <ScriptText text={exercise.type === 'word-to-reading' ? rd(exercise.answer) : exercise.answer} language={exercise.language} size="sm" />
+						</p>
 					{/if}
+					<!-- Listening: confirm what the word was by revealing its reading + meaning. -->
+					{#if exercise.type === 'audio-to-word'}
+						<p class="reveal">
+							{#if item.reading}<span class="reveal-reading">{rd(item.reading)}</span>{/if}
+							<span class="reveal-meaning">{item.meaning}</span>
+						</p>
+					{/if}
+				</div>
+			</div>
+
+			{#if selected?.correct}
+				{#if $settings.gradeButtons}
+					<div class="grade-row">
+						<button class="btn3d ghost g" onclick={() => finish(3)}>Hard <kbd>1</kbd></button>
+						<button class="btn3d success g" onclick={() => finish(4)}>Good <kbd>2</kbd></button>
+						<button class="btn3d easy g" onclick={() => finish(5)}>Easy <kbd>3</kbd></button>
+					</div>
 				{:else}
 					<div class="grade-row">
-						<button class="btn3d danger g wide" onclick={() => finish(0)}>Got it <kbd>↵</kbd></button>
+						<button class="btn3d success g wide" onclick={() => finish(4)}>Continue <kbd>↵</kbd></button>
 					</div>
 				{/if}
-			</div>
-		{/if}
+			{:else}
+				<div class="grade-row">
+					<button class="btn3d danger g wide" onclick={() => finish(0)}>Got it <kbd>↵</kbd></button>
+				</div>
+			{/if}
+		</div>
 	{/if}
 </div>
 
 <style>
+	.typed {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+	.typed input {
+		width: 100%;
+		padding: 0.8rem 1rem;
+		border: 2px solid var(--color-border);
+		border-bottom-width: 4px;
+		border-radius: 1rem;
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-family: var(--font-script);
+		font-size: 1.4rem;
+		text-align: center;
+	}
+	.typed input:focus {
+		outline: none;
+		border-color: var(--color-accent);
+	}
+	.typed input.ok {
+		border-color: var(--color-success);
+		color: var(--color-success);
+	}
+	.typed input.no {
+		border-color: var(--color-danger);
+		color: var(--color-danger);
+		text-decoration: line-through;
+	}
+	.typed-actions {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+	.typed-actions :global(.btn3d) {
+		flex: 1;
+	}
+	.built,
+	.bank {
+		width: 100%;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		justify-content: center;
+	}
+	.built {
+		min-height: 3.6rem;
+		padding: 0.5rem;
+		border-bottom: 2px solid var(--color-border);
+		align-items: center;
+	}
+	.built-hint {
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+	.tile {
+		padding: 0.45rem 0.85rem;
+		border: 2px solid var(--color-border);
+		border-bottom-width: 4px;
+		border-radius: 0.8rem;
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-family: var(--font-script);
+		font-size: 1.3rem;
+	}
+	.tile.used {
+		visibility: hidden;
+	}
+	.almost {
+		font-weight: 800;
+		color: var(--color-warning);
+	}
+	.answer-reading {
+		color: var(--color-text-muted);
+		margin-left: 0.4rem;
+	}
 	.exercise {
 		display: flex;
 		flex-direction: column;

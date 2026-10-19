@@ -38,12 +38,29 @@ function pickDistractors(item: LearningItem, pool: LearningItem[], n: number, rn
 	return ranked.slice(0, n);
 }
 
+/** The words of a sentence (punctuation dropped), via Intl.Segmenter. */
+export function sentenceWords(text: string, language: LearningItem['language']): string[] {
+	if (typeof Intl.Segmenter !== 'function') return text.split(/\s+/).filter(Boolean);
+	const seg = new Intl.Segmenter(language, { granularity: 'word' });
+	return [...seg.segment(text)].filter((s) => s.isWordLike).map((s) => s.segment);
+}
+
+/** A short example (2–8 words) to dictate, about half the time; else none. */
+function pickDictation(item: LearningItem, rng: Rng) {
+	const usable = item.examples
+		.map((ex) => ({ ...ex, words: sentenceWords(ex.target, item.language) }))
+		.filter((ex) => ex.words.length >= 2 && ex.words.length <= 8);
+	if (!usable.length || rng() < 0.5) return undefined;
+	return usable[Math.floor(rng() * usable.length)];
+}
+
 function choice(label: string, sublabel: string | undefined, correct: boolean, key: string): Choice {
 	return { key, label, sublabel, correct };
 }
 
 export interface BuildOptions {
 	audio: boolean; // local TTS available
+	typed?: boolean; // recall by typing (settings.typedRecall)
 	rng?: Rng;
 	choiceCount?: number; // total options incl. correct (default 4)
 }
@@ -61,12 +78,16 @@ export function buildExercise(
 ): Exercise | null {
 	const rng = opts.rng ?? Math.random;
 	const total = opts.choiceCount ?? 4;
-	let type = exerciseTypeFor(dimension, opts.audio);
+	let type = exerciseTypeFor(dimension, opts.audio, opts.typed ?? false);
 
 	// Context needs an example sentence; fall back to recall-style if none.
 	if (type === 'cloze' && item.examples.length === 0) {
 		type = 'meaning-to-word';
 	}
+
+	// Listening: every other card or so, a short example sentence to rebuild by ear.
+	const dictationExample = type === 'audio-to-word' ? pickDictation(item, rng) : undefined;
+	if (dictationExample) type = 'dictation';
 
 	const base = {
 		itemId: item.id,
@@ -193,6 +214,37 @@ export function buildExercise(
 				clozeTranslit: example.transliteration,
 				choices,
 				answer: item.target
+			};
+		}
+		case 'type-recall': {
+			return {
+				...base,
+				instruction: 'Type the word',
+				promptMode: 'meaning',
+				promptMeaning: item.meaning,
+				typeKey: {
+					language: item.language,
+					target: item.target,
+					reading: item.reading,
+					...(item.transliteration ? { transliteration: item.transliteration } : {})
+				},
+				answer: item.target
+			};
+		}
+		case 'dictation': {
+			const ex = dictationExample!;
+			return {
+				...base,
+				instruction: 'Build the sentence you hear',
+				promptMode: 'audio',
+				promptScript: ex.target,
+				clozeFull: ex.target,
+				clozeReading: ex.reading,
+				clozeTranslit: ex.transliteration,
+				clozeMeaning: ex.meaning,
+				tiles: shuffle(ex.words, rng),
+				tileAnswer: ex.words,
+				answer: ex.target
 			};
 		}
 		case 'record-compare': {

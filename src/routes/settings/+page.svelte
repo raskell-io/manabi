@@ -150,6 +150,10 @@
 		<input type="checkbox" checked={s.gradeButtons} onchange={(e) => updateSettings({ gradeButtons: e.currentTarget.checked })} />
 		<span>Self-rate difficulty after a correct answer (Hard / Good / Easy). When off, a correct answer just advances (graded “Good”) for a faster review.</span>
 	</label>
+	<label class="check">
+		<input type="checkbox" checked={s.typedRecall} onchange={(e) => updateSettings({ typedRecall: e.currentTarget.checked })} />
+		<span>Type the word on recall cards — in its script or romanized (pinyin with tones, kana or romaji, Hangul or romanization). When off, you pick it from four.</span>
+	</label>
 </section>
 
 <section class="group">

@@ -7,6 +7,7 @@
  */
 
 import type { Dimension, ExerciseType, Language } from '$lib/db/types';
+import type { AnswerKey } from './answer';
 
 export interface Choice {
 	/** Stable key for keyed-each + selection. */
@@ -48,8 +49,13 @@ export interface Exercise {
 	clozeTranslit?: string;
 	/** Audio ref for audio prompts (resolved/synthesized by the runner). */
 	promptAudioRef?: string;
-	/** Multiple-choice options (absent for record-compare). */
+	/** Multiple-choice options (absent for record-compare, typing and dictation). */
 	choices?: Choice[];
+	/** Type-recall: what a typed answer is checked against. */
+	typeKey?: AnswerKey;
+	/** Dictation: the sentence's words, shuffled, and in order. */
+	tiles?: string[];
+	tileAnswer?: string[];
 	/** Canonical correct answer, for attempt logging. */
 	answer: string;
 }
@@ -61,14 +67,18 @@ export const INSTRUCTIONS: Record<ExerciseType, string> = {
 	'audio-to-word': 'Which word do you hear?',
 	cloze: 'Fill in the blank',
 	'meaning-to-word': 'Choose the word',
+	'type-recall': 'Type the word',
+	dictation: 'Build the sentence you hear',
 	'record-compare': 'Listen, then record yourself'
 };
 
 /**
  * The exercise type used to drill a dimension. `audio` flags whether local
- * TTS is available — when off, listening/pronunciation fall back to text.
+ * TTS is available — when off, listening/pronunciation fall back to text;
+ * `typed` makes recall a typing card. (Dictation is chosen per card in
+ * generate.ts, when the item has a short example sentence.)
  */
-export function exerciseTypeFor(dimension: Dimension, audio: boolean): ExerciseType {
+export function exerciseTypeFor(dimension: Dimension, audio: boolean, typed: boolean): ExerciseType {
 	switch (dimension) {
 		case 'recognition':
 			return 'word-to-meaning';
@@ -79,6 +89,6 @@ export function exerciseTypeFor(dimension: Dimension, audio: boolean): ExerciseT
 		case 'context':
 			return 'cloze';
 		case 'recall':
-			return 'meaning-to-word';
+			return typed ? 'type-recall' : 'meaning-to-word';
 	}
 }

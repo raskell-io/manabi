@@ -138,7 +138,7 @@
 		current?.dimension === 'listening' || current?.dimension === 'pronunciation'
 	);
 	let exercise = $derived<Exercise | null>(
-		current && item ? buildExercise(item, current.dimension, pool, { audio: taskAudio }) : null
+		current && item ? buildExercise(item, current.dimension, pool, { audio: taskAudio, typed: $settings.typedRecall }) : null
 	);
 
 	function start(m: Mode) {

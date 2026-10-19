@@ -63,8 +63,11 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
   `recognition.introducedOn === today`, reviews by `reviewCap`;
   `{ scope }` = a lesson's item-id set → scope order, both caps lifted);
   `isUnlocked` gates context behind 1 recognition rep, recall behind 2.
-- `exercises/generate.ts` — `buildExercise(item, dimension, pool, {audio, rng})`;
+- `exercises/generate.ts` — `buildExercise(item, dimension, pool, {audio, typed, rng})`;
   distractors prefer same kind/level/tags. `rng` injectable for deterministic tests.
+  Recall is a typing card when `settings.typedRecall` (checked by `exercises/answer.ts`:
+  script or romanized, pinyin tones, "close" for a slip); listening is a dictation
+  (rebuild a 2–8 word example from tiles) about half the time when one exists.
 - `inference/router.ts` — TTS is local-first (MMS) then OpenAI; generation, Hebrew
   diacritization (`lib/hebrew.ts` — accepts a result only if the letters are unchanged) and
   transcription (`lib/pronunciation.ts` scores it; learner confirms) are OpenAI-only.
