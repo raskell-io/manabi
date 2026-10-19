@@ -79,7 +79,7 @@
 	<div class="app" class:immersive={$immersive}>
 		<!-- Phone top bar: brand, active language, streak, settings. -->
 		<header class="topbar">
-			<a href="/" class="tb-brand"><Mascot size={34} /><span class="wordmark">manabi</span></a>
+			<a href="/" class="tb-brand"><Mascot size={34} still label="Manabi" /><span class="wordmark">manabi</span></a>
 			<a href="/" class="lang-chip" title="Switch language">{langNative}</a>
 			<span class="streak" class:lit={streak.today} title="{streak.days}-day streak">
 				<Flame size={18} />{streak.days}
@@ -93,7 +93,7 @@
 			<!-- Desktop sidebar -->
 			<aside class="sidebar">
 				<a href="/" class="brand">
-					<Mascot size={46} />
+					<Mascot size={46} still label="Manabi" />
 					<span class="wordmark">manabi</span>
 				</a>
 

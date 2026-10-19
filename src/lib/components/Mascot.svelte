@@ -7,6 +7,10 @@
 	 * Pure SVG + CSS: the wings flap (scaleX about the body), the body floats,
 	 * the eyes blink and the antennae wiggle. `mood` swaps the face and the
 	 * tempo. Everything is still under prefers-reduced-motion.
+	 *
+	 * `still` freezes the pose: the brand mark in the nav is a logo, not the
+	 * character. Like Duolingo's owl, Nabi comes alive once per screen, in the
+	 * content — never twice.
 	 */
 	export type MascotMood = 'happy' | 'cheer' | 'sad' | 'think' | 'sleep';
 </script>
@@ -15,8 +19,9 @@
 	let {
 		mood = 'happy',
 		size = 96,
-		label = 'Nabi the butterfly'
-	}: { mood?: MascotMood; size?: number; label?: string } = $props();
+		label = 'Nabi the butterfly',
+		still = false
+	}: { mood?: MascotMood; size?: number; label?: string; still?: boolean } = $props();
 
 	// Unique gradient ids per instance (several mascots can share a page).
 	const uid = `nabi-${Math.random().toString(36).slice(2, 8)}`;
@@ -39,6 +44,7 @@
 
 <svg
 	class="nabi mood-{mood}"
+	class:still
 	width={size}
 	height={size}
 	viewBox="0 0 120 120"
@@ -360,6 +366,13 @@
 		}
 	}
 
+	.still,
+	.still * {
+		animation: none !important;
+	}
+	.still .ground {
+		display: none;
+	}
 	@media (prefers-reduced-motion: reduce) {
 		.nabi *,
 		.nabi {

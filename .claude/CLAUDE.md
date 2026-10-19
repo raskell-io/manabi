@@ -46,7 +46,7 @@ src/lib/
   roots.ts    Hebrew roots: rootOfWord / searchRoots / splitByRoot (highlight) over hand-curated roots-data.ts
   path.ts     learning paths: per language a Beginner and a Refresher path (pathsFor), each ordered stages (script · words · reading · skills · explore) over existing content; progress derived (pathState / stageProgress), never stored; the pick lives in settings.pathChoice (else suggestedPath)
   names.ts    place & people names per language (countries · home · world · family · given) over hand-curated names-data.ts
-  components/ PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep) · Confetti
+  components/ PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep; `still` for the nav logo — one animated Nabi per screen) · Confetti
 src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)

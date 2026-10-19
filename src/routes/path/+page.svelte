@@ -74,14 +74,14 @@
 		if (ids.length) void goto(scopeHref(ids, st.title));
 	}
 
-	const mood = $derived(allDone ? 'cheer' : trail.doneCount > 0 ? 'happy' : 'think');
 	const R = 41; // progress ring radius (viewBox 0 0 92 92)
 	const C = 2 * Math.PI * R;
 </script>
 
 <header class="head">
 	<div class="head-top">
-		<Mascot size={72} {mood} />
+		<!-- Nabi lives on the trail at "you are here"; up here only once the path is done. -->
+		{#if allDone}<Mascot size={72} mood="cheer" />{/if}
 		<div>
 			<h1>Your {langName} path</h1>
 			<p class="sub">
