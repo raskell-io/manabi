@@ -156,7 +156,7 @@
 	<h2>Audio</h2>
 	<label class="check">
 		<input type="checkbox" checked={s.localTtsEnabled} onchange={(e) => updateSettings({ localTtsEnabled: e.currentTarget.checked })} />
-		<span>Synthesize pronunciation on-device (transformers.js MMS). When off, OpenAI TTS is used if a key is set.</span>
+		<span>Synthesize pronunciation on-device (transformers.js MMS) — Korean only for now; the other languages use the bundled recordings. Otherwise OpenAI TTS is used if a key is set.</span>
 	</label>
 </section>
 

@@ -1,10 +1,11 @@
 /**
- * Local TTS via transformers.js using Facebook's MMS text-to-speech models,
- * one per language. Models load on demand and cache in the browser. If a model
- * is unavailable or fails, the router falls back to OpenAI TTS.
+ * Local TTS via transformers.js using Facebook's MMS text-to-speech models.
+ * Models load on demand and cache in the browser. If there is no model for a
+ * language, or it fails, the router falls back to OpenAI TTS.
  *
- * Model ids may need adjustment as Xenova ports change; on error we degrade
- * gracefully rather than block the review loop.
+ * Only Korean has a transformers.js (ONNX) port: MMS has no Mandarin or
+ * Japanese voice, and Hebrew (facebook/mms-tts-heb) exists only as PyTorch.
+ * Those languages rely on the bundled recordings, then OpenAI.
  */
 
 import type { Language, ManabiSettings } from '$lib/db/types';
@@ -17,12 +18,14 @@ import type {
 	TtsResult
 } from '../types';
 
-const MMS_MODEL: Record<Language, string> = {
-	zh: 'Xenova/mms-tts-cmn', // Mandarin
-	ja: 'Xenova/mms-tts-jpn',
-	ko: 'Xenova/mms-tts-kor',
-	he: 'Xenova/mms-tts-heb'
+const MMS_MODEL: Partial<Record<Language, string>> = {
+	ko: 'Xenova/mms-tts-kor'
 };
+
+/** Can this language be synthesized on-device? */
+export function hasLocalVoice(language: Language): boolean {
+	return MMS_MODEL[language] !== undefined;
+}
 
 interface TtsPipelineOutput {
 	audio: Float32Array;
@@ -74,6 +77,9 @@ export const ttsLocalProvider: InferenceProvider = {
 			return { ok: false, error: 'Empty text', providerId: 'tts-local', target: 'local' };
 		}
 		const model = MMS_MODEL[input.language];
+		if (!model) {
+			return { ok: false, error: 'No on-device voice for this language', providerId: 'tts-local', target: 'local' };
+		}
 		try {
 			const pipe = (await loadPipeline('tts', model)) as TtsPipelineFn;
 			const out = await pipe(input.text);

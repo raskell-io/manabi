@@ -12,7 +12,7 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
    context · recall — each has its own SM-2 schedule; recall/context unlock later.
 3. **Reading-first.** pinyin tone marks, kana, Hangul + Revised Romanization, vowelled
    (niqqud) Hebrew + RTL. Adding a language = `Language` + `LANGUAGES` in types.ts, then
-   every `Record<Language, …>` (seed, scripts, MMS model, reading guide, gen-audio VOICE).
+   every `Record<Language, …>` (seed, scripts, reading guide, gen-audio VOICE; an MMS voice in tts-local.ts only if an ONNX port exists).
 4. **Human-in-the-loop AI.** Workbench generates *drafts*; user approves to publish.
 5. **Local-first.** All state in IndexedDB. svelte-check must be 0/0.
 
