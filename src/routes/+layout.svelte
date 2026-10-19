@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import { Settings as SettingsIcon, Sun, Moon, Download, Flame } from 'lucide-svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
+	import Splash from '$lib/components/Splash.svelte';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 	import { armInstallCapture, installPrompt, promptInstall } from '$lib/install';
 	import { allItems, initDB, practiceTimes, settings, updateSettings } from '$lib/db/store';
@@ -55,12 +56,40 @@
 	const settingsActive = $derived(isNavActive({ href: '/settings' }, activePath));
 	const streak = $derived(computeStreak($practiceTimes));
 
+	// Launch splash: up while the database opens; on the first launch of a
+	// browser session it also stays a beat so its animation can play.
+	let splash = $state(true);
+	let splashLeaving = $state(false);
+	let splashSlow = $state(false);
+	const SPLASH_MIN_MS = 1300;
+	function firstLaunch(): boolean {
+		try {
+			if (sessionStorage.getItem('manabi-splash')) return false;
+			sessionStorage.setItem('manabi-splash', '1');
+		} catch {
+			/* storage blocked: treat as a reload */
+		}
+		return true;
+	}
+	async function dismissSplash(startedAt: number, full: boolean) {
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const wait = full && !reduced ? SPLASH_MIN_MS - (performance.now() - startedAt) : 0;
+		if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+		splashLeaving = true;
+		setTimeout(() => (splash = false), reduced ? 0 : 450);
+	}
+
 	onMount(async () => {
+		const startedAt = performance.now();
+		const full = firstLaunch();
+		const slowTimer = setTimeout(() => (splashSlow = true), 2500);
 		await initDB();
 		// Load the Traditional converter before the first render, so a Traditional
 		// reader never sees a flash of Simplified.
 		await setZhScript(get(settings).zhScript);
 		ready = true;
+		clearTimeout(slowTimer);
+		void dismissSplash(startedAt, full);
 		armInstallCapture();
 		// GitHub sync (if configured): pull/merge/push on start + when back online.
 		void startAutoSync();
@@ -73,12 +102,9 @@
 	});
 </script>
 
-{#if !ready}
-	<div class="boot">
-		<Mascot size={110} mood="happy" />
-		<span class="wordmark">manabi</span>
-	</div>
-{:else}
+{#if splash}<Splash leaving={splashLeaving} slow={splashSlow} />{/if}
+
+{#if ready}
 	<div class="app" class:immersive={$immersive}>
 		<!-- Phone top bar: brand, active language, streak, settings. -->
 		<header class="topbar">
@@ -166,14 +192,6 @@
 {/if}
 
 <style>
-	.boot {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		height: 100vh;
-	}
 	.wordmark {
 		font-weight: 900;
 		font-size: 1.6rem;

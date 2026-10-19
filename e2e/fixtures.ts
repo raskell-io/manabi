@@ -26,6 +26,7 @@ export { expect };
 export async function boot(page: Page): Promise<void> {
 	await page.goto('/');
 	await page.waitForSelector('.langs');
+	await expect(page.locator('.splash')).toHaveCount(0);
 }
 
 /** Switch the active language from Home. */
@@ -36,3 +37,10 @@ export async function useLanguage(page: Page, native: '中文' | '日本語' | '
 
 /** Collapse whitespace (innerText keeps line breaks). */
 export const squish = (s: string) => s.replace(/\s+/g, ' ').trim();
+
+/** After a session's last card: past the streak screen (first session of the day) to the summary. */
+export async function toSummary(page: Page): Promise<void> {
+	await page.locator('.summary, .streak-screen').first().waitFor();
+	if (await page.locator('.streak-screen').count()) await page.locator('.streak-screen button', { hasText: 'Continue' }).click();
+	await page.locator('.summary').waitFor();
+}

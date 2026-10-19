@@ -56,3 +56,27 @@ export function playWrong(): void {
 	note(ac, 392.0, 0.0, 0.16, 0.15, 'sine');
 	note(ac, 311.1, 0.1, 0.3, 0.15, 'sine');
 }
+
+/** Combo milestone (3 / 5 / 10 in a row): a quick sparkly run up two octaves. */
+export function playCombo(): void {
+	const ac = audioCtx();
+	if (!ac) return;
+	[1318.5, 1568.0, 2093.0, 2637.0].forEach((f, i) => note(ac, f, i * 0.045, 0.12, 0.11));
+}
+
+/** Lesson complete: a little fanfare — C major arpeggio, then a held chord. */
+export function playComplete(): void {
+	const ac = audioCtx();
+	if (!ac) return;
+	[523.3, 659.3, 784.0].forEach((f, i) => note(ac, f, i * 0.09, 0.16, 0.14));
+	[1046.5, 1318.5, 1568.0].forEach((f) => note(ac, f, 0.3, 0.6, 0.09));
+}
+
+/** Streak extended: a warm rising swell (G4 → D5 → G5), the top ringing. */
+export function playStreak(): void {
+	const ac = audioCtx();
+	if (!ac) return;
+	note(ac, 392.0, 0.0, 0.18, 0.12, 'sine');
+	note(ac, 587.3, 0.12, 0.2, 0.13, 'sine');
+	note(ac, 784.0, 0.24, 0.55, 0.15);
+}

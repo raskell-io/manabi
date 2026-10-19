@@ -3,9 +3,13 @@
 	import { fly } from 'svelte/transition';
 	import { get } from 'svelte/store';
 	import { page } from '$app/stores';
-	import { X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter, RotateCcw, Flame, Target, Timer, Zap } from 'lucide-svelte';
+	import { X, BookOpen, Mic, Headphones, Layers, LayoutGrid, ListFilter, RotateCcw, Flame, Target, Timer, Zap, Sparkles } from 'lucide-svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
 	import Confetti from '$lib/components/Confetti.svelte';
+	import CountUp from '$lib/components/CountUp.svelte';
+	import LessonIntro from '$lib/components/LessonIntro.svelte';
+	import StreakCelebration from '$lib/components/StreakCelebration.svelte';
+	import { playCombo, playComplete } from '$lib/sounds';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
 		activeItems,
@@ -13,6 +17,7 @@
 		getDoc,
 		gradeItem,
 		getItem,
+		practiceTimes,
 		recordPronunciationAttempt,
 		settings,
 		snapshotQueue
@@ -20,7 +25,7 @@
 	import { buildExercise } from '$lib/exercises/generate';
 	import { DIMENSIONS, DIMENSION_LABELS, type Dimension, type LearningItem } from '$lib/db/types';
 	import { parseMode, resolveScope, scopeHref, type Mode, type ReviewScope } from '$lib/srs/scope';
-	import { formatDuration } from '$lib/today';
+	import { computeStreak, formatDuration, lastSevenDays, type WeekDay } from '$lib/today';
 	import { rankAudioPractice, type AudioDimension, type RankedPractice } from '$lib/srs/practice';
 	import { loadAudioManifest, hasPrerecorded, type LangManifest } from '$lib/audio';
 	import type { QueueTask } from '$lib/srs/queue';
@@ -52,6 +57,32 @@
 	// Consecutive correct answers (shown as a flame once it reaches 3).
 	let combo = $state(0);
 	let bestCombo = $state(0);
+
+	// The playful layer: an intro card, points (XP) per right answer with a
+	// "+10" floating off the progress bar, a toast at combo milestones, and a
+	// streak screen before the summary when the session extends the streak.
+	let intro = $state(false);
+	let xp = $state(0);
+	let floaters = $state<{ id: number; n: number; at: number }[]>([]);
+	let toast = $state<{ id: number; n: number } | null>(null);
+	let streakBefore: { days: number; today: boolean } = { days: 0, today: false };
+	let streak = $state<{ days: number; week: WeekDay[] } | null>(null);
+	let fx = 0;
+	const XP_RIGHT = 10;
+	const XP_COMBO_BONUS = 5; // per answer while on a run of 3+
+	const isMilestone = (n: number) => n === 3 || n === 5 || (n >= 10 && n % 10 === 0);
+
+	function reward(gain: number, runLength: number, at: number) {
+		xp += gain;
+		const id = ++fx;
+		floaters = [...floaters, { id, n: gain, at }];
+		setTimeout(() => (floaters = floaters.filter((f) => f.id !== id)), 950);
+		if (isMilestone(runLength)) {
+			toast = { id, n: runLength };
+			setTimeout(() => (toast?.id === id ? (toast = null) : null), 1700);
+			setTimeout(playCombo, 120);
+		}
+	}
 
 	// What happened in this session, for the summary screen.
 	type Result = { dimension: Dimension; itemId: string; correct: boolean | null };
@@ -153,11 +184,19 @@
 		elapsedMs = 0;
 		tasks = tasksFor(m);
 		done = tasks.length === 0;
+		xp = 0;
+		floaters = [];
+		toast = null;
+		streak = null;
+		streakBefore = computeStreak(get(practiceTimes));
+		intro = tasks.length > 0 && !reducedMotion;
 	}
 
 	function backToModes() {
 		mode = null;
 		done = false;
+		intro = false;
+		streak = null;
 		allTasks = snapshotQueue(scope ?? undefined).tasks;
 		epoch += 1;
 	}
@@ -208,6 +247,13 @@
 			allTasks = snapshotQueue(scope ?? undefined).tasks;
 			epoch += 1;
 			void maybeAutoSync(); // push this session's progress (no-op unless configured)
+			// First session of the day that counts: the streak screen comes first.
+			const after = computeStreak(get(practiceTimes));
+			if (results.length > 0 && !streakBefore.today && after.today) {
+				streak = { days: after.days, week: lastSevenDays(get(practiceTimes)) };
+			} else if (results.length > 0) {
+				playComplete();
+			}
 		} else {
 			index += 1;
 		}
@@ -218,6 +264,7 @@
 		const ok = result.kind === 'mcq' ? result.quality >= 3 : result.rating !== 'bad';
 		combo = ok ? combo + 1 : 0;
 		bestCombo = Math.max(bestCombo, combo);
+		if (ok) reward(XP_RIGHT + (combo >= 3 ? XP_COMBO_BONUS : 0), combo, ((index + 1) / tasks.length) * 100);
 		results = [
 			...results,
 			{
@@ -302,6 +349,15 @@
 			</div>
 		{/if}
 	</div>
+{:else if done && streak}
+	<StreakCelebration
+		days={streak.days}
+		week={streak.week}
+		onContinue={() => {
+			streak = null;
+			playComplete();
+		}}
+	/>
 {:else if done}
 	<div class="summary">
 		{#if results.length > 0}<Confetti />{/if}
@@ -319,9 +375,10 @@
 			<p class="muted">Nothing was due for this mode.</p>
 		{:else}
 			<div class="sum-grid">
-				<div class="sum s-cards"><span class="lbl"><Zap size={13} strokeWidth={3} /> {results.length === 1 ? 'card' : 'cards'}</span><span class="num">{results.length}</span></div>
-				<div class="sum s-acc"><span class="lbl"><Target size={13} strokeWidth={3} /> accuracy</span><span class="num">{accuracy === null ? '—' : `${accuracy}%`}</span></div>
+				<div class="sum s-cards"><span class="lbl"><Zap size={13} strokeWidth={3} /> {results.length === 1 ? 'card' : 'cards'}</span><span class="num"><CountUp value={results.length} delay={350} /></span></div>
+				<div class="sum s-acc"><span class="lbl"><Target size={13} strokeWidth={3} /> accuracy</span><span class="num">{#if accuracy === null}—{:else}<CountUp value={accuracy} delay={450} format={(n) => `${Math.round(n)}%`} />{/if}</span></div>
 				<div class="sum s-time"><span class="lbl"><Timer size={13} strokeWidth={3} /> time</span><span class="num">{formatDuration(elapsedMs)}</span></div>
+				<div class="sum s-xp"><span class="lbl"><Sparkles size={13} strokeWidth={3} /> XP</span><span class="num"><CountUp value={xp} delay={650} duration={900} /></span></div>
 			</div>
 			<ul class="skills">
 				{#each bySkill as s (s.dim)}
@@ -366,8 +423,11 @@
 {:else if current && item && exercise}
 	<div class="session-head">
 		<button class="quit" onclick={backToModes} aria-label="Quit session" title="Quit session"><X size={18} /></button>
-		<div class="progress">
-			<div class="bar" style="width: {Math.max(4, (index / tasks.length) * 100)}%"></div>
+		<div class="progress-wrap">
+			<div class="progress">
+				<div class="bar" class:hot={combo >= 3} style="width: {Math.max(4, (index / tasks.length) * 100)}%"></div>
+			</div>
+			{#each floaters as f (f.id)}<span class="xp-float" style="left: {Math.min(92, Math.max(6, f.at))}%" aria-hidden="true">+{f.n} XP</span>{/each}
 		</div>
 		{#if combo >= 3}
 			{#key combo}
@@ -375,19 +435,29 @@
 			{/key}
 		{/if}
 	</div>
+	{#if toast}
+		{#key toast.id}
+			<div class="combo-toast" role="status"><Flame size={20} strokeWidth={2.8} /> {toast.n} in a row!</div>
+		{/key}
+	{/if}
+	{#if intro}
+		<LessonIntro mode={mode ?? 'reading'} count={tasks.length} title={scope?.title} onDone={() => (intro = false)} />
+	{/if}
 	<div class="meta">
-		<span>{index + 1} / {tasks.length}</span>
+		<span>{index + 1} / {tasks.length}{#if xp > 0}<span class="xp-total">{xp} XP</span>{/if}</span>
 		<span class="meta-right">
 			{#if scope}<span class="scope-tag">{scope.title}</span>{/if}
 			<span class="dim">{DIMENSION_LABELS[current.dimension]}{current.isNew ? ' · new' : ''}</span>
 		</span>
 	</div>
 
-	{#key index}
-		<div class="card" in:fly={{ x: 48, duration: reducedMotion ? 0 : 180 }}>
-			<ExerciseRunner {exercise} {item} {onComplete} />
-		</div>
-	{/key}
+	{#if !intro}
+		{#key index}
+			<div class="card" in:fly={{ x: 48, duration: reducedMotion ? 0 : 180 }}>
+				<ExerciseRunner {exercise} {item} {onComplete} />
+			</div>
+		{/key}
+	{/if}
 {:else}
 	<p class="muted">Loading…</p>
 {/if}
@@ -415,8 +485,11 @@
 		color: var(--color-text);
 		background: var(--color-bg-elevated);
 	}
-	.progress {
+	.progress-wrap {
+		position: relative;
 		flex: 1;
+	}
+	.progress {
 		height: 16px;
 		background: var(--color-bg-elevated);
 		border-radius: 999px;
@@ -428,6 +501,86 @@
 		border-radius: 999px;
 		background: var(--color-success);
 		transition: width 0.45s cubic-bezier(0.3, 1.3, 0.5, 1);
+	}
+	/* On a run of 3+: the bar heats up (warm gradient, moving sheen). */
+	.bar.hot {
+		background: linear-gradient(90deg, var(--color-sun), var(--color-warning), var(--color-pink));
+		background-size: 200% 100%;
+		animation: sheen 1.6s linear infinite;
+		box-shadow: 0 0 12px color-mix(in srgb, var(--color-warning) 55%, transparent);
+	}
+	@keyframes sheen {
+		to {
+			background-position: -200% 0;
+		}
+	}
+	.xp-float {
+		position: absolute;
+		top: 1.1rem; /* starts just under the bar and rises across it */
+		translate: -50% 0;
+		font-size: 0.85rem;
+		font-weight: 900;
+		color: var(--color-sun);
+		-webkit-text-stroke: 0.5px color-mix(in srgb, var(--color-warning) 70%, #000);
+		pointer-events: none;
+		animation: float-up 0.95s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+	}
+	@keyframes float-up {
+		0% {
+			opacity: 0;
+			transform: translateY(6px) scale(0.6);
+		}
+		20% {
+			opacity: 1;
+			transform: translateY(-4px) scale(1.15);
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-30px) scale(1);
+		}
+	}
+	.combo-toast {
+		position: fixed;
+		top: calc(4.2rem + env(safe-area-inset-top));
+		left: 50%;
+		z-index: 40;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.55rem 1.1rem;
+		border-radius: 999px;
+		background: linear-gradient(90deg, var(--color-sun), var(--color-warning));
+		color: #fff;
+		font-weight: 900;
+		font-size: 1.05rem;
+		text-shadow: 0 1px 0 color-mix(in srgb, var(--color-warning) 60%, #000);
+		box-shadow: 0 4px 0 color-mix(in srgb, var(--color-warning) 65%, #000), 0 10px 24px color-mix(in srgb, var(--color-warning) 35%, transparent);
+		pointer-events: none;
+		animation: toast 1.7s cubic-bezier(0.3, 1.4, 0.5, 1) forwards;
+	}
+	@keyframes toast {
+		0% {
+			opacity: 0;
+			transform: translate(-50%, -20px) scale(0.5);
+		}
+		15% {
+			opacity: 1;
+			transform: translate(-50%, 0) scale(1.08);
+		}
+		25%,
+		80% {
+			opacity: 1;
+			transform: translate(-50%, 0) scale(1);
+		}
+		100% {
+			opacity: 0;
+			transform: translate(-50%, -10px) scale(0.95);
+		}
+	}
+	.xp-total {
+		margin-left: 0.6rem;
+		font-weight: 800;
+		color: var(--color-warning);
 	}
 	.bar::after {
 		/* the glossy highlight stripe */
@@ -502,7 +655,7 @@
 	}
 	.sum-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 0.75rem;
 		margin: 1.25rem 0 1rem;
 	}
@@ -523,6 +676,13 @@
 	.sum.s-time {
 		--c: var(--color-sky);
 		animation-delay: 0.2s;
+	}
+	.sum.s-xp {
+		--c: var(--color-warning);
+		animation-delay: 0.3s;
+	}
+	.sum {
+		animation-delay: 0.15s;
 	}
 	.sum .lbl {
 		display: inline-flex;
@@ -575,6 +735,22 @@
 		height: 100%;
 		background: var(--color-success);
 		border-radius: 999px;
+		transform-origin: left;
+		animation: fill-in 0.7s 0.6s cubic-bezier(0.3, 1, 0.5, 1) both;
+	}
+	@keyframes fill-in {
+		from {
+			transform: scaleX(0);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.sk-fill,
+		.bar.hot,
+		.xp-float,
+		.combo-toast,
+		.sum {
+			animation: none !important;
+		}
 	}
 	.sk-fill.low {
 		background: var(--color-warning);

@@ -7,8 +7,8 @@ test('progress: review forecast and practice calendar', async ({ page }) => {
 	// One reading session today.
 	await page.goto('/review?mode=reading');
 	for (;;) {
-		await page.locator('.choice, .summary').first().waitFor();
-		if (await page.locator('.summary').count()) break;
+		await page.locator('.choice, .summary, .streak-screen').first().waitFor();
+		if (await page.locator('.summary, .streak-screen').count()) break;
 		await page.locator('.choice').first().click();
 		await page.keyboard.press('Enter');
 	}

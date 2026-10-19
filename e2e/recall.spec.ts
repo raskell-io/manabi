@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { test, expect, toSummary } from './fixtures';
 import type { Page } from '@playwright/test';
 
 /** One item (今天) taken through the days it takes to unlock dictation, context and typed recall. */
@@ -21,7 +21,7 @@ test('dictation, then typed recall, as the word matures', async ({ page, context
 	await expect(page.locator('.instruction')).toHaveText('What does this mean?');
 	await page.locator('.choice', { hasText: 'today' }).click();
 	await gradeGood(page);
-	await page.locator('.summary').waitFor();
+	await toSummary(page);
 
 	// Listening is unlocked: a short example sentence to rebuild from tiles.
 	await session(page, 'listening');
@@ -30,14 +30,14 @@ test('dictation, then typed recall, as the word matures', async ({ page, context
 	for (const w of ['我', '今天', '很', '忙']) await page.locator('.bank .tile:not(.used)', { hasText: new RegExp(`^${w}$`) }).click();
 	await expect(page.locator('.reveal-meaning')).toHaveText('I am very busy today.');
 	await gradeGood(page);
-	await page.locator('.summary').waitFor();
+	await toSummary(page);
 
 	// Day 2: second recognition rep (and the context card it unlocked).
 	await page.clock.setSystemTime(new Date('2026-10-21T08:00:00'));
 	await session(page, 'reading');
 	for (;;) {
-		await page.locator('.choice, .summary').first().waitFor();
-		if (await page.locator('.summary').count()) break;
+		await page.locator('.choice, .summary, .streak-screen').first().waitFor();
+		if (await page.locator('.summary, .streak-screen').count()) break;
 		const instruction = await page.locator('.instruction').innerText();
 		await page.locator('.choice', { hasText: instruction.startsWith('What does') ? 'today' : '今天' }).first().click();
 		await gradeGood(page);
@@ -65,8 +65,8 @@ test('typed recall: "I don\'t know" shows the answer', async ({ page, context })
 		await page.clock.setSystemTime(new Date(`${day}T08:00:00`));
 		await session(page, 'reading');
 		for (;;) {
-			await page.locator('.choice, .summary').first().waitFor();
-			if (await page.locator('.summary').count()) break;
+			await page.locator('.choice, .summary, .streak-screen').first().waitFor();
+			if (await page.locator('.summary, .streak-screen').count()) break;
 			const instruction = await page.locator('.instruction').innerText();
 			await page.locator('.choice', { hasText: instruction.startsWith('What does') ? 'today' : '今天' }).first().click();
 			await gradeGood(page);

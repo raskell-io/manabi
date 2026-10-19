@@ -5,6 +5,7 @@ test('one animated Nabi per screen; the nav logo is still', async ({ page }) => 
 	for (const route of ['/', '/dashboard', '/path', '/review', '/radicals', '/settings']) {
 		await page.goto(route);
 		await page.locator('.app').waitFor();
+		await expect(page.locator('.splash')).toHaveCount(0);
 		const census = await page.evaluate(() => {
 			const visible = [...document.querySelectorAll('svg.nabi')].filter((s) => (s as SVGElement).checkVisibility());
 			const moving = visible.filter((s) => getComputedStyle(s.querySelector('.wing-l')!).animationName !== 'none');

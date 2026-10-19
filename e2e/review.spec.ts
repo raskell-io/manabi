@@ -1,16 +1,49 @@
-import { test, expect, boot, squish } from './fixtures';
+import { test, expect, boot, squish, toSummary } from './fixtures';
 
 test('a full reading session runs to its summary', async ({ page }) => {
 	await page.goto('/review');
 	await page.locator('.mode-card[data-mode=reading]').click();
-	for (let n = 0; n < 40 && !(await page.locator('.summary').count()); n++) {
+	for (let n = 0; n < 40 && !(await page.locator('.summary, .streak-screen').count()); n++) {
 		await page.locator('.choice:not([disabled])').first().waitFor({ timeout: 5000 }).catch(() => {});
-		if (await page.locator('.summary').count()) break;
+		if (await page.locator('.summary, .streak-screen').count()) break;
 		await page.locator('.choice').nth(n % 2).click();
 		await page.locator('.grade').waitFor();
 		await page.keyboard.press('Enter');
 	}
+	// The first session of the day extends the streak: that screen comes first.
+	await expect(page.locator('.streak-screen h1')).toHaveText('You started a streak!');
+	await toSummary(page);
 	await expect(page.locator('.summary')).toBeVisible();
+});
+
+test('a lesson starts with an intro card, then XP and combos as you go', async ({ page }) => {
+	// Learn the right answers first: every Chinese item's meaning, from the Items list.
+	await boot(page);
+	await page.goto('/items');
+	await page.locator('.row').first().waitFor();
+	const meaningOf = new Map(
+		await page.locator('.row').evaluateAll((rows) =>
+			rows.map((r) => [r.querySelector('.script')?.textContent ?? '', r.querySelector('.meaning')?.textContent ?? ''] as const)
+		)
+	);
+
+	await page.goto('/review');
+	await page.locator('.mode-card[data-mode=reading]').click();
+	await expect(page.locator('.intro .title')).toHaveText('Reading');
+	await expect(page.locator('.intro .count')).toHaveText(/^\d+ cards$/);
+	await page.locator('.intro').click(); // tap to skip
+	await expect(page.locator('.intro')).toHaveCount(0);
+
+	// Three right answers in a row: +10 XP each, then the combo toast.
+	for (let i = 1; i <= 3; i++) {
+		const word = (await page.locator('.prompt .script').first().innerText()).trim();
+		await page.locator('.choice', { hasText: meaningOf.get(word)! }).first().click();
+		await expect(page.locator('.grade.ok')).toBeVisible();
+		await page.keyboard.press('Enter');
+		await expect(page.locator('.xp-total')).toHaveText(`${i * 10 + (i >= 3 ? 5 : 0)} XP`);
+	}
+	await expect(page.locator('.combo-toast')).toHaveText(/3 in a row!/);
+	await expect(page.locator('.bar.hot')).toBeVisible();
 });
 
 test('a session in dark mode', async ({ page }) => {
@@ -53,15 +86,17 @@ test.describe('Home → session → summary', () => {
 			if (await page.locator('.grade.no').count()) wrong++;
 			await page.keyboard.press('Enter');
 		}
-		await page.locator('.summary').waitFor();
+		await toSummary(page);
 		const vib = await page.evaluate(() => (window as unknown as { __vib: unknown[] }).__vib);
 		expect(vib).toHaveLength(5);
 		expect(vib.filter(Array.isArray)).toHaveLength(wrong);
 
-		const sums = (await page.locator('.sum').allInnerTexts()).map(squish);
-		expect(sums[0]).toMatch(/^cards 5$/i);
-		expect(sums[1]).toMatch(new RegExp(`^accuracy ${Math.round((100 * (5 - wrong)) / 5)}%$`, 'i'));
-		expect(sums[2]).toMatch(/^time \d+s$/i);
+		// The numbers count up: poll until they settle.
+		const sums = () => page.locator('.sum').allInnerTexts().then((t) => t.map(squish));
+		await expect.poll(async () => (await sums())[0]).toMatch(/^cards 5$/i);
+		await expect.poll(async () => (await sums())[1]).toMatch(new RegExp(`^accuracy ${Math.round((100 * (5 - wrong)) / 5)}%$`, 'i'));
+		expect((await sums())[2]).toMatch(/^time \d+s$/i);
+		await expect.poll(async () => (await sums())[3]).toMatch(wrong === 5 ? /^xp 0$/i : /^xp [1-9]\d*$/i);
 		const skills = (await page.locator('.skills li').allInnerTexts()).map(squish);
 		expect(skills).toHaveLength(1);
 		expect(skills[0]).toMatch(/^Recognition \d\/5$/);

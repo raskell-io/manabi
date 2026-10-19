@@ -143,6 +143,14 @@ is consistent and there is nothing to load.) Words you add yourself have no reco
 ones are spoken by an on-device voice, and the other languages use OpenAI's voice if you have
 set a key.
 
+## Points, runs and streaks
+
+A session opens with a short card from Nabi (tap to skip). Every right answer earns **10 XP**
+(15 while you are on a run of three or more), floating off the progress bar; the bar heats up
+on a run, and 3, 5, 10… in a row get a cheer. The first session that counts each day lights
+your **streak** — a flame screen with the week so far — before the summary, where the numbers
+count up. All of it is still when your device asks for reduced motion.
+
 ## Typing answers
 
 Recall cards show the meaning and ask you to type the word. You can type it in its own

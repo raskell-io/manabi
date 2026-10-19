@@ -380,11 +380,13 @@
 	.typed input.ok {
 		border-color: var(--color-success);
 		color: var(--color-success);
+		animation: pop-in 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
 	}
 	.typed input.no {
 		border-color: var(--color-danger);
 		color: var(--color-danger);
 		text-decoration: line-through;
+		animation: shake 0.4s ease;
 	}
 	.typed-actions {
 		display: flex;
@@ -424,6 +426,17 @@
 	}
 	.tile.used {
 		visibility: hidden;
+	}
+	.tile.placed {
+		animation: pop-in 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.feedback,
+		.fb-head > :global(svg),
+		.typed input,
+		.tile.placed {
+			animation: none !important;
+		}
 	}
 	.almost {
 		font-weight: 800;
@@ -615,6 +628,26 @@
 		font-size: 1.35rem;
 		font-weight: 900;
 		color: var(--fb);
+		animation: pop-in 0.4s 0.08s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+	}
+	/* Nabi hops in with the banner: up for a right answer, a little droop for a miss. */
+	.fb-head > :global(svg) {
+		animation: hop-in 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+	}
+	.grade.no .fb-head > :global(svg) {
+		animation-name: droop-in;
+	}
+	@keyframes hop-in {
+		from {
+			opacity: 0;
+			transform: translateY(28px) scale(0.6);
+		}
+	}
+	@keyframes droop-in {
+		from {
+			opacity: 0;
+			transform: translateY(-12px) rotate(-10deg);
+		}
 	}
 	.answer-line {
 		margin: 0;
