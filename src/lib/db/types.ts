@@ -10,7 +10,7 @@
  * mutating them in place (kurumi idiom).
  */
 
-import type { ZhReading, ZhScript } from '../chinese';
+import type { ZhReading, ZhScript, ZhVariants } from '../chinese';
 
 // --- ID generation ----------------------------------------------------------
 
@@ -119,6 +119,7 @@ export interface LearningItem {
 	level: string; // 'A1' | 'HSK1' | 'N4' ...
 	examples: ExampleSentence[];
 	audioRef?: string; // blob ref of word-level audio
+	zhVariants?: ZhVariants; // Chinese: the item's own Taiwan / Hong Kong form and Taiwan reading
 	status: ItemStatus;
 	createdAt: number;
 	updatedAt: number;
@@ -317,6 +318,7 @@ export interface ManabiSettings {
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	zhScript: ZhScript; // Chinese display script; content is stored Simplified (lib/chinese.ts)
 	zhReading: ZhReading; // Chinese reading aid shown; readings are stored as pinyin (lib/zhuyin.ts)
+	zhRuby: boolean; // Chinese: show the reading above each character where it is known
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
 	typedRecall: boolean; // recall cards ask you to type the word (vs. pick it)
 	theme: 'system' | 'light' | 'dark';
@@ -343,6 +345,7 @@ export function defaultSettings(): ManabiSettings {
 		hideHebrewVowels: false,
 		zhScript: 'simplified',
 		zhReading: 'pinyin',
+		zhRuby: false,
 		gradeButtons: true,
 		typedRecall: true,
 		theme: 'light',
@@ -352,7 +355,7 @@ export function defaultSettings(): ManabiSettings {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 export interface ManabiDocument {
 	schemaVersion: number;

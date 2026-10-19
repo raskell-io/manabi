@@ -11,7 +11,7 @@
 	import type { Language } from '$lib/db/types';
 	import { isHan, strokeLang } from '$lib/strokes';
 	import { radicalOf } from '$lib/radicals';
-	import { displayReading, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { readingOf, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 
 	let {
 		glyph,
@@ -44,7 +44,7 @@
 	<header>
 		<span class="big"><ScriptText text={glyph.char} {language} size="xl" /></span>
 		<div class="meta">
-			<span class="roman">{displayReading(glyph.roman, glyph.char, language, $settings.zhReading)}</span>
+			<span class="roman">{$readingOf(glyph.roman, glyph.char, language)}</span>
 			{#if glyph.gloss}<span class="gloss">{glyph.gloss}</span>{/if}
 			{#if rad}
 				<a class="radical" href="/radicals?r={rad.radical.n}" onclick={onClose}>

@@ -9,19 +9,30 @@
 	import LookupSheet from './LookupSheet.svelte';
 	import { settings } from '$lib/db/store';
 	import { languageDir, stripNiqqud, type Language } from '$lib/db/types';
-	import { scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { rubyOf, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { dictionary } from '$lib/dictionary';
 	import type { DictHit } from '$lib/lookup';
 
 	let {
 		text,
 		language,
-		size = 'md'
+		size = 'md',
+		reading
 	}: {
 		text: string;
 		language: Language;
 		size?: 'sm' | 'md' | 'lg';
+		/** Chinese: the line's reading, for syllables above the characters (when on). */
+		reading?: string;
 	} = $props();
+
+	// Ruby per character of the original text (conversion keeps one character per
+	// character; when it doesn't, or there are surrogate pairs, no ruby).
+	const ruby = $derived.by(() => {
+		if (language !== 'zh') return null;
+		const segs = $rubyOf(text, reading);
+		return segs && segs.length === text.length ? segs : null;
+	});
 
 	interface Segment {
 		text: string;
@@ -80,7 +91,7 @@
 		open && hit !== null && s.index < hit.start + hit.surface.length && s.index + s.text.length > hit.start;
 </script>
 
-<span class="tap {size}" dir={languageDir(language)} lang={scriptLangTag(language, $zhScript)}
+<span class="tap {size}" class:has-ruby={ruby} dir={languageDir(language)} lang={scriptLangTag(language, $zhScript)}
 	>{#each segments as s (s.index)}{#if s.word}<span
 				role="button"
 				tabindex="0"
@@ -92,9 +103,12 @@
 						e.preventDefault();
 						void tap(s);
 					}
-				}}>{shown(s.text)}</span
-			>{:else}{shown(s.text)}{/if}{/each}</span
+				}}>{@render chars(s)}</span
+			>{:else}{@render chars(s)}{/if}{/each}</span
 >
+
+{#snippet chars(s: Segment)}{#if ruby}{#each ruby.slice(s.index, s.index + s.text.length) as g, i (i)}{#if g.rt}<ruby>{g.text}<rt>{g.rt}</rt></ruby
+			>{:else}{g.text}{/if}{/each}{:else}{shown(s.text)}{/if}{/snippet}
 
 {#if open}
 	<LookupSheet {hit} surface={tapped} {language} {loading} onClose={close} />
@@ -104,6 +118,9 @@
 	.tap {
 		font-family: var(--font-script);
 		line-height: 1.5;
+	}
+	.tap.has-ruby {
+		line-height: 2.3;
 	}
 	.sm {
 		font-size: 1rem;
@@ -116,6 +133,13 @@
 	}
 	/* Inline spans, not buttons: buttons are atomic boxes, which would let a line
 	   start with "。" (no kinsoku across the box edge). */
+	rt {
+		font-family: var(--font-sans, inherit);
+		font-size: 0.5em;
+		font-weight: 600;
+		line-height: 1.1;
+		color: var(--color-text-muted);
+	}
 	.tok {
 		cursor: pointer;
 		border-radius: 0.3em;

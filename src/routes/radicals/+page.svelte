@@ -10,7 +10,7 @@
 	import { RADICALS, getRadical, radicalMembers, searchRadicals, type Radical } from '$lib/radicals';
 	import { scriptSections, sectionGlyphs, type Glyph } from '$lib/scripts';
 	import { isBundled, strokeLang, hanChars } from '$lib/strokes';
-	import { displayReading, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { readingOf, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 
 	const lang = $derived<Language>($settings.activeLanguage);
 	const drawLang = $derived(strokeLang(lang));
@@ -89,7 +89,7 @@
 			<div class="hero-meta">
 				<span class="num">Radical {selected.n} · {selected.strokes} {selected.strokes === 1 ? 'stroke' : 'strokes'}</span>
 				<h1>{selected.meaning}</h1>
-				{#if lang === 'zh' && selected.pinyin}<span class="pinyin">{displayReading(selected.pinyin, selected.char, lang, $settings.zhReading)}</span>{/if}
+				{#if lang === 'zh' && selected.pinyin}<span class="pinyin">{$readingOf(selected.pinyin, selected.char, lang)}</span>{/if}
 				{#if selected.variants.length}
 					<span class="variants">
 						Also written
@@ -116,7 +116,7 @@
 				{@const gl = glyphFor(c)}
 				<button class="member" class:mine={mine.has(c)} onclick={() => (sheet = gl)} title={gl.gloss ?? ''}>
 					<span class="m-char" lang={scriptLang}>{c}</span>
-					<span class="m-read">{displayReading(gl.roman, c, lang, $settings.zhReading)}</span>
+					<span class="m-read">{$readingOf(gl.roman, c, lang)}</span>
 				</button>
 			{/each}
 		</div>

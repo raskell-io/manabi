@@ -41,7 +41,7 @@ src/lib/
   audio.ts    synthesize → blob cache → play
   sync.ts     GitHub Contents-API sync of the backup snapshot (runSync pure over SyncIO); with settings.syncMarkdown also content/<lang>/{items,passages}.md (content-md.ts: render/parse, per-section hash → only hand-edited sections apply back, never deletes)
   strokes.ts  drawing-pad data: bundled static/strokes/{zh,ja}/<hex>.json (strokes-index.ts) else pinned jsDelivr CDN
-  chinese.ts  Chinese script option (settings.zhScript: Simplified · Traditional TW/HK): content stays Simplified, display converts via lazily loaded opencc-js (`toZhScript`, `scriptLangTag`; awaited at boot); readings shown as pinyin or Zhuyin (settings.zhReading, `displayReading` → zhuyin.ts)
+  chinese.ts  Chinese script option (settings.zhScript: Simplified · Traditional TW/HK): content stays Simplified, display converts via lazily loaded opencc-js (`toZhScript`, `scriptLangTag`; awaited at boot); an item's own `zhVariants` (Taiwan / HK form, Taiwan reading) win over conversion; readings via the `$readingOf(reading, target, language)` store (pinyin or Zhuyin, zhuyin.ts); `$rubyOf` puts syllables above characters (settings.zhRuby; ScriptText / TapText `reading` prop)
   radicals.ts 214 Kangxi radicals + radicalOf / radicalMembers / searchRadicals over generated radicals-data.ts
   roots.ts    Hebrew roots: rootOfWord / searchRoots / splitByRoot (highlight) over hand-curated roots-data.ts
   path.ts     learning paths: per language a Beginner and a Refresher path (pathsFor), each ordered stages (script · words · reading · skills · explore) over existing content; progress derived (pathState / stageProgress), never stored; the pick lives in settings.pathChoice (else suggestedPath)
@@ -88,7 +88,7 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
   Don't name scoped classes after Tailwind utilities (`ring`, `shadow`, …) — Tailwind generates them.
 - Script text always rendered via `ScriptText` (sets `dir`/`lang` — RTL for Hebrew; converts Chinese
   to the chosen script). Chinese rendered by hand must go through `displayText(…, $toZhScript)`, and readings
-  through `displayReading(reading, target, language, $settings.zhReading)`.
+  through `$readingOf(reading, target, language)`.
 - Optional fields (`transliteration`, `audioRef`) may be absent; never write `undefined`.
 - In `.svelte` `<script lang="ts">`, never declare optional *function parameters*
   (`function f(x?: T)`): the compiler strips the type but leaves the `?`, so the browser

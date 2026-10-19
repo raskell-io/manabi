@@ -7,8 +7,8 @@
 	import Mascot from '$lib/components/Mascot.svelte';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 	import { armInstallCapture, installPrompt, promptInstall } from '$lib/install';
-	import { initDB, practiceTimes, settings, updateSettings } from '$lib/db/store';
-	import { setZhScript } from '$lib/chinese';
+	import { allItems, initDB, practiceTimes, settings, updateSettings } from '$lib/db/store';
+	import { setZhReadingMode, setZhRuby, setZhScript, setZhVariants } from '$lib/chinese';
 	import { computeStreak } from '$lib/today';
 	import { LANGUAGES } from '$lib/db/types';
 	import { startAutoSync } from '$lib/sync';
@@ -37,6 +37,9 @@
 	$effect(() => {
 		if (ready) void setZhScript($settings.zhScript);
 	});
+	$effect(() => setZhReadingMode($settings.zhReading));
+	$effect(() => setZhRuby($settings.zhRuby));
+	$effect(() => setZhVariants($allItems));
 
 	function prefersDark(): boolean {
 		return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;

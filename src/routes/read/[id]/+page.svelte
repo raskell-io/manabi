@@ -5,7 +5,7 @@
 	import TapText from '$lib/components/TapText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import { deletePassage, getPassage, markPassageRead, settings, studyPassageLine } from '$lib/db/store';
-	import { displayReading } from '$lib/chinese';
+	import { displayText, readingOf, toZhScript } from '$lib/chinese';
 	import { PASSAGE_KIND_LABELS, type Passage } from '$lib/db/types';
 
 	const id = $derived($page.params.id);
@@ -97,7 +97,7 @@
 {:else}
 	<header class="head">
 		<div class="title-row">
-			<h1>{passage.title}</h1>
+			<h1>{displayText(passage.title, passage.language, $toZhScript)}</h1>
 			<span class="kind">{PASSAGE_KIND_LABELS[passage.kind]} · {passage.level}</span>
 		</div>
 		{#if passage.intro}<p class="intro">{passage.intro}</p>{/if}
@@ -121,10 +121,10 @@
 	<div class="lines" class:conversation={passage.kind === 'conversation'}>
 		{#each passage.lines as line, i (i)}
 			<div class="line side-{speakerSide.get(line.speaker ?? '') ?? 0}">
-				{#if line.speaker}<span class="speaker">{line.speaker}</span>{/if}
+				{#if line.speaker}<span class="speaker">{displayText(line.speaker, passage.language, $toZhScript)}</span>{/if}
 				<div class="bubble">
 					<div class="line-main">
-						<div class="script-line"><TapText text={line.target} language={passage.language} size="md" /></div>
+						<div class="script-line"><TapText text={line.target} language={passage.language} size="md" reading={line.reading} /></div>
 						<div class="line-actions">
 							<button class="study" class:on={revealed.has(i)} onclick={() => toggleReveal(i)} title="Reading & translation" aria-label="Show reading and translation">
 								<Eye size={15} />
@@ -137,7 +137,7 @@
 							{/if}
 						</div>
 					</div>
-					{#if showReadingFor(i) && line.reading}<div class="reading">{displayReading(line.reading, line.target, passage.language, $settings.zhReading)}</div>{/if}
+					{#if showReadingFor(i) && line.reading}<div class="reading">{$readingOf(line.reading, line.target, passage.language)}</div>{/if}
 					{#if showMeaningFor(i) && line.meaning}<div class="meaning">{line.meaning}</div>{/if}
 				</div>
 			</div>

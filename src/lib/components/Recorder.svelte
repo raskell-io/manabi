@@ -3,7 +3,7 @@
 	import { storeBlob } from '$lib/db/blob-store';
 	import { playRef } from '$lib/audio';
 	import { settings } from '$lib/db/store';
-	import { displayReading, displayText, toZhScript } from '$lib/chinese';
+	import { readingOf, displayText, toZhScript } from '$lib/chinese';
 	import { canTranscribe, transcribe } from '$lib/inference/router';
 	import { scorePronunciation, suggestRating, type AsrResult } from '$lib/pronunciation';
 	import { tapCorrect, tapWrong } from '$lib/haptics';
@@ -132,7 +132,7 @@
 <div class="recorder">
 	<div class="prompt">
 		<ScriptText {text} {language} size="lg" />
-		<div class="reading">{displayReading(reading, text, language, $settings.zhReading)}</div>
+		<div class="reading">{$readingOf(reading, text, language)}</div>
 	</div>
 
 	<div class="controls">

@@ -18,11 +18,21 @@ import type {
 	PassageKind,
 	PassageLine
 } from './types';
+import type { ZhVariants } from '$lib/chinese';
 
 interface SeedSpec extends GeneratedItem {
 	id: string;
 	kind?: ItemKind;
+	zhVariants?: ZhVariants;
 }
+
+/**
+ * Seed words whose Taiwan form or reading differs beyond character conversion
+ * (also applied to existing databases by the schema-12 migration in store.ts).
+ */
+export const SEED_ZH_VARIANTS: Record<string, ZhVariants> = {
+	'seed-zh-internet': { tw: '網路', twReading: 'wǎnglù' }
+};
 
 // ---------------------------------------------------------------------------
 // Chinese — A1 → A2 (HSK1-2)
@@ -128,6 +138,7 @@ const ZH: SeedSpec[] = [
 	{ id: 'seed-zh-phone', target: '手机', reading: 'shǒujī', meaning: 'mobile phone', tags: ['tech', 'daily', 'HSK2'], level: 'A2',
 		examples: [{ target: '我用手机买票。', reading: 'Wǒ yòng shǒujī mǎi piào.', meaning: 'I buy tickets with my phone.' }] },
 	{ id: 'seed-zh-internet', target: '网络', reading: 'wǎngluò', meaning: 'internet / network', tags: ['tech', 'HSK3'], level: 'A2',
+		zhVariants: SEED_ZH_VARIANTS['seed-zh-internet'],
 		examples: [{ target: '这里的网络很快。', reading: 'Zhèlǐ de wǎngluò hěn kuài.', meaning: 'The internet here is fast.' }] },
 	{ id: 'seed-zh-pay', target: '支付', reading: 'zhīfù', meaning: 'to pay (esp. digitally)', tags: ['tech', 'shopping', 'HSK3'], level: 'A2',
 		examples: [{ target: '可以用手机支付吗？', reading: 'Kěyǐ yòng shǒujī zhīfù ma?', meaning: 'Can I pay by phone?' }] },
@@ -1852,6 +1863,7 @@ export function seedItems(now: number = Date.now()): LearningItem[] {
 				tags: spec.tags,
 				level: spec.level,
 				examples: spec.examples,
+				...(spec.zhVariants ? { zhVariants: spec.zhVariants } : {}),
 				status: 'published',
 				createdAt: now,
 				updatedAt: now

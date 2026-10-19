@@ -95,3 +95,36 @@ test('Zhuyin reading aid', async ({ page }) => {
 		if (await page.locator('.summary').count()) break;
 	}
 });
+
+test('an item\'s own Taiwan form and reading; readings above the characters', async ({ page }) => {
+	await boot(page);
+	await page.goto('/settings');
+	await page.locator('button.lang', { hasText: 'Taiwan' }).click();
+	await page.goto('/items');
+	await page.locator('input[placeholder^="Search"]').fill('internet');
+	await expect(page.locator('.row .script').first()).toHaveText('網路');
+	await expect(page.locator('.row .sub').first()).toHaveText('wǎnglù');
+
+	// Edit it: a Hong Kong form too.
+	await page.locator('.row').first().click();
+	await expect(page.locator('input[placeholder="e.g. 軟體"]')).toHaveValue('網路');
+	await page.fill('input[placeholder="e.g. 軟件"]', '網絡');
+	await page.locator('button.save').click();
+
+	await page.goto('/settings');
+	await page.locator('button.lang', { hasText: 'Hong Kong' }).click();
+	await page.locator('label.check', { hasText: 'Show the reading above each character' }).locator('input').check();
+	await page.goto('/items');
+	await page.locator('input[placeholder^="Search"]').fill('internet');
+	const word = page.locator('.row .script').first();
+	await expect(word.locator('ruby')).toHaveCount(2);
+	await expect(word.locator('rt')).toHaveText(['wǎng', 'luò']);
+	expect(await word.evaluate((el) => [...el.querySelectorAll('ruby')].map((r) => r.firstChild?.textContent).join(''))).toBe('網絡');
+
+	// In a passage, every line gets its syllables, and words stay tappable.
+	await page.goto('/read');
+	await page.locator('a.card').first().click();
+	await expect(page.locator('.lines rt').first()).toBeVisible();
+	await page.locator('.lines .tok').first().click();
+	await expect(page.locator('.sheet .entry').first()).toBeVisible();
+});

@@ -13,7 +13,7 @@ import { derived, writable, type Readable } from 'svelte/store';
 import { fromBase64, toBase64 } from '$lib/base64';
 import { deleteBlob } from './blob-store';
 import { emptySummary, isManabiDocument, mergeInto, plain, type MergeSummary } from './merge';
-import { passagesToApply, seedsToApply } from './seed';
+import { passagesToApply, seedsToApply, SEED_ZH_VARIANTS } from './seed';
 import { applyItemEdits, applyPassageEdits, parseItems, parsePassages, renderItems, renderPassages, type EditCounts } from '$lib/content-md';
 import { gradeDimension, isPass } from '$lib/srs/schedule';
 import { buildQueue, queueCounts, type QueueSummary } from '$lib/srs/queue';
@@ -264,6 +264,11 @@ function migrate(d: Automerge.Doc<ManabiDocument>): Automerge.Doc<ManabiDocument
 			// Fill in any settings added since this document was created.
 			for (const [k, v] of Object.entries(defaultSettings())) {
 				if (doc.settings[k] === undefined) doc.settings[k] = v;
+			}
+			// Schema 12: seeded words get their Taiwan form / reading where it differs.
+			for (const [id, v] of Object.entries(SEED_ZH_VARIANTS)) {
+				const it = doc.learningItems[id];
+				if (it && !it.zhVariants) it.zhVariants = { ...v };
 			}
 			doc.schemaVersion = SCHEMA_VERSION;
 		});

@@ -5,7 +5,7 @@
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import { allItems, createItem, settings } from '$lib/db/store';
 	import { LANGUAGES, needsNiqqud } from '$lib/db/types';
-	import { displayReading, toZhScript } from '$lib/chinese';
+	import { readingOf, toZhScript } from '$lib/chinese';
 	import { MAX_SCOPE_ITEMS, scopeHref } from '$lib/srs/scope';
 
 	let query = $state('');
@@ -19,7 +19,7 @@
 			return (
 				it.target.toLowerCase().includes(q) ||
 				(it.language === 'zh' && $toZhScript(it.target).includes(q)) ||
-				displayReading(it.reading, it.target, it.language, $settings.zhReading).includes(q) ||
+				$readingOf(it.reading, it.target, it.language).includes(q) ||
 				it.reading.toLowerCase().includes(q) ||
 				it.meaning.toLowerCase().includes(q) ||
 				it.tags.some((t) => t.toLowerCase().includes(q))
@@ -80,8 +80,8 @@
 		<li>
 			<a class="row" href="/items/{it.id}">
 				<div class="lead">
-					<ScriptText text={it.target || '—'} language={it.language} size="md" />
-					<div class="sub">{displayReading(it.reading, it.target, it.language, $settings.zhReading)}</div>
+					<ScriptText text={it.target || '—'} language={it.language} size="md" reading={it.reading} />
+					<div class="sub">{$readingOf(it.reading, it.target, it.language)}</div>
 				</div>
 				<div class="mid">
 					<div class="meaning">{it.meaning || '(no meaning)'}</div>

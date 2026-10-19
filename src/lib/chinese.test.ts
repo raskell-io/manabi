@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { get } from 'svelte/store';
-import { displayText, scriptLangTag, setZhScript, toZhScript, zhLangTag, zhScript } from './chinese';
+import { displayText, readingOf, rubyOf, scriptLangTag, setZhReadingMode, setZhRuby, setZhScript, setZhVariants, toZhScript, zhLangTag, zhScript } from './chinese';
 import { radicalOf } from './radicals';
 
 describe('zhLangTag / scriptLangTag', () => {
@@ -58,5 +58,39 @@ describe('radical data covers Traditional forms', () => {
 		expect(radicalOf('語')?.radical.n).toBe(149); // 言
 		expect(radicalOf('语')?.radical.n).toBe(149);
 		expect(radicalOf('髮')?.radical.n).toBe(190); // 髟
+	});
+});
+
+describe('per-item variants, readings and ruby', () => {
+	const items = [{ language: 'zh' as const, target: '网络', zhVariants: { tw: '網路', twReading: 'wǎnglù' } }];
+
+	it('prefers an item\'s own Taiwan form and reading', async () => {
+		setZhVariants(items);
+		await setZhScript('traditional-tw');
+		expect(get(toZhScript)('网络')).toBe('網路');
+		expect(get(readingOf)('wǎngluò', '网络', 'zh')).toBe('wǎnglù');
+		await setZhScript('traditional-hk');
+		expect(get(toZhScript)('网络')).toBe('網絡'); // no Hong Kong form: converted
+		expect(get(readingOf)('wǎngluò', '网络', 'zh')).toBe('wǎngluò');
+		await setZhScript('simplified');
+		expect(get(toZhScript)('网络')).toBe('网络');
+		setZhVariants([]);
+	});
+
+	it('readings follow the Zhuyin setting, only for hanzi', () => {
+		setZhReadingMode('zhuyin');
+		expect(get(readingOf)('jīntiān', '今天', 'zh')).toBe('ㄐㄧㄣ ㄊㄧㄢ');
+		expect(get(readingOf)('b', 'ㄅ', 'zh')).toBe('b');
+		expect(get(readingOf)('kyō', '今日', 'ja')).toBe('kyō');
+		setZhReadingMode('pinyin');
+	});
+
+	it('ruby only when switched on and the syllables line up', () => {
+		expect(get(rubyOf)('今天', 'jīntiān')).toBeNull();
+		setZhRuby(true);
+		expect(get(rubyOf)('今天', 'jīntiān')).toEqual([{ text: '今', rt: 'jīn' }, { text: '天', rt: 'tiān' }]);
+		expect(get(rubyOf)('今天', 'jīn')).toBeNull();
+		expect(get(rubyOf)('今天', undefined)).toBeNull();
+		setZhRuby(false);
 	});
 });

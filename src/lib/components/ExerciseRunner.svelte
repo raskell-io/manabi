@@ -6,7 +6,7 @@
 	import Recorder from './Recorder.svelte';
 	import ScriptText from './ScriptText.svelte';
 	import { settings } from '$lib/db/store';
-	import { displayReading, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { readingOf, rubyOf, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { playPrerecorded } from '$lib/audio';
 	import { playCorrect, playWrong } from '$lib/sounds';
 	import { tapCorrect, tapWrong } from '$lib/haptics';
@@ -41,8 +41,11 @@
 		return exercise.language === 'zh' ? $toZhScript(t) : t;
 	}
 
+	// With readings above the characters, the prompt's reading line would repeat them.
+	const promptRuby = $derived(exercise.language === 'zh' && !!$rubyOf(exercise.promptScript ?? '', exercise.promptReading));
+
 	// Readings (prompt, choices, cloze, reveal) as pinyin or Zhuyin.
-	const rd = (reading: string) => displayReading(reading, item.target, exercise.language, $settings.zhReading);
+	const rd = (reading: string) => $readingOf(reading, item.target, exercise.language);
 
 	// Split the full cloze sentence around the answer so we can fill the blank in
 	// place and highlight the inserted word once answered. The sentence is shown
@@ -183,8 +186,8 @@
 				{onRate}
 			/>
 		{:else if exercise.promptMode === 'script'}
-			<ScriptText text={exercise.promptScript ?? ''} language={exercise.language} size="xl" />
-			{#if exercise.promptReading}
+			<ScriptText text={exercise.promptScript ?? ''} language={exercise.language} size="xl" reading={exercise.promptReading} />
+			{#if exercise.promptReading && !promptRuby}
 				<div class="reading">{rd(exercise.promptReading)}</div>
 			{/if}
 			<AudioButton text={item.target} language={item.language} itemId={item.id} label="Play word" />

@@ -16,7 +16,7 @@
 
 import { derived, writable, type Readable } from 'svelte/store';
 import type { Language } from './db/types';
-import { pinyinToZhuyin } from './zhuyin';
+import { pinyinToZhuyin, readingSyllables, rubySegments } from './zhuyin';
 
 export type ZhScript = 'simplified' | 'traditional-tw' | 'traditional-hk';
 
@@ -89,8 +89,6 @@ export async function setZhScript(script: ZhScript): Promise<void> {
 /** The script currently rendered (lags the setting while the converter loads). */
 export const zhScript: Readable<ZhScript> = derived(active, ($a) => $a.script);
 
-/** Simplified → the rendered script. Identity for Simplified. */
-export const toZhScript: Readable<Convert> = derived(active, ($a) => $a.convert);
 
 /** Convert text in `language` for display (non-Chinese text passes through). */
 export function displayText(text: string, language: Language, convert: Convert): string {
@@ -104,13 +102,80 @@ export const ZH_READINGS: { value: ZhReading; native: string; label: string }[] 
 	{ value: 'zhuyin', native: 'ㄅㄆㄇ', label: 'Zhuyin (bopomofo)' }
 ];
 
+/**
+ * An item's own regional forms, where character conversion isn't enough: a
+ * one-to-many character on its own (干 → 乾 or 幹), or Taiwan vocabulary and
+ * readings (软件 → 軟體, 垃圾 lèsè).
+ */
+export interface ZhVariants {
+	tw?: string;
+	hk?: string;
+	twReading?: string;
+	[key: string]: unknown;
+}
+
+const variants = writable<Map<string, ZhVariants>>(new Map());
+let variantsKey = '';
+
+/** Register every Chinese item's variants (layout effect over all items). */
+export function setZhVariants(items: { language: Language; target: string; zhVariants?: ZhVariants }[]): void {
+	const list = items.filter((it) => it.language === 'zh' && it.zhVariants).map((it) => [it.target, it.zhVariants!] as const);
+	const key = JSON.stringify(list);
+	if (key === variantsKey) return;
+	variantsKey = key;
+	variants.set(new Map(list));
+}
+
+const readingMode = writable<ZhReading>('pinyin');
+/** Follow the reading-aid setting (layout effect). */
+export function setZhReadingMode(mode: ZhReading): void {
+	readingMode.set(mode);
+}
+
+const ruby = writable(false);
+/** Follow the reading-above-characters setting (layout effect). */
+export function setZhRuby(on: boolean): void {
+	ruby.set(on);
+}
+
+/** Simplified → the rendered script, preferring an item's own regional form. Identity for Simplified. */
+export const toZhScript: Readable<Convert> = derived([active, variants], ([$a, $v]) => {
+	if ($a.script === 'simplified') return identity;
+	const tw = $a.script === 'traditional-tw';
+	return (text: string) => {
+		const v = $v.get(text);
+		return (tw ? v?.tw : v?.hk) || $a.convert(text);
+	};
+});
+
 const HAN = /\p{Script=Han}/u;
 
 /**
- * A reading for display: Zhuyin when picked, for Chinese text written in
- * hanzi. `target` is what the reading belongs to — bopomofo glyphs and the
- * pinyin tone drills keep their pinyin.
+ * A reading for display: the item's Taiwan reading when reading Taiwan
+ * Traditional, as Zhuyin when picked — for Chinese written in hanzi
+ * (`target` is what the reading belongs to: bopomofo glyphs and the pinyin
+ * tone drill keep their pinyin).
  */
-export function displayReading(reading: string, target: string, language: Language, mode: ZhReading): string {
-	return language === 'zh' && mode === 'zhuyin' && HAN.test(target) ? pinyinToZhuyin(reading) : reading;
-}
+export const readingOf: Readable<(reading: string, target: string, language: Language) => string> = derived(
+	[active, variants, readingMode],
+	([$a, $v, $mode]) =>
+		(reading: string, target: string, language: Language) => {
+			if (language !== 'zh' || !HAN.test(target)) return reading;
+			const r = ($a.script === 'traditional-tw' && $v.get(target)?.twReading) || reading;
+			return $mode === 'zhuyin' ? pinyinToZhuyin(r) : r;
+		}
+);
+
+/**
+ * Ruby for Chinese text with a known reading (each hanzi with its syllable
+ * above), when that option is on and the syllables line up; else null.
+ */
+export const rubyOf: Readable<(text: string, reading: string | undefined) => { text: string; rt?: string }[] | null> = derived(
+	[active, variants, readingMode, ruby, toZhScript],
+	([$a, $v, $mode, $ruby, $convert]) =>
+		(text: string, reading: string | undefined) => {
+			if (!$ruby || !reading) return null;
+			const r = ($a.script === 'traditional-tw' && $v.get(text)?.twReading) || reading;
+			return rubySegments($convert(text), readingSyllables(r, $mode));
+		}
+);

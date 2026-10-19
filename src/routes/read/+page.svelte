@@ -2,6 +2,7 @@
 	import { MessageSquare, FileText, Check, ClipboardPaste } from 'lucide-svelte';
 	import { passageReads, passages, settings } from '$lib/db/store';
 	import { LANGUAGES, type Passage } from '$lib/db/types';
+	import { displayText, toZhScript } from '$lib/chinese';
 
 	const conversations = $derived($passages.filter((p) => p.kind === 'conversation'));
 	const texts = $derived($passages.filter((p) => p.kind === 'text'));
@@ -17,7 +18,7 @@
 {#snippet card(p: Passage)}
 	<a class="card" href="/read/{p.id}">
 		<div class="card-top">
-			<span class="title">{p.title}</span>
+			<span class="title">{displayText(p.title, p.language, $toZhScript)}</span>
 			<span class="level">{#if $passageReads[p.id]}<span class="read-mark"><Check size={13} strokeWidth={3} /> Read</span>{/if}{p.level}</span>
 		</div>
 		{#if p.intro}<p class="intro">{p.intro}</p>{/if}

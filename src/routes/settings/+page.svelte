@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Download, RefreshCw, Upload } from 'lucide-svelte';
+	import ScriptText from '$lib/components/ScriptText.svelte';
 	import {
 		allItems,
 		exerciseAttempts,
@@ -15,7 +16,7 @@
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
 	import { localModelStatus } from '$lib/inference/local-models';
 	import { asrModelId, loadAsr } from '$lib/inference/providers/asr-local';
-	import { displayReading, toZhScript, zhLangTag, zhScript, ZH_READINGS, ZH_SCRIPTS } from '$lib/chinese';
+	import { readingOf, toZhScript, zhLangTag, zhScript, ZH_READINGS, ZH_SCRIPTS } from '$lib/chinese';
 
 	let s = $derived($settings);
 
@@ -224,11 +225,15 @@
 			</button>
 		{/each}
 	</div>
+	<label class="check ruby-toggle">
+		<input type="checkbox" checked={s.zhRuby} onchange={(e) => updateSettings({ zhRuby: e.currentTarget.checked })} />
+		<span>Show the reading above each character (on words and sentences whose reading is known).</span>
+	</label>
 	<p class="preview-row">
 		<span class="muted">Preview:</span>
 		<span class="zh-preview-block">
-			<span class="zh-preview" lang={zhLangTag($zhScript)}>{$toZhScript('我们说汉语。头发、面条、这里')}</span>
-			<span class="zh-preview-reading">{displayReading('Wǒmen shuō Hànyǔ.', '汉', 'zh', s.zhReading)}</span>
+			<span class="zh-preview-script"><ScriptText text="我们说汉语。" language="zh" size="sm" reading="Wǒmen shuō Hànyǔ." /> <span class="zh-preview" lang={zhLangTag($zhScript)}>{$toZhScript('头发、面条、这里')}</span></span>
+			<span class="zh-preview-reading">{$readingOf('Wǒmen shuō Hànyǔ.', '汉', 'zh')}</span>
 		</span>
 	</p>
 </section>

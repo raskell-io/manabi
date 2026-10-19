@@ -11,6 +11,7 @@
  */
 
 import type { ExampleSentence, ItemKind, ItemStatus, Language, LearningItem, Passage, PassageKind, PassageLine } from './db/types';
+import type { ZhVariants } from './chinese';
 
 const LANGUAGE_NAME: Record<Language, string> = { zh: 'Chinese', ja: 'Japanese', ko: 'Korean', he: 'Hebrew' };
 const ITEM_KINDS: ItemKind[] = ['word', 'phrase', 'sentence', 'grammar', 'character'];
@@ -66,6 +67,9 @@ export function renderItems(language: Language, items: LearningItem[]): string {
 			`- level: ${clean(it.level)}`,
 			`- tags: ${it.tags.map(clean).join(', ')}`,
 			`- status: ${it.status}`,
+			...(it.zhVariants?.tw ? [`- tw: ${clean(it.zhVariants.tw)}`] : []),
+			...(it.zhVariants?.hk ? [`- hk: ${clean(it.zhVariants.hk)}`] : []),
+			...(it.zhVariants?.twReading ? [`- twreading: ${clean(it.zhVariants.twReading)}`] : []),
 			...it.examples.map((ex) => quoteLine([ex.target, ex.reading, ex.meaning, ex.transliteration]))
 		])
 	);
@@ -85,6 +89,8 @@ export interface ParsedItem {
 	tags: string[];
 	status: ItemStatus;
 	examples: ExampleSentence[];
+	/** Chinese: Taiwan / Hong Kong form and Taiwan reading (- tw / - hk / - twreading). */
+	zhVariants?: ZhVariants;
 }
 
 interface RawSection {
@@ -131,6 +137,9 @@ export function parseItems(md: string): ParsedItem[] {
 			const f = s.fields;
 			const kind = f.get('kind') as ItemKind;
 			const translit = f.get('transliteration');
+			const variants = Object.fromEntries(
+				([['tw', 'tw'], ['hk', 'hk'], ['twReading', 'twreading']] as const).map(([k, field]) => [k, f.get(field)]).filter(([, v]) => v)
+			) as ZhVariants;
 			return {
 				...(s.id ? { id: s.id } : {}),
 				touched: touched(s),
@@ -142,6 +151,7 @@ export function parseItems(md: string): ParsedItem[] {
 				level: f.get('level') || 'A1',
 				tags: (f.get('tags') ?? '').split(',').map((t) => t.trim()).filter(Boolean),
 				status: f.get('status') === 'draft' ? 'draft' : 'published',
+				...(Object.keys(variants).length ? { zhVariants: variants } : {}),
 				examples: s.quotes.filter(Boolean).map((q) => {
 					const [target, reading = '', meaning = '', transliteration] = splitQuote(q);
 					return { target, reading, meaning, ...(transliteration ? { transliteration } : {}) };
@@ -261,6 +271,7 @@ export function applyItemEdits(d: Doc, language: Language, parsed: ParsedItem[],
 				tags: p.tags,
 				level: p.level,
 				examples: p.examples,
+				...(p.zhVariants ? { zhVariants: p.zhVariants } : {}),
 				status: p.status,
 				createdAt: now,
 				updatedAt: now
@@ -278,7 +289,8 @@ export function applyItemEdits(d: Doc, language: Language, parsed: ParsedItem[],
 			kind: p.kind,
 			level: p.level,
 			tags: p.tags,
-			status: p.status
+			status: p.status,
+			zhVariants: p.zhVariants
 		})) {
 			changed = assign(rec, k, v) || changed;
 		}

@@ -120,3 +120,20 @@ describe('applying hand edits', () => {
 		expect(d.passages[p.id].lines.at(-1)).toEqual({ target: '再见！', reading: 'Zàijiàn!', meaning: 'Bye!' });
 	});
 });
+
+describe('Chinese variants in markdown', () => {
+	it('round-trips and applies Taiwan / Hong Kong forms', () => {
+		const md = renderItems('zh', zhItems);
+		expect(md).toContain('- tw: 網路\n- twreading: wǎnglù');
+		const net = parseItems(md).find((p) => p.id === 'seed-zh-internet')!;
+		expect(net.zhVariants).toEqual({ tw: '網路', twReading: 'wǎnglù' });
+		expect(net.touched).toBe(false);
+		const d = {
+			learningItems: Object.fromEntries(zhItems.map((it) => [it.id, structuredClone(it)])),
+			passages: {}
+		};
+		const edited = md.replace('- meaning: hot\n', '- meaning: hot\n- hk: 熱\n- tw: 熱\n');
+		expect(applyItemEdits(d, 'zh', parseItems(edited), () => 'x', 3).updated).toBe(1);
+		expect(Object.values(d.learningItems).find((it) => it.meaning === 'hot')!.zhVariants).toEqual({ tw: '熱', hk: '熱' });
+	});
+});

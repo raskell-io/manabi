@@ -6,7 +6,7 @@
 	import AudioButton from '$lib/components/AudioButton.svelte';
 	import StrokePad from '$lib/components/StrokePad.svelte';
 	import { hanChars, strokeLang } from '$lib/strokes';
-	import { displayReading, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
+	import { readingOf, displayText, scriptLangTag, toZhScript, zhScript } from '$lib/chinese';
 	import { radicalOf } from '$lib/radicals';
 	import { rootLabel, rootOfWord, splitByRoot } from '$lib/roots';
 	import { deleteItem, getItem, pronunciationAttempts, settings, updateItem } from '$lib/db/store';
@@ -45,6 +45,18 @@
 		if (form) tagsText = form.tags.join(', ');
 	});
 
+	// Chinese: the item's own Taiwan / Hong Kong form and Taiwan reading (chinese.ts ZhVariants).
+	let variants = $state({ tw: '', hk: '', twReading: '' });
+	$effect(() => {
+		if (form) variants = { tw: form.zhVariants?.tw ?? '', hk: form.zhVariants?.hk ?? '', twReading: form.zhVariants?.twReading ?? '' };
+	});
+
+	function zhVariantsPatch() {
+		if (form?.language !== 'zh') return form?.zhVariants;
+		const v = Object.fromEntries(Object.entries(variants).map(([k, x]) => [k, x.trim()]).filter(([, x]) => x));
+		return Object.keys(v).length ? v : undefined;
+	}
+
 	function save() {
 		if (!form || !id) return;
 		updateItem(id, {
@@ -56,7 +68,8 @@
 			kind: form.kind,
 			status: form.status,
 			tags: tagsText.split(',').map((t) => t.trim()).filter(Boolean),
-			examples: form.examples
+			examples: form.examples,
+			zhVariants: zhVariantsPatch()
 		});
 	}
 
@@ -118,8 +131,8 @@
 {:else}
 	<header class="head">
 		<div class="preview">
-			<ScriptText text={form.target || '—'} language={form.language as Language} size="lg" forceVowels />
-			<span class="muted">{displayReading(form.reading, form.target, form.language as Language, $settings.zhReading)}</span>
+			<ScriptText text={form.target || '—'} language={form.language as Language} size="lg" forceVowels reading={form.reading} />
+			<span class="muted">{$readingOf(form.reading, form.target, form.language as Language)}</span>
 			{#if form.target}
 				<AudioButton text={form.target} language={form.language as Language} audioRef={form.audioRef} itemId={form.id} />
 			{/if}
@@ -218,6 +231,24 @@
 			<span>Tags (comma-separated)</span>
 			<input bind:value={tagsText} placeholder="time, daily, HSK1" />
 		</label>
+		{#if form.language === 'zh'}
+			<p class="wide variants-note muted">
+				Traditional forms are worked out automatically. Fill these in only where that isn't right for this word — a character
+				with several Traditional forms (干 → 乾 or 幹), or a different Taiwan word or reading (软件 → 軟體).
+			</p>
+			<label>
+				<span>Taiwan form</span>
+				<input bind:value={variants.tw} class="script-input" lang="zh-Hant-TW" placeholder="e.g. 軟體" />
+			</label>
+			<label>
+				<span>Hong Kong form</span>
+				<input bind:value={variants.hk} class="script-input" lang="zh-Hant-HK" placeholder="e.g. 軟件" />
+			</label>
+			<label>
+				<span>Taiwan reading</span>
+				<input bind:value={variants.twReading} placeholder="pinyin, e.g. ruǎntǐ" />
+			</label>
+		{/if}
 	</div>
 
 	<section class="examples">
@@ -295,7 +326,8 @@
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		/* minmax(0, …): inputs have a wide intrinsic size that 1fr won't shrink below */
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 1rem;
 	}
 	label {
@@ -305,11 +337,17 @@
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
 	}
-	label.wide {
+	label.wide,
+	.variants-note {
 		grid-column: 1 / -1;
+	}
+	.variants-note {
+		margin: 0.4rem 0 0;
+		font-size: 0.85rem;
 	}
 	input,
 	select {
+		min-width: 0;
 		padding: 0.55rem 0.7rem;
 		border: 2px solid var(--color-border);
 		border-radius: 0.7rem;
@@ -444,10 +482,23 @@
 	}
 	.ex {
 		display: grid;
-		grid-template-columns: 1.3fr 1fr 1fr auto;
+		grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) auto;
 		gap: 0.5rem;
 		margin-bottom: 0.5rem;
 		align-items: center;
+	}
+	@media (max-width: 560px) {
+		.grid {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		/* An example stacks: the sentence on its own row, then reading, meaning and delete. */
+		.ex {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+			margin-bottom: 1rem;
+		}
+		.ex > :first-child {
+			grid-column: 1 / -1;
+		}
 	}
 	.ex-del {
 		border: 2px solid var(--color-border);

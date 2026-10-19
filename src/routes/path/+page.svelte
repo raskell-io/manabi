@@ -188,7 +188,7 @@
 
 				{#if preview.length}
 					<div class="preview" class:titles={st.kind === 'reading'} dir={lang === 'he' && st.kind !== 'reading' ? 'rtl' : 'ltr'}>
-						{#each preview as t (t)}<span lang={st.kind === 'reading' ? 'en' : scriptLangTag(lang, $zhScript)} dir="auto">{st.kind === 'reading' ? t : displayText(t, lang, $toZhScript)}</span>{/each}
+						{#each preview as t (t)}<span lang={st.kind === 'reading' ? 'en' : scriptLangTag(lang, $zhScript)} dir="auto">{displayText(t, lang, $toZhScript)}</span>{/each}
 					</div>
 				{/if}
 

@@ -10,7 +10,7 @@
 	import AudioButton from './AudioButton.svelte';
 	import { allItems, settings, studyVocabWord } from '$lib/db/store';
 	import type { Language } from '$lib/db/types';
-	import { displayReading } from '$lib/chinese';
+	import { readingOf } from '$lib/chinese';
 	import { DICT_CREDIT } from '$lib/dictionary';
 	import type { DictHit } from '$lib/lookup';
 	import type { DictEntry } from '$lib/dict-shard';
@@ -63,10 +63,10 @@
 		{#each entries as e, i (i)}
 			<section class="entry">
 				<div class="head">
-					<span class="word"><ScriptText text={e.w} {language} size="lg" forceVowels /></span>
+					<span class="word"><ScriptText text={e.w} {language} size="lg" forceVowels reading={e.r} /></span>
 					<AudioButton text={e.w} {language} label="Play {e.w}" />
 				</div>
-				{#if e.r}<p class="reading">{displayReading(e.r, e.w, language, $settings.zhReading)}{#if e.p && language !== 'ja'}<span class="pos">{e.p}</span>{/if}</p>{/if}
+				{#if e.r}<p class="reading">{$readingOf(e.r, e.w, language)}{#if e.p && language !== 'ja'}<span class="pos">{e.p}</span>{/if}</p>{/if}
 				<ol class="glosses">
 					{#each e.g as g, j (j)}<li>{g}</li>{/each}
 				</ol>

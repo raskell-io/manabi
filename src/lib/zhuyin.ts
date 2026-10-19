@@ -83,12 +83,19 @@ const TONE_MARK = ['', '', 'ˊ', 'ˇ', 'ˋ'];
 /** A word of pinyin letters (tone marks allowed), apostrophes allowed between syllables. */
 const WORD = /[a-züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜê]+(?:['’][a-züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜê]+)*/g;
 
-/** Segment one apostrophe-free chunk; null when it isn't pinyin. */
-function segment(chunk: string): string[] | null {
+interface Syllable {
+	/** The syllable as written in the pinyin (tone mark kept); "r" for erhua. */
+	pinyin: string;
+	zhuyin: string;
+}
+
+/** Segment one apostrophe-free chunk (`lower` is it lowercased); null when it isn't pinyin. */
+function segment(chunk: string, lower: string): Syllable[] | null {
 	// Strip tones: plain letters + the tone (0 = none) at each position.
+	const chars = [...chunk];
 	const plain: string[] = [];
 	const tones: number[] = [];
-	for (const ch of chunk) {
+	for (const ch of lower) {
 		const t = TONED[ch];
 		plain.push(t ? t[0] : ch === 'v' ? 'ü' : ch);
 		tones.push(t ? t[1] : 0);
@@ -113,30 +120,70 @@ function segment(chunk: string): string[] | null {
 		}
 	}
 	if (!best[n]) return null;
-	const out: string[] = [];
+	const out: Syllable[] = [];
 	for (let i = n; i > 0; i = best[i]![1]) {
 		const [, from, piece] = best[i]!;
+		const pinyin = chars.slice(from, i).join('');
 		if (piece === 'r') {
-			out.unshift('ㄦ');
+			out.unshift({ pinyin, zhuyin: 'ㄦ' });
 			continue;
 		}
 		const tone = tones.slice(from, i).find(Boolean) ?? 0;
 		const bopo = SYLLABLE_ZHUYIN.get(piece)!;
-		out.unshift(tone === 0 ? '˙' + bopo : bopo + TONE_MARK[tone]);
+		out.unshift({ pinyin, zhuyin: tone === 0 ? '˙' + bopo : bopo + TONE_MARK[tone] });
 	}
 	return out;
 }
 
-/** Convert one pinyin word (may contain apostrophes); null when it isn't pinyin. */
-function convertWord(word: string): string | null {
-	const parts: string[] = [];
+/** The syllables of one pinyin word (may contain apostrophes); null when it isn't pinyin. */
+function wordSyllables(word: string): Syllable[] | null {
+	const parts: Syllable[] = [];
 	for (const chunk of word.split(/['’]/)) {
-		const syllables = segment(chunk);
+		const syllables = segment(chunk, chunk.toLowerCase());
 		if (!syllables) return null;
 		parts.push(...syllables);
 	}
+	return parts;
+}
+
+/** Convert one pinyin word to Zhuyin; null when it isn't pinyin. */
+function convertWord(word: string): string | null {
+	const parts = wordSyllables(word)?.map((s) => s.zhuyin);
 	// Erhua attaches to the syllable before it (ㄋㄚˇㄦ), as in print.
-	return parts.reduce((s, p, i) => (i === 0 ? p : p === 'ㄦ' ? s + p : `${s} ${p}`), '');
+	return parts ? parts.reduce((s, p, i) => (i === 0 ? p : p === 'ㄦ' ? s + p : `${s} ${p}`), '') : null;
+}
+
+/**
+ * A reading split into syllables, one per hanzi — pinyin as written or
+ * Zhuyin; erhua is its own syllable (it has its own 儿). Null when part of
+ * it isn't pinyin.
+ */
+export function readingSyllables(reading: string, mode: 'pinyin' | 'zhuyin'): string[] | null {
+	const out: string[] = [];
+	const text = reading.normalize('NFC').replace(/(\p{L}) r(?=\P{L}|$)/gu, '$1r');
+	for (const token of text.split(/\s+/).filter(Boolean)) {
+		const words = token.match(new RegExp(WORD.source, 'gi'));
+		if (!words) {
+			if (/\p{L}/u.test(token)) return null;
+			continue;
+		}
+		for (const w of words) {
+			const syl = wordSyllables(w);
+			if (!syl) return null;
+			out.push(...syl.map((s) => (mode === 'zhuyin' ? s.zhuyin : s.pinyin)));
+		}
+	}
+	return out;
+}
+
+/** Ruby segments for `text`: each hanzi paired with its syllable. Null when they don't line up. */
+export function rubySegments(text: string, syllables: string[] | null): { text: string; rt?: string }[] | null {
+	if (!syllables) return null;
+	const chars = [...text];
+	const han = chars.filter((c) => /\p{Script=Han}/u.test(c)).length;
+	if (han === 0 || han !== syllables.length) return null;
+	let k = 0;
+	return chars.map((c) => (/\p{Script=Han}/u.test(c) ? { text: c, rt: syllables[k++] } : { text: c }));
 }
 
 const memo = new Map<string, string>();
