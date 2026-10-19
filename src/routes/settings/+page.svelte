@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Download, RefreshCw, Upload } from 'lucide-svelte';
+	import { CalendarPlus, Download, RefreshCw, Upload } from 'lucide-svelte';
+	import { isTime, reminderIcs } from '$lib/reminder';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import {
 		allItems,
@@ -56,6 +57,17 @@
 				if (!syncConfigured) return 'Not configured.';
 				return st.lastSyncAt ? `Last synced ${ago(st.lastSyncAt)}.` : 'Not synced yet.';
 		}
+	}
+
+	// --- Reminder ---
+	function downloadReminder() {
+		const ics = reminderIcs(s.reminderTime, location.origin + '/');
+		const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'manabi-reminder.ics';
+		a.click();
+		setTimeout(() => URL.revokeObjectURL(url), 1000);
 	}
 
 	// --- Backup ---
@@ -305,6 +317,18 @@
 </section>
 
 <section class="group">
+	<h2>Daily reminder</h2>
+	<p class="muted">Manabi has no server to send notifications, so the reminder lives in your calendar: a daily event at this time that opens Manabi.</p>
+	<div class="backup-row">
+		<label class="time">
+			<span>Time</span>
+			<input type="time" value={s.reminderTime} onchange={(e) => isTime(e.currentTarget.value) && updateSettings({ reminderTime: e.currentTarget.value })} />
+		</label>
+		<button class="action" onclick={downloadReminder}><CalendarPlus size={16} /> Add to my calendar</button>
+	</div>
+</section>
+
+<section class="group">
 	<h2>Theme</h2>
 	<div class="theme-row">
 		{#each THEMES as t (t.value)}
@@ -438,6 +462,15 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.6rem;
+	}
+	label.time {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0;
+	}
+	label.time input {
+		width: auto;
 	}
 	.sync-status {
 		font-size: 0.88rem;

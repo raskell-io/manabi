@@ -2,10 +2,17 @@
 	import { GraduationCap, Mic } from 'lucide-svelte';
 	import ScriptText from '$lib/components/ScriptText.svelte';
 	import Mascot from '$lib/components/Mascot.svelte';
-	import { exerciseAttempts, getItem, pronunciationAttempts, settings, skillMemories } from '$lib/db/store';
-	import { DIMENSIONS, DIMENSION_LABELS, type Dimension } from '$lib/db/types';
+	import ReviewForecast from '$lib/components/ReviewForecast.svelte';
+	import ActivityCalendar from '$lib/components/ActivityCalendar.svelte';
+	import { allItems, exerciseAttempts, getItem, practiceTimes, pronunciationAttempts, settings, skillMemories } from '$lib/db/store';
+	import { DIMENSIONS, DIMENSION_LABELS, LANGUAGES, todayIso, type Dimension } from '$lib/db/types';
+	import { activityCalendar, reviewForecast } from '$lib/srs/stats';
 	import { scopeHref } from '$lib/srs/scope';
 	import { suggestRating, summarizePronunciation } from '$lib/pronunciation';
+
+	// What's coming (this language) and what's been done (all languages).
+	const forecast = $derived(reviewForecast($allItems, $skillMemories, $settings.activeLanguage, todayIso()));
+	const calendar = $derived(activityCalendar($practiceTimes, todayIso()));
 
 	// Per-dimension accuracy for the active language.
 	const byDimension = $derived(
@@ -62,9 +69,14 @@
 	<Mascot size={64} mood="think" />
 	<div>
 		<h1>Progress</h1>
-		<p class="muted">Accuracy by skill for {$settings.activeLanguage.toUpperCase()}, across all attempts.</p>
+		<p class="muted">Reviews ahead and practice so far, then accuracy by skill for {LANGUAGES.find((l) => l.code === $settings.activeLanguage)?.name}.</p>
 	</div>
 </div>
+
+<section class="charts">
+	<ReviewForecast days={forecast} />
+	<ActivityCalendar weeks={calendar} />
+</section>
 
 <section class="dims">
 	{#each byDimension as d (d.dim)}
@@ -138,6 +150,12 @@
 </section>
 
 <style>
+	.charts {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
 	.head {
 		display: flex;
 		align-items: center;

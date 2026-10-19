@@ -322,6 +322,7 @@ export interface ManabiSettings {
 	gradeButtons: boolean; // show Hard/Good/Easy after a correct answer (vs. auto-advance)
 	typedRecall: boolean; // recall cards ask you to type the word (vs. pick it)
 	theme: 'system' | 'light' | 'dark';
+	reminderTime: string; // HH:MM for the daily calendar reminder (reminder.ts)
 	/** The learning path picked per language ('beginner' | 'refresher'); unset = suggested. */
 	pathChoice: Partial<Record<Language, string>>;
 	[key: string]: unknown;
@@ -349,13 +350,14 @@ export function defaultSettings(): ManabiSettings {
 		gradeButtons: true,
 		typedRecall: true,
 		theme: 'light',
+		reminderTime: '19:00',
 		pathChoice: {}
 	};
 }
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export interface ManabiDocument {
 	schemaVersion: number;

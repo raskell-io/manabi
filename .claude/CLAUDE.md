@@ -52,6 +52,8 @@ src/lib/
 src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
+  srs/stats.ts reviewForecast (due skill reviews per coming day) · activityCalendar (answers per day, Monday-first weeks) → dashboard ReviewForecast / ActivityCalendar
+  reminder.ts daily practice reminder as a repeating .ics event (no server for push)
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
   haptics.ts  tapCorrect / tapWrong (navigator.vibrate; Android only, iOS ignores)
   install.ts  PWA install hint: captured beforeinstallprompt (Chromium) or iOS Share-sheet steps; Home only, ≥5 attempts, dismiss once
