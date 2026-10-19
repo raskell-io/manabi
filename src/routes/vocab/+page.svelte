@@ -23,12 +23,17 @@
 	const levels = $derived<LevelMeta[]>(manifest[lang] ?? []);
 	const meta = $derived(levels.find((l) => l.level === activeLevel));
 
-	/** A level as shown: HSK 3, N4, Top 1,500 (Cantonese frequency bands). */
+	/** A level as shown: HSK 3, N4, or a Cantonese frequency band — Top 500, 501–1,500 (ids are the band's last rank). */
 	function levelName(level: string): string {
-		return lang === 'zh' ? `HSK ${level}` : lang === 'yue' ? `Top ${Number(level).toLocaleString('en')}` : level;
+		if (lang === 'zh') return `HSK ${level}`;
+		if (lang !== 'yue') return level;
+		const ranks = levels.map((l) => Number(l.level));
+		const k = ranks.indexOf(Number(level));
+		const fmt = (n: number) => n.toLocaleString('en');
+		return k <= 0 ? `Top ${fmt(Number(level))}` : `${fmt(ranks[k - 1] + 1)}–${fmt(Number(level))}`;
 	}
 
-	/** The level tag an added word carries: "ZH 3", "JA N4", "YUE Top 500". */
+	/** The level tag an added word carries: "ZH 3", "JA N4", "YUE 501–1,500". */
 	const itemLevel = () => `${lang.toUpperCase()} ${lang === 'yue' ? levelName(activeLevel) : activeLevel}`;
 
 	const DISPLAY_CAP = 600;

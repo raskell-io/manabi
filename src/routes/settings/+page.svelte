@@ -244,7 +244,7 @@
 		</label>
 		<label class="check">
 			<input type="checkbox" checked={s.localAsrCantonese} onchange={(e) => updateSettings({ localAsrCantonese: e.currentTarget.checked })} />
-			<span>Cantonese: use a Whisper trained on Hong Kong Cantonese (≈ 300 MB). It writes what you say — 係, 嘅, 咗 — where the general model writes standard Chinese.</span>
+			<span>Cantonese: use a Whisper trained on Hong Kong Cantonese (≈ 300 MB). It writes what you say — <span lang="zh-Hant-HK">係, 嘅, 咗</span> — where the general model writes standard Chinese.</span>
 		</label>
 		{#if s.localAsrCantonese}
 			<div class="backup-row asr-yue">

@@ -18,7 +18,7 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 5. **Local-first.** All state in IndexedDB. svelte-check must be 0/0.
 
 ## Architecture
-- One Automerge doc (`SCHEMA_VERSION` 13; forward-only `migrate()` in store.ts) persisted to IndexedDB via idb-keyval.
+- One Automerge doc (`SCHEMA_VERSION` 14; forward-only `migrate()` in store.ts) persisted to IndexedDB via idb-keyval.
   Collections: `learningItems`, `lessons`, `srsStates` (keyed by itemId),
   `exerciseAttempts`, `pronunciationAttempts`, `contentDrafts`, `settings`,
   optional `passageReads` (passage id → first read to the end; unioned on merge),
@@ -52,16 +52,18 @@ src/lib/
   path.ts     learning paths: per language a Beginner and a Refresher path (pathsFor), each ordered stages (script · words · reading · skills · explore) over existing content; progress derived (pathState / stageProgress), never stored; the pick lives in settings.pathChoice (else suggestedPath)
   dictionary.ts tap-a-word lookup: lookup.ts (longest match zh/yue/ja + deinflect-ja.ts; ko particles/endings + form map; he prefixes + form map) over static/dict shards (dict-shard.ts layout, built by tools/gen-dict.mjs from CC-CEDICT / CC-Canto / JMdict / Wiktionary; CC BY-SA, see static/dict/LICENSE.md), fetched lazily + SW-cached
   own-text.ts "Read your own text": splitSentences, offline readings (pinyin / kana / romanizeHangul), AI readings + translations via router `annotate`
+  niqqud-model.ts on-device Hebrew vowels, pure part: DictaBERT-menaked char tokenizer, applyNikud (matres lectionis kept, NFC), argmaxRows;
+              the session is inference/providers/niqqud-local.ts (onnxruntime-web, pinned to transformers.js's version; model cached in Cache API 'manabi-models')
   names.ts    place & people names per language (countries · home · world · family · given) over hand-curated names-data.ts
   components/ Splash (launch screen; full animation once per browser session) · LessonIntro (pre-session card) · StreakCelebration (first session of the day) · CountUp · TapText (tappable words → LookupSheet) · PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep; `still` for the nav logo — one animated Nabi per screen) · Confetti
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
-  srs/stats.ts reviewForecast (due skill reviews per coming day) · activityCalendar (answers per day, Monday-first weeks) → dashboard ReviewForecast / ActivityCalendar · xpSummary (total / today / week, from xpSessions)
+  srs/stats.ts reviewForecast (due skill reviews per coming day) · activityCalendar (answers per day, Monday-first weeks) → dashboard ReviewForecast / ActivityCalendar · xpSummary (total / today / week, from xpSessions; settings.xpGoal = Home's ring, GoalCelebration when a session crosses it)
   reminder.ts daily practice reminder as a repeating .ics event (no server for push)
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
   haptics.ts  tapCorrect / tapWrong (navigator.vibrate; Android only, iOS ignores)
   install.ts  PWA install hint: captured beforeinstallprompt (Chromium) or iOS Share-sheet steps; Home only, ≥5 attempts, dismiss once
-src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings · about (credits & licences, build stamp from vite `define`)
+src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab (HSK · JLPT · Cantonese frequency bands, static/wordlists from tools/gen-vocab-data.mjs) · items[/[id]] · lessons · dashboard · workbench · settings · about (credits & licences, build stamp from vite `define`)
 ```
 
 ## Key modules
@@ -75,13 +77,17 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
   Recall is a typing card when `settings.typedRecall` (checked by `exercises/answer.ts`:
   script or romanized, pinyin / Jyutping tones, "close" for a slip); listening is a dictation
   (rebuild a 2–8 word example from tiles) about half the time when one exists.
-- `inference/router.ts` — TTS is local-first (MMS, Korean only) then OpenAI; transcription
-  is OpenAI first, then on-device Whisper (`providers/asr-local.ts`, opt-in `settings.localAsr`,
-  WASM; int8 decoders fail in onnxruntime-web, so base = q8 encoder + fp16 decoder; Chinese
-  normalized to Simplified, Cantonese (run as 'chinese' — base/small have no yue token) to HK Traditional; `asr-text.ts` drops hallucinated stock phrases) —
-  `lib/pronunciation.ts` scores it and the learner confirms. Generation, line annotation and
-  Hebrew diacritization (`lib/hebrew.ts` — accepts a result only if the letters are unchanged)
-  are OpenAI-only.
+- `inference/router.ts` — provider lists are built lazily (functions, not module-level arrays: a chunk import
+  cycle once left a provider undefined at init). TTS is local-first (MMS, Korean only) then OpenAI; transcription
+  is OpenAI first, then on-device Whisper (`providers/asr-local.ts`, opt-in `settings.localAsr`; `ASR_MODELS` base /
+  small / cantonese with per-device dtypes; WebGPU when `settings.localAsrGpu` and `hasWebGpu()` finds a real
+  adapter — software fallback adapters (headless SwiftShader) don't count — else WASM; int8 decoders fail in
+  onnxruntime-web, so base = q8 encoder + fp16 decoder on WASM; Cantonese runs as 'chinese' and goes to HK
+  Traditional, or with `settings.localAsrCantonese` the whisper-small-cantonese fine-tune, started via
+  decoder_input_ids because its config lacks a language table; `asr-text.ts` drops hallucinated stock phrases) —
+  `lib/pronunciation.ts` scores it and the learner confirms. Hebrew diacritization (`lib/hebrew.ts` — accepts a
+  result only if the letters are unchanged) runs on-device first with `settings.localNiqqud`, else OpenAI.
+  Generation and line annotation are OpenAI-only.
 - `db/store.ts` — `gradeItem`, `recordPronunciationAttempt`, `approveDraft`, derived
   stores (`activeItems`, `reviewSummary`, `lessonCounts`, `skillMemories`, …),
   `snapshotQueue(scope?)` for a stable per-session review order.
@@ -113,5 +119,4 @@ the build; every test fails on a page or console error): `npm run test:e2e`, or
 
 ## Deferred (future milestones)
 Lessons in the Markdown round-trip (items and passages ship; isomorphic-git is out because
-GitHub's git-over-HTTP has no CORS); an on-device model for
-Hebrew diacritization (OpenAI-only today); WebGPU for on-device Whisper (WASM only so far).
+GitHub's git-over-HTTP has no CORS); an on-device TTS voice beyond Korean (no MMS ports for the others).
