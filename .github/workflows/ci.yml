@@ -27,3 +27,17 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Install Playwright's headless Chromium
+        run: npx playwright install --with-deps --only-shell chromium
+
+      - name: Browser tests (Playwright, against the production build)
+        run: npx playwright test
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

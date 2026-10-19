@@ -90,8 +90,10 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
 mise run dev | build | test
 npx svelte-check   # 0/0 invariant (CI gate)
 ```
-Vitest covers SRS scheduling, queue building, and exercise generation. There is no
-in-repo browser test; smoke-test by driving the dev server with a headless browser.
+Vitest covers SRS scheduling, queue building, and exercise generation (`src/**/*.test.ts`).
+Browser tests live in `e2e/` (Playwright, desktop + phone projects, against `vite preview` of
+the build; every test fails on a page or console error): `npm run test:e2e`, or
+`npx playwright test` with a build in place. CI runs both.
 
 ## Deferred (future milestones)
 Markdown round-trip of content in the sync repo (snapshot sync itself ships — `sync.ts`;

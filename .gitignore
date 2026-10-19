@@ -30,3 +30,7 @@ tools/.scripts.mjs
 
 # local headless smoke-test harness (playwright-core + screenshots)
 .smoke/
+
+# Playwright output
+/test-results
+/playwright-report
