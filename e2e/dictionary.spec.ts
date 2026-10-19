@@ -84,3 +84,18 @@ test('own text with AI readings and translations', async ({ page, context }) => 
 	await page.locator('.tok', { hasText: 'ספר' }).click();
 	await expect(page.locator('.sheet .entry').first()).toContainText('book');
 });
+
+test('pasted Traditional Chinese is stored Simplified, read in your script', async ({ page }) => {
+	await boot(page);
+	await page.goto('/read/new');
+	await page.fill('textarea', '我們喜歡吃米飯。');
+	await page.locator('button', { hasText: 'Start reading' }).click();
+	await page.waitForURL(/\/read\/(?!new)/);
+	await expect(page.locator('h1')).toHaveText('我们喜欢吃米饭。');
+	await page.locator('.controls button', { hasText: 'Readings' }).click();
+	await expect(page.locator('.reading').first()).toHaveText('wǒmen xǐhuan chī mǐfàn.');
+	await page.goto('/settings');
+	await page.locator('button.lang', { hasText: 'Taiwan' }).click();
+	await page.goto('/read');
+	await expect(page.locator('a.card', { hasText: '我們喜歡吃米飯' })).toHaveCount(1);
+});

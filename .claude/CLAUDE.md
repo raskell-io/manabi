@@ -17,7 +17,7 @@ transformers.js + OpenAI behind an inference router, adapter-static PWA.
 5. **Local-first.** All state in IndexedDB. svelte-check must be 0/0.
 
 ## Architecture
-- One Automerge doc (`schemaVersion` 1) persisted to IndexedDB via idb-keyval.
+- One Automerge doc (`SCHEMA_VERSION` 13; forward-only `migrate()` in store.ts) persisted to IndexedDB via idb-keyval.
   Collections: `learningItems`, `lessons`, `srsStates` (keyed by itemId),
   `exerciseAttempts`, `pronunciationAttempts`, `contentDrafts`, `settings`,
   optional `passageReads` (passage id → first read to the end; unioned on merge).
@@ -49,7 +49,6 @@ src/lib/
   own-text.ts "Read your own text": splitSentences, offline readings (pinyin / kana / romanizeHangul), AI readings + translations via router `annotate`
   names.ts    place & people names per language (countries · home · world · family · given) over hand-curated names-data.ts
   components/ TapText (tappable words → LookupSheet) · PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep; `still` for the nav logo — one animated Nabi per screen) · Confetti
-src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
   srs/stats.ts reviewForecast (due skill reviews per coming day) · activityCalendar (answers per day, Monday-first weeks) → dashboard ReviewForecast / ActivityCalendar
@@ -57,6 +56,7 @@ src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] 
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
   haptics.ts  tapCorrect / tapWrong (navigator.vibrate; Android only, iOS ignores)
   install.ts  PWA install hint: captured beforeinstallprompt (Chromium) or iOS Share-sheet steps; Home only, ≥5 attempts, dismiss once
+src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
 ```
 
 ## Key modules

@@ -66,15 +66,24 @@ adaptive icons). The manifest lists icons with `purpose: 'any'` and a `maskable`
 
 ### Offline behavior
 
-The Workbox `globPatterns` precache the **app shell only** (~72 entries: JS/CSS/HTML/icons).
+The Workbox `globPatterns` precache the **app shell only** (~120 entries, ≈ 6.7 MB: JS/CSS/HTML/icons/WASM).
 Deliberately **excluded**:
 
 - **Audio packs** and **word lists** — fetched on demand and held in the HTTP cache. 73 MB
   of audio would make the first install huge, and Range-request caching in a SW is
   error-prone ([audio](./audio.md#what-is-not-precached)).
-- OpenAI and Hugging Face requests — `NetworkOnly` runtime rules.
+- **Dictionary shards** (`static/dict/`, ~34 MB) — runtime-cached (`StaleWhileRevalidate`,
+  `manabi-dict`) as words are tapped; audio manifests and word lists likewise in `manabi-data`,
+  stroke data `CacheFirst` in `manabi-strokes`.
+- OpenAI and Hugging Face requests — `NetworkOnly` runtime rules. On-device models (Korean
+  TTS, Whisper) are cached by transformers.js itself, not the service worker; the
+  onnxruntime WASM files are excluded from precaching (`globIgnores`).
 
-Result: the shell works offline immediately; audio/vocab work offline **after first use**.
+(The opencc-js Traditional Chinese dictionaries are an ordinary JS chunk, so they are
+precached with the shell, but only imported once a Traditional script is picked.)
+
+Result: the shell works offline immediately; audio, vocab, lookups and on-device models work
+offline **after first use**.
 
 ## Production deploy (Cloudflare Pages)
 

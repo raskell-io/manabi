@@ -18,31 +18,43 @@ Automerge document on your device and never committed or sent anywhere else.
 ## The inference router
 
 [`router.ts`](../src/lib/inference/router.ts) is a small provider abstraction (the
-`InferenceProvider` interface in [`types.ts`](../src/lib/inference/types.ts)) with two task
-families:
+`InferenceProvider` interface in [`types.ts`](../src/lib/inference/types.ts)). Each task walks
+an ordered provider list and uses the first one whose `capabilities(settings)` allow it:
 
 | Task | Routing | Provider |
 | --- | --- | --- |
 | `generateItems` | remote only | OpenAI (JSON mode) |
 | `generatePassages` | remote only | OpenAI (JSON mode) |
-| `synthesize` (TTS) | local-first, then remote | MMS (local) → OpenAI |
+| `annotate` | remote only | OpenAI (JSON mode) — reading + translation per line of an own text |
+| `diacritize` | remote only | OpenAI (JSON mode) — Hebrew niqqud |
+| `synthesize` (TTS) | local-first, then remote | MMS (local, **Korean only**) → OpenAI |
+| `transcribe` (ASR) | remote-first, then local | OpenAI → Whisper (local, opt-in) |
 
 ```ts
 synthesize(input, settings)       // TTS — local MMS first, OpenAI fallback
+transcribe(input, settings)       // ASR — OpenAI first, on-device Whisper fallback
 generateItems(input, settings)    // vocab drafts (OpenAI JSON)
 generatePassages(input, settings) // reading drafts (OpenAI JSON)
-canGenerate(settings) / canSynthesize(settings)  // capability checks
+annotate(input, settings)         // own-text readings + translations (OpenAI JSON)
+diacritize(input, settings)       // Hebrew niqqud (OpenAI JSON)
+canGenerate / canSynthesize / canTranscribe / canDiacritize(settings)  // capability checks
 ```
 
-Generation is **OpenAI-only** (it needs reliable JSON output). TTS is **local-first** by
-design, but in practice the local path does not load, so audio is handled by the
-[prerecording pipeline](./audio.md) instead — the router's TTS path is a fallback that
-rarely fires.
+Generation, annotation and diacritization are **OpenAI-only** (they need reliable JSON
+output). TTS is **local-first**, but the only on-device voice is Korean, and most audio comes
+from the [prerecording pipeline](./audio.md) anyway — the router's TTS path only fires for
+text without a clip. Transcription runs the other way round: the remote model is more
+accurate, so it goes first, and a failing or impossible call (no key, offline) falls through
+to the on-device model when that is switched on. Synthesis and transcription try the next
+provider when one fails; the JSON tasks return the first capable provider's result.
 
 Providers live in [`providers/openai.ts`](../src/lib/inference/providers/openai.ts) (chat
-JSON-mode generation + a TTS endpoint) and
+JSON-mode generation, annotation, diacritization, a TTS endpoint and transcription),
 [`providers/tts-local.ts`](../src/lib/inference/providers/tts-local.ts) (transformers.js
-MMS). [`local-models.ts`](../src/lib/inference/local-models.ts) is the local model registry.
+MMS, Korean) and [`providers/asr-local.ts`](../src/lib/inference/providers/asr-local.ts)
+(transformers.js Whisper). [`local-models.ts`](../src/lib/inference/local-models.ts) loads
+transformers.js pipelines lazily (dynamic import, so the runtime stays out of the initial
+bundle), dedupes concurrent loads, and publishes download progress in `localModelStatus`.
 
 ## Generation → validation → draft
 
@@ -92,10 +104,9 @@ The end-to-end flow is verifiable by stubbing the OpenAI `fetch` in a headless b
 (the mock must handle the CORS preflight `OPTIONS` and return CORS headers). The validators
 themselves are plain unit tests (`passages.test.ts`).
 
-## Other router tasks: Hebrew diacritization & transcription
+## Other router tasks: Hebrew diacritization, annotation & transcription
 
-The same router serves two more OpenAI-only tasks (both advertised through
-`ProviderCapabilities` and implemented in `providers/openai.ts`):
+The same router serves three more tasks (advertised through `ProviderCapabilities`):
 
 - **`diacritize({ texts })`** — adds niqqud to bare Hebrew strings (Chat Completions, JSON
   mode, temperature 0). The provider only checks the shape; [`src/lib/hebrew.ts`](../src/lib/hebrew.ts)
@@ -104,9 +115,17 @@ The same router serves two more OpenAI-only tasks (both advertised through
   `diacritizeItems` / `diacritizePassages` batch a whole generation into one request and only
   send strings that `needsNiqqud` (two or more Hebrew letters, no marks). Used by the item
   editor's **Add vowels (AI)** button and automatically by the Workbench for Hebrew output.
-- **`transcribe({ audio, language })`** — sends a learner's recording (multipart) to the
-  transcription endpoint with the language hint; for Chinese a neutral Simplified-script
-  prompt keeps the output in the same script as the items. Gated by the **Pronunciation**
-  setting (`asrScoring`). Scoring is pure and lives in
+- **`annotate({ language, lines })`** — for **Read your own text** (`/read/new`): one
+  `{ reading, transliteration?, meaning }` per input line, same order (Chat Completions, JSON
+  mode, temperature 0.2). `validateAnnotations` rejects a result whose line count does not
+  match; the page then keeps the offline dictionary readings and says the AI step failed. Gated
+  like generation (`canGenerate`). See [content → own texts](./content.md#the-learners-own-texts).
+- **`transcribe({ audio, language })`** — OpenAI first: sends a learner's recording
+  (multipart) to the transcription endpoint (`gpt-4o-mini-transcribe`) with the language hint;
+  for Chinese a neutral Simplified-script prompt keeps the output in the same script as the
+  items. Then, when `settings.localAsr` is on, **on-device Whisper** (`asr-local.ts`: WASM,
+  base = q8 encoder + fp16 decoder because onnxruntime-web's int8 decoders fail, Chinese
+  normalized to Simplified, hallucinated stock phrases dropped by `asr-text.ts`). Both are
+  gated by the **Pronunciation** setting (`asrScoring`). Scoring is pure and lives in
   [`src/lib/pronunciation.ts`](../src/lib/pronunciation.ts) — see [SRS → Pronunciation
   scoring](./srs.md#pronunciation-scoring-asr).

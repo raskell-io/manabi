@@ -5,6 +5,7 @@
 	import { LANGUAGES } from '$lib/db/types';
 	import { dictionary } from '$lib/dictionary';
 	import { linesFromText, splitSentences } from '$lib/own-text';
+	import { toSimplified } from '$lib/chinese';
 	import { annotate, canGenerate } from '$lib/inference/router';
 
 	const lang = $derived($settings.activeLanguage);
@@ -25,7 +26,10 @@
 		busy = true;
 		error = '';
 		try {
-			const lines = await linesFromText(lang, text, dictionary);
+			// Chinese is stored Simplified (the dictionary and audio key on it); pasted
+			// Traditional is shown as Traditional again by the script setting.
+			const source = lang === 'zh' ? await toSimplified(text) : text;
+			const lines = await linesFromText(lang, source, dictionary);
 			const kept = lines.slice(0, MAX_LINES);
 			if (useAi && aiAvailable) {
 				const res = await annotate({ language: lang, lines: kept.map((l) => l.target) }, $settings);
@@ -42,7 +46,7 @@
 			const id = createPassage({
 				language: lang,
 				kind: 'text',
-				title: title.trim() || kept[0].target.slice(0, 24),
+				title: (lang === 'zh' ? await toSimplified(title.trim()) : title.trim()) || kept[0].target.slice(0, 24),
 				level: 'Your text',
 				tags: ['mine'],
 				lines: kept

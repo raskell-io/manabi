@@ -90,6 +90,16 @@ export async function setZhScript(script: ZhScript): Promise<void> {
 export const zhScript: Readable<ZhScript> = derived(active, ($a) => $a.script);
 
 
+let simplifier: Promise<Convert> | null = null;
+/**
+ * Traditional → Simplified, the stored form (pasted text, speech-recognition
+ * output). Loads the small t2cn dictionary on first use.
+ */
+export async function toSimplified(text: string): Promise<string> {
+	simplifier ??= import('opencc-js/t2cn').then((OpenCC) => OpenCC.Converter({ from: 't', to: 'cn' }));
+	return (await simplifier)(text);
+}
+
 /** Convert text in `language` for display (non-Chinese text passes through). */
 export function displayText(text: string, language: Language, convert: Convert): string {
 	return language === 'zh' ? convert(text) : text;

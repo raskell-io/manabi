@@ -7,20 +7,28 @@ to regenerate or extend it.
 
 ## Why prerecorded (not on-device TTS)
 
-The app ships a local TTS attempt (`@huggingface/transformers` MMS, in
-[`providers/tts-local.ts`](../src/lib/inference/providers/tts-local.ts)), but **in-browser
-ONNX TTS does not load reliably**, so it is not the audio path. Cloud TTS at *runtime*
-would need network and a key for every play. The solution: synthesize everything **once,
-offline**, with a high-quality voice, and ship static audio that plays instantly and
-offline.
+On-device TTS cannot cover the four languages: the app's local provider
+([`providers/tts-local.ts`](../src/lib/inference/providers/tts-local.ts),
+`@huggingface/transformers` MMS) has exactly **one voice, Korean** (`Xenova/mms-tts-kor`).
+MMS has no Mandarin or Japanese voice, and its Hebrew model (`facebook/mms-tts-heb`) exists
+only as PyTorch, with no ONNX port transformers.js could run; requesting those failed with a
+missing download before falling back, so the provider now fails fast for them. Cloud TTS at
+*runtime* would need network and a key for every play. The solution: synthesize everything
+**once, offline**, with a high-quality voice, and ship static audio that plays instantly and
+offline. Text without a clip (your own items, AI drafts) falls back to on-device TTS for
+Korean, then OpenAI TTS when a key is set ([router](./ai-workbench.md#the-inference-router)).
+
+(The other on-device model, **Whisper**, is speech *recognition* for pronunciation scoring,
+not TTS — see [SRS → pronunciation scoring](./srs.md#pronunciation-scoring-asr).)
 
 The synthesis engine is **edge-tts** (free Microsoft neural voices), chosen after local
-models failed to cover all three languages well:
+models failed to cover the languages well:
 
 | Language | Voice |
 | --- | --- |
 | zh | `zh-CN-XiaoxiaoNeural` |
 | ja | `ja-JP-NanamiNeural` |
+| ko | `ko-KR-SunHiNeural` |
 | he | `he-IL-HilaNeural` |
 
 (Local alternatives that did not work out: the Voxtral model lacks zh/ja/he; Kokoro's zh
@@ -33,9 +41,10 @@ so one file per clip will not fit. Instead, clips are concatenated into a few hu
 **audio sprite packs** with a small inter-clip gap, and a per-language **manifest** records
 where each clip lives inside its pack.
 
-Current output: **347 WebM/Opus packs (~73 MB)** + three manifests
-(`manifest-zh.json` 11,319 entries, `manifest-ja.json` 8,525, `manifest-he.json` 177).
-That is ~350 files total — comfortably under the cap.
+Current output: **356 WebM/Opus packs (~76 MB)** + four manifests
+(`manifest-zh.json` 11,365 entries, `manifest-ja.json` 8,568, `manifest-ko.json` 352,
+`manifest-he.json` 225). That is ~360 files total — comfortably under the cap, even with the
+dictionary shards (~220 files) and bundled stroke data alongside.
 
 Format is **Opus 24 kbps mono in a WebM container**. Opus is ~half the size of AAC for
 speech; WebM is the container that plays Opus across Chrome, Firefox, **and Safari/iOS 16.4+**
@@ -131,7 +140,12 @@ supersedes any in-flight one.
 
 `AudioButton.svelte` is the UI: it checks the manifest for the active language
 (`hasPrerecorded`) to decide if it is enabled, then plays the prerecorded clip, falling back
-to a device-cached blob or on-the-fly synthesis only if there is no clip.
+to a device-cached blob or on-the-fly synthesis (`synthesizeToRef` → router `synthesize`:
+Korean MMS on-device, else OpenAI) only if there is no clip. A synthesized clip is stored in
+the blob store and attached to the item as `audioRef`.
+
+Clips are keyed by the stored text, so Chinese plays the same clip whether it is displayed
+Simplified or Traditional.
 
 The `/review` Listening mode uses `hasPrerecorded` to only offer hear-it cards for words
 that actually have audio.
@@ -161,6 +175,6 @@ env with `edge-tts` + `ffmpeg` works. Commit `static/audio/packs/` and
 ## What is NOT precached
 
 The service worker precaches the app shell but **not** the audio packs ([PWA](./pwa-and-deployment.md)).
-73 MB would make the first install enormous, and Range-request caching in a service worker
+76 MB would make the first install enormous, and Range-request caching in a service worker
 is error-prone. Packs are fetched on demand and held in the browser's HTTP cache, so audio
 works offline after first use.

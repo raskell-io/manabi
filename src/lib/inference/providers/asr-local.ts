@@ -11,6 +11,7 @@
 
 import type { ManabiSettings } from '$lib/db/types';
 import { loadPipeline } from '../local-models';
+import { toSimplified } from '$lib/chinese';
 import { cleanTranscript, maxTokensFor, WHISPER_LANGUAGE } from '../asr-text';
 import type { InferenceProvider, InferenceResult, ProviderCapabilities, TranscribeInput, TranscribeResult } from '../types';
 
@@ -35,12 +36,6 @@ async function decode(blob: Blob): Promise<Float32Array> {
 	} finally {
 		void ctx.close();
 	}
-}
-
-let toSimplified: Promise<(text: string) => string> | null = null;
-function simplified(): Promise<(text: string) => string> {
-	toSimplified ??= import('opencc-js/t2cn').then((OpenCC) => OpenCC.Converter({ from: 't', to: 'cn' }));
-	return toSimplified;
 }
 
 /** The model id for the chosen size. */
@@ -88,7 +83,7 @@ export const asrLocalProvider: InferenceProvider = {
 				max_new_tokens: maxTokensFor(audio.length / SAMPLE_RATE)
 			});
 			let text = cleanTranscript(out.text ?? '');
-			if (input.language === 'zh' && text) text = (await simplified())(text);
+			if (input.language === 'zh' && text) text = await toSimplified(text);
 			return { ok: true, value: { text }, providerId: 'asr-local', target: 'local' };
 		} catch (err) {
 			return fail(err instanceof Error ? err.message : 'On-device recognition failed');

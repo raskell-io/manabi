@@ -9,7 +9,7 @@ Source of truth: [`src/lib/db/types.ts`](../src/lib/db/types.ts) (shapes) and
 
 ## The document
 
-`SCHEMA_VERSION = 4`. The document is a set of keyed maps (objects keyed by id) plus
+`SCHEMA_VERSION = 13` (see [the history](#schema-history)). The document is a set of keyed maps (objects keyed by id) plus
 settings:
 
 ```ts
@@ -24,6 +24,7 @@ interface ManabiDocument {
   contentDrafts:        Record<string, ContentDraft>;       // AI vocab drafts
   passageDrafts:        Record<string, PassageDraft>;        // AI reading drafts
   seededIds:            Record<string, boolean>;             // which seeds were applied
+  passageReads?:        Record<string, number>;              // passage id → first read to the end (ms)
   settings:             ManabiSettings;
 }
 ```
@@ -33,11 +34,15 @@ insert/update/delete by id are clean and order-independent.
 
 ### What is NOT in the document
 
-To keep the doc small and fast, three large data sets live outside it and are fetched on
+To keep the doc small and fast, the large data sets live outside it and are fetched on
 demand:
 
 - **Audio** (`static/audio/packs/*.webm` + manifests) — see [audio](./audio.md).
 - **Vocabulary lists** (`static/wordlists/*.json`) — see [content](./content.md).
+- **Dictionaries** (`static/dict/<lang>/<bucket>.json`) — see
+  [content](./content.md#dictionaries--toolsgen-dictmjs).
+- **Traditional Chinese** — never stored: Chinese text is stored Simplified and converted for
+  display ([below](#chinese-script-and-readings)).
 - **Script tables** (`src/lib/scripts-data.ts`) — generated reference data.
 
 Only when you *start studying* a word/glyph does a `LearningItem` get created in the doc.
@@ -49,7 +54,7 @@ Only when you *start studying* a word/glyph does a `LearningItem` get created in
 ```ts
 interface LearningItem {
   id: string;
-  language: 'zh' | 'ja' | 'he';
+  language: 'zh' | 'ja' | 'ko' | 'he';
   kind: 'word' | 'phrase' | 'sentence' | 'grammar' | 'character';
   target: string;          // the script: 今天 / 食べる / שָׁלוֹם
   reading: string;         // pinyin / kana / vowelled Hebrew
@@ -59,6 +64,7 @@ interface LearningItem {
   level: string;           // 'A1' | 'HSK1' | 'N4' ...
   examples: ExampleSentence[];
   audioRef?: string;       // blob ref of a (device-cached) synthesized clip
+  zhVariants?: ZhVariants; // Chinese only: the item's own Taiwan / Hong Kong form + Taiwan reading
   status: 'published' | 'draft';
   createdAt: number; updatedAt: number;
 }
@@ -67,6 +73,12 @@ interface LearningItem {
 Levels and exam tiers (HSK/JLPT/CEFR) are **tags/metadata**, not a hierarchy — items are
 the unit, lessons are optional bundles. An `ExampleSentence` has the same
 `target`/`reading`/`transliteration`/`meaning` shape plus an optional `audioRef`.
+
+`zhVariants` (`{ tw?, hk?, twReading? }`, type in [`chinese.ts`](../src/lib/chinese.ts)) is for
+the cases character conversion cannot handle: a character with several Traditional forms on
+its own (干 → 乾 / 幹), or Taiwan vocabulary and readings (网络 → 網路 *wǎnglù*). It is edited on
+the item page and round-trips through the sync Markdown (`- tw` / `- hk` / `- twreading`).
+Seed words that need it are listed in `SEED_ZH_VARIANTS` ([`seed.ts`](../src/lib/db/seed.ts)).
 
 ### Passage — graded reading material
 
@@ -80,6 +92,10 @@ interface Passage {
 ```
 
 Powers the `/read` screen. A line can be **mined** into a `sentence` `LearningItem`.
+"Read your own text" (`/read/new`) creates a passage with `kind: 'text'`, `level: 'Your text'`
+and the tag `mine`; its lines have dictionary readings and, without AI, an empty `meaning`
+(such lines cannot be mined). `passageReads[id]` records when a passage was first read to the
+end (it drives the learning path).
 
 ### SkillMemory + DimState — the SRS state
 
@@ -106,8 +122,11 @@ See [SRS](./srs.md) for how these advance.
 ### Attempts, lessons, drafts
 
 - `ExerciseAttempt` — one logged answer (item, dimension, exercise type, correct, quality,
-  chosen vs expected, timestamp).
-- `PronunciationAttempt` — a recording ref + a `bad | okay | good` self-rating.
+  chosen vs expected, timestamp). `exerciseType` is one of `word-to-meaning`,
+  `word-to-reading`, `reading-to-word`, `audio-to-word`, `cloze`, `meaning-to-word`,
+  `type-recall`, `dictation`, `record-compare` (see [SRS → exercises](./srs.md#exercises)).
+- `PronunciationAttempt` — a recording ref + a `bad | okay | good` self-rating, plus the
+  optional `transcript` and 0–100 `score` from speech recognition.
 - `Lesson` — `{ title, language, itemIds[] }`, a named bundle.
 - `ContentDraft` / `PassageDraft` — AI-generated candidates awaiting approval; see
   [AI workbench](./ai-workbench.md).
@@ -117,13 +136,47 @@ See [SRS](./srs.md) for how these advance.
 ```ts
 interface ManabiSettings {
   activeLanguage; newPerDay; reviewCap;
-  openaiApiKey; openaiModel;          // for the workbench; key stays on-device
-  localTtsEnabled; hideHebrewVowels; gradeButtons;
+  openaiApiKey; openaiModel;          // AI features; key stays on-device
+  githubSyncRepo; githubSyncToken;    // GitHub sync ('' = off); token stays on-device
+  syncAuto;                           // sync on start, after a session, when back online
+  syncMarkdown;                       // also keep items + passages as Markdown in the repo
+  localTtsEnabled;                    // on-device TTS (Korean MMS only)
+  asrScoring;                         // score recordings with speech recognition
+  localAsr; localAsrModel;            // on-device Whisper (opt-in), 'base' | 'small'
+  hideHebrewVowels;
+  zhScript;                           // 'simplified' | 'traditional-tw' | 'traditional-hk'
+  zhReading;                          // 'pinyin' | 'zhuyin'
+  zhRuby;                             // Chinese: reading above each character
+  gradeButtons; typedRecall;
   theme: 'system' | 'light' | 'dark';
+  reminderTime;                       // 'HH:MM' for the daily calendar reminder
+  pathChoice;                         // learning path picked per language
 }
 ```
 
-Defaults: `newPerDay: 5`, `reviewCap: 40`, `openaiModel: 'gpt-4o'`, `activeLanguage: 'zh'`.
+Defaults (`defaultSettings()`): `newPerDay: 5`, `reviewCap: 40`, `openaiModel: 'gpt-4o'`,
+`activeLanguage: 'zh'`, `syncAuto` and `syncMarkdown` on, `localTtsEnabled` and `asrScoring`
+on, `localAsr` off with `localAsrModel: 'base'`, `zhScript: 'simplified'`,
+`zhReading: 'pinyin'`, `zhRuby` off, `gradeButtons` and `typedRecall` on, `theme: 'light'`,
+`reminderTime: '19:00'`, `pathChoice: {}`.
+
+### Chinese script and readings
+
+Chinese `target`s and examples are always stored **Simplified** and readings as tone-marked
+**pinyin**; `zhScript`, `zhReading` and `zhRuby` only change the display, so SRS progress,
+audio (keyed by the Simplified text) and seeds are shared whichever script is read.
+[`chinese.ts`](../src/lib/chinese.ts) holds this state outside the document as Svelte stores,
+fed by the root layout from settings and items:
+
+- `$toZhScript` — Simplified → the rendered script via opencc-js (`cn2t`, phrase-level, loaded
+  lazily and awaited at boot so there is no flash of Simplified); an item's own `zhVariants`
+  form wins over conversion. Characters only, never vocabulary.
+- `$readingOf(reading, target, language)` — the Taiwan reading when reading Taiwan
+  Traditional, as Zhuyin when picked ([`zhuyin.ts`](../src/lib/zhuyin.ts)); non-hanzi targets
+  (the bopomofo chart, the tone drill) keep their pinyin.
+- `$rubyOf(text, reading)` — one syllable per hanzi for ruby above the characters when
+  `zhRuby` is on and the syllables line up (`readingSyllables` / `rubySegments`), else `null`.
+  `ScriptText` and `TapText` take a `reading` prop for this.
 
 ## Persistence
 
@@ -156,16 +209,20 @@ cleared once the merged document is saved.
 
 Reads are exposed as derived Svelte stores so components stay declarative:
 `settings`, `activeLanguage`, `allItems`, `activeItems` (active language, published),
-`lessons`, `passages`, `contentDrafts`, `passageDrafts`, `exerciseAttempts`,
-`skillMemories`, and `reviewSummary` (the due counts). `snapshotQueue()` returns a stable
-queue for a review session.
+`lessons`, `passages`, `passageReads`, `pathData`, `contentDrafts`, `passageDrafts`,
+`exerciseAttempts`, `pronunciationAttempts`, `practiceTimes` (every answer and recording, any
+language — feeds the streak and the practice calendar), `skillMemories`, `reviewSummary` (the
+due counts), `languageCounts` and `lessonCounts`. `snapshotQueue()` returns a stable queue
+for a review session.
 
 ### Store API (write side)
 
 CRUD and domain operations all live in `store.ts`, e.g. `createItem`, `updateItem`,
 `deleteItem`, `gradeItem`, `recordPronunciationAttempt`, `createLesson`, `createPassage`,
-`studyScriptChar`, `studyVocabWord`, `addVocabWords` (bulk = one change), `studyPassageLine`
-(sentence mining), and the draft operations (`addDrafts`, `approveDraft`, …). Components
+`deletePassage`, `markPassageRead`, `studyScriptChar`, `studyVocabWord` (also used by the
+dictionary sheet's **Add to reviews**), `addVocabWords` (bulk = one change), `studyPassageLine`
+(sentence mining), the draft operations (`addDrafts`, `approveDraft`, …), and the sync
+Markdown hooks `renderContentFile` / `applyContentFile` ([sync](./sync.md#markdown-round-trip)). Components
 **never** call `Automerge.change` directly.
 
 ## The `undefined` gotcha
@@ -208,6 +265,7 @@ The merge is therefore **semantic**, collection by collection:
 | `lessons` | `itemIds` are unioned |
 | `contentDrafts`, `passageDrafts` | a decision (approved / rejected) beats `pending` |
 | `exerciseAttempts`, `pronunciationAttempts`, `seededIds` | union by id |
+| `passageReads` | union; the earlier read time wins |
 | `settings` | never touched |
 
 An import **never deletes** anything, and merging the same file twice is a no-op
@@ -227,6 +285,13 @@ function migrate(d) {
       if (!doc.seededIds) doc.seededIds = {};
       if (!doc.passages) doc.passages = {};
       if (!doc.passageDrafts) doc.passageDrafts = {};
+      // Fill in any settings added since this document was created.
+      for (const [k, v] of Object.entries(defaultSettings()))
+        if (doc.settings[k] === undefined) doc.settings[k] = v;
+      // Schema 12: seeded words get their Taiwan form / reading where it differs.
+      for (const [id, v] of Object.entries(SEED_ZH_VARIANTS))
+        if (doc.learningItems[id] && !doc.learningItems[id].zhVariants)
+          doc.learningItems[id].zhVariants = { ...v };
       doc.schemaVersion = SCHEMA_VERSION;
     });
   }
@@ -234,9 +299,33 @@ function migrate(d) {
 }
 ```
 
+Because missing settings are filled from `defaultSettings()`, adding a setting needs only a
+default and a version bump — no per-field migration line.
+
 To add a collection or field in a new schema version: bump `SCHEMA_VERSION`, add the
 "ensure it exists" line to `migrate()`, and update `createEmptyDocument()`. Never remove or
 repurpose an existing field destructively — old documents in users' browsers still have it.
+
+### Schema history
+
+| Version | Added |
+| --- | --- |
+| 1–4 | initial collections, seed upsert (`seededIds`), passages, passage drafts |
+| 5 | GitHub sync settings (`githubSyncRepo`, `githubSyncToken`, `syncAuto`) |
+| 6 | `asrScoring`; `PronunciationAttempt.transcript` / `score` (ASR scoring, with Hebrew diacritization) |
+| 7 | `zhScript` (Traditional Chinese display) |
+| 8 | `zhReading` (Zhuyin) |
+| 9 | `typedRecall` (typed recall; `type-recall` / `dictation` exercise types) |
+| 10 | `localAsr`, `localAsrModel` (on-device Whisper) |
+| 11 | `syncMarkdown` (Markdown round-trip) |
+| 12 | `zhRuby`; `LearningItem.zhVariants`, backfilled for seed words from `SEED_ZH_VARIANTS` |
+| 13 | `reminderTime` (daily reminder) |
+
+(`passageReads` and `pathChoice` arrived without a bump: the collection is optional and the
+setting is filled from the defaults on the next migration.)
+
+A backup or sync snapshot whose `schemaVersion` is newer than the app's is refused with a
+message to update first.
 
 ## Seeding (the upsert mechanism)
 

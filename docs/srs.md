@@ -14,9 +14,9 @@ Source: [`src/lib/srs/schedule.ts`](../src/lib/srs/schedule.ts),
 ```
 recognition  — see the word, know the meaning           (the entry skill)
 pronunciation— say it (record & self-compare)
-listening    — hear it, identify it
+listening    — hear it, identify it (or rebuild a heard sentence: dictation)
 context      — understand it in a sentence (cloze)
-recall       — produce it from the meaning
+recall       — produce it from the meaning (type it, or pick it)
 ```
 
 Each is a separate `DimState` (interval, ease, repetitions, nextReview, lapses,
@@ -154,8 +154,19 @@ and which dimension each trains (`EXERCISE_DIMENSION`).
 [`exercises/generate.ts`](../src/lib/exercises/generate.ts) builds a runnable exercise:
 
 ```ts
-buildExercise(item, dimension, pool, { audio, rng })
+buildExercise(item, dimension, pool, { audio, typed, rng })
 ```
+
+`exerciseTypeFor(dimension, audio, typed)` picks the signature drill per dimension; the review
+page sets `audio` for listening and pronunciation tasks, and `typed` is `settings.typedRecall`:
+
+| Dimension | Exercise type | Fallback / variant |
+| --- | --- | --- |
+| recognition | `word-to-meaning` | — |
+| pronunciation | `record-compare` | `word-to-reading` without audio |
+| listening | `audio-to-word` | `dictation` about half the time when a short example exists; `reading-to-word` without audio |
+| context | `cloze` | `meaning-to-word` when the item has no example |
+| recall | `type-recall` (typed on) | `meaning-to-word` (typed off) |
 
 - **MCQ** exercises (recognition, listening, recall) pick the correct answer plus
   distractors from `pool` — preferring items of the **same kind / level / tags / language**
@@ -167,6 +178,14 @@ buildExercise(item, dimension, pool, { audio, rng })
   answer, the blank is **filled in place** (answer highlighted) with the sentence's
   reading/transliteration beneath it, the full sentence's clip **auto-plays** (the seed
   example sentences are prerecorded), and a replay button is shown.
+- **Typed recall** (`type-recall`) shows the meaning and asks you to type the word, checked
+  by [`exercises/answer.ts`](../src/lib/exercises/answer.ts) (`checkTyped`) — see
+  [below](#typed-recall).
+- **Dictation** (`dictation`, listening) plays one of the item's example sentences of 2–8
+  words (split with `Intl.Segmenter`, punctuation dropped) and you rebuild it from shuffled
+  word tiles; it is checked once every tile is placed, and the sentence, its reading and
+  translation are then revealed and the sentence replays. `pickDictation` chooses it about
+  half the time (via `rng`) when such an example exists.
 - **Record-and-compare** (pronunciation) plays the native clip and records you; you
   self-rate `bad | okay | good`.
 - `rng` is injectable, so distractor selection is deterministic in tests.
@@ -174,6 +193,23 @@ buildExercise(item, dimension, pool, { audio, rng })
 `ExerciseRunner.svelte` renders whatever `buildExercise` returns and reports a
 `CompleteResult` back to the page, which calls `gradeItem` (MCQ/cloze) or
 `recordPronunciationAttempt` (speaking).
+
+### Typed recall
+
+With `settings.typedRecall` on (the default), recall cards are typing cards. The learner may
+type the word in its own script or romanized:
+
+| Language | Accepted |
+| --- | --- |
+| zh | hanzi (Simplified, or the displayed Traditional form, passed as `alternatives`), or pinyin with tone marks or tone numbers (`mǎ` / `ma3`; `v` for ü) |
+| ja | kanji / kana as written, the kana reading (katakana treated as hiragana), or romaji (the item's `transliteration`) |
+| ko | Hangul or Revised Romanization |
+| he | Hebrew with or without niqqud, or the `transliteration` |
+
+`checkTyped` returns a `Verdict`: `exact`, `close` or `wrong`. **Close** counts as correct but
+says "Almost!" and shows the answer: pinyin with the right letters but missing or wrong tones
+("add the tones" / "check the tones"), or a small typo (Levenshtein distance 1 for 4–7
+characters, 2 for 8+). **I don't know** reveals the answer and grades it as wrong.
 
 **Audio feedback.** On mount, the runner auto-plays the word when it is on screen and
 won't give the answer away (the recognition `script` prompt and listening `audio` prompt;
@@ -184,8 +220,9 @@ tweakable by editing the notes).
 
 ## Pronunciation scoring (ASR)
 
-`record-compare` is self-rated (bad / okay / good → quality 1 / 3 / 5). When an OpenAI key is
-set and **Settings → Pronunciation** is on, the `Recorder` also sends the take to the router's
+`record-compare` is self-rated (bad / okay / good → quality 1 / 3 / 5). When **Settings →
+Pronunciation** (`asrScoring`) is on and a transcriber is available — an OpenAI key, or
+on-device recognition (`localAsr`) — the `Recorder` also sends the take to the router's
 `transcribe` task and scores the transcript with
 [`scorePronunciation`](../src/lib/pronunciation.ts): both strings are normalized (NFKC,
 lowercase, no spaces/punctuation, niqqud stripped, katakana → hiragana) and compared by
@@ -195,8 +232,33 @@ as "Heard … · N% match" with a **suggested** rating (≥85 good, ≥60 okay, 
 the learner confirms or overrides, so recognition mistakes never grade silently. The
 transcript and score are stored on the `PronunciationAttempt`.
 
-Known limits: Chinese traditional/simplified variants and Japanese homophone kanji can lower
-a correct take's score — the transcript is shown precisely so the learner can judge.
+For Chinese, transcript and word are both converted to the **displayed** script before
+comparing (`displayText(…, $toZhScript)`), so a transcript in either script scores the same.
+Known limit: Japanese homophone kanji can lower a correct take's score — the transcript is
+shown precisely so the learner can judge.
+
+### Who transcribes
+
+The router tries **OpenAI first** (more accurate), then **on-device Whisper** when it is
+switched on — so Whisper covers no key, offline, or a failed call
+([AI workbench → router](./ai-workbench.md#other-router-tasks-hebrew-diacritization-annotation--transcription)).
+
+On-device recognition ([`providers/asr-local.ts`](../src/lib/inference/providers/asr-local.ts))
+runs transformers.js `automatic-speech-recognition` in **WASM** with
+`onnx-community/whisper-base` (≈ 130 MB, ~3 s per take) or `whisper-small` (≈ 300 MB, ~10 s;
+`settings.localAsrModel`). The model downloads on first use (or via **Download now** in
+Settings, with progress from `localModelStatus`) and is cached by transformers.js, so it then
+works offline. Details that matter:
+
+- **Weights.** onnxruntime-web's WASM backend rejects Whisper's int8 decoders ("Missing
+  required scale"), so base uses a **q8 encoder + fp16 decoder** and small uses q4 / q4.
+- The recording is decoded to 16 kHz mono; the language is always set; the token budget is
+  scaled to the clip length (`maxTokensFor`, 8–96 tokens).
+- [`asr-text.ts`](../src/lib/inference/asr-text.ts) `cleanTranscript` drops known
+  hallucinated subtitle lines ("thanks for watching", 谢谢观看, ご視聴ありがとうございました…).
+- Chinese output is normalized to Simplified (opencc-js `t2cn`).
+- **Hebrew needs `small`**; with base, Hebrew recordings fail locally (and use OpenAI only).
+- WebGPU is untested; WASM only so far.
 
 ## Extending the scheduler
 
