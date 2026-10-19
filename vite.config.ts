@@ -52,6 +52,16 @@ export default defineConfig({
 						}
 					},
 					{
+						// Dictionary shards (tap-a-word lookup): fetched as words are
+						// tapped, kept so lookups work offline afterwards.
+						urlPattern: /\/dict\/(index|[a-z]{2}\/\d+)\.json$/,
+						handler: 'StaleWhileRevalidate',
+						options: {
+							cacheName: 'manabi-dict',
+							expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 90 }
+						}
+					},
+					{
 						// Stroke-order data for the drawing pad: bundled files and the
 						// pinned CDN fallback never change for a given URL — cache forever.
 						urlPattern: ({ url }) =>

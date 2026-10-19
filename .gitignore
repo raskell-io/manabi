@@ -34,3 +34,6 @@ tools/.scripts.mjs
 # Playwright output
 /test-results
 /playwright-report
+
+# Downloads cached by tools/gen-dict.mjs
+/.cache

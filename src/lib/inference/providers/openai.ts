@@ -23,7 +23,9 @@ import type {
 	TranscribeInput,
 	TranscribeResult,
 	TtsInput,
-	TtsResult
+	TtsResult,
+	AnnotateInput,
+	AnnotateResult
 } from '../types';
 
 const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
@@ -106,6 +108,32 @@ function buildPassagePrompt(input: GeneratePassagesInput): string {
 	]
 		.filter(Boolean)
 		.join('\n');
+}
+
+function buildAnnotatePrompt(input: AnnotateInput): string {
+	return [
+		`Annotate each of these ${input.lines.length} ${input.language} lines from a learner's own reading text.`,
+		READING_GUIDE[input.language],
+		'Do NOT change the lines. For each, give its reading and a natural English translation (meaning); add transliteration where the guide asks.',
+		'Return STRICT JSON only, one entry per line in the same order, shape:',
+		'{"lines":[{"reading":"","transliteration":"","meaning":""}]}',
+		JSON.stringify({ lines: input.lines })
+	].join('\n');
+}
+
+/** Validate the model's annotations: exactly one per input line, or nothing. */
+export function validateAnnotations(raw: unknown, count: number): AnnotateResult['lines'] | null {
+	const lines = (raw as { lines?: unknown })?.lines;
+	if (!Array.isArray(lines) || lines.length !== count) return null;
+	return lines.map((x) => {
+		const e = (x ?? {}) as Record<string, unknown>;
+		const t = typeof e.transliteration === 'string' ? e.transliteration.trim() : '';
+		return {
+			reading: typeof e.reading === 'string' ? e.reading.trim() : '',
+			meaning: typeof e.meaning === 'string' ? e.meaning.trim() : '',
+			...(t ? { transliteration: t } : {})
+		};
+	});
 }
 
 /** Validate + coerce the model's JSON into clean GeneratedPassage[]. Drops bad entries. */
@@ -321,6 +349,36 @@ export const openaiProvider: InferenceProvider = {
 			return { ok: true, value: { passages }, providerId: 'openai', target: 'remote' };
 		} catch (err) {
 			return { ok: false, error: err instanceof Error ? err.message : 'Generation failed', providerId: 'openai', target: 'remote' };
+		}
+	},
+
+	async annotate(input: AnnotateInput, settings: ManabiSettings): Promise<InferenceResult<AnnotateResult>> {
+		const key = settings.openaiApiKey.trim();
+		if (!key) return { ok: false, error: 'No OpenAI API key set', providerId: 'openai', target: 'remote' };
+		try {
+			const res = await fetch(CHAT_URL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+				body: JSON.stringify({
+					model: settings.openaiModel || 'gpt-4o',
+					temperature: 0.2,
+					response_format: { type: 'json_object' },
+					messages: [
+						{ role: 'system', content: 'You are a precise language teacher annotating text for a learner. Output only valid JSON.' },
+						{ role: 'user', content: buildAnnotatePrompt(input) }
+					]
+				})
+			});
+			if (!res.ok) {
+				const text = await res.text();
+				return { ok: false, error: `OpenAI ${res.status}: ${text.slice(0, 200)}`, providerId: 'openai', target: 'remote' };
+			}
+			const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+			const lines = validateAnnotations(JSON.parse(data.choices?.[0]?.message?.content ?? '{}'), input.lines.length);
+			if (!lines) return { ok: false, error: 'The annotation did not match the lines', providerId: 'openai', target: 'remote' };
+			return { ok: true, value: { lines }, providerId: 'openai', target: 'remote' };
+		} catch (err) {
+			return { ok: false, error: err instanceof Error ? err.message : 'Annotation failed', providerId: 'openai', target: 'remote' };
 		}
 	},
 

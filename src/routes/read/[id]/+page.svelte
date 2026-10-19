@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { ArrowLeft, Plus, Check, Eye, Languages } from 'lucide-svelte';
-	import ScriptText from '$lib/components/ScriptText.svelte';
+	import { goto } from '$app/navigation';
+	import { ArrowLeft, Plus, Check, Eye, Languages, Trash2 } from 'lucide-svelte';
+	import TapText from '$lib/components/TapText.svelte';
 	import AudioButton from '$lib/components/AudioButton.svelte';
-	import { getPassage, markPassageRead, settings, studyPassageLine } from '$lib/db/store';
+	import { deletePassage, getPassage, markPassageRead, settings, studyPassageLine } from '$lib/db/store';
 	import { displayReading } from '$lib/chinese';
 	import { PASSAGE_KIND_LABELS, type Passage } from '$lib/db/types';
 
@@ -62,14 +63,30 @@
 		return () => io.disconnect();
 	});
 
+	// Lines without a translation (your own text, no AI) can't become review cards.
+	const minable = $derived(passage?.lines.some((l) => l.meaning) ?? false);
 	function mineAll() {
 		if (!passage) return;
 		const next = new Set(mined);
 		passage.lines.forEach((line, i) => {
+			if (!line.meaning) return;
 			studyPassageLine(passage.language, line);
 			next.add(i);
 		});
 		mined = next;
+	}
+
+	// Your own texts can be deleted (two taps, no blocking confirm dialog).
+	const own = $derived(passage?.tags.includes('mine') ?? false);
+	let confirmDelete = $state(false);
+	function remove() {
+		if (!passage) return;
+		if (!confirmDelete) {
+			confirmDelete = true;
+			return;
+		}
+		deletePassage(passage.id);
+		void goto('/read');
 	}
 </script>
 
@@ -91,8 +108,14 @@
 			<button class:on={showTranslation} onclick={() => (showTranslation = !showTranslation)}>
 				<Languages size={15} /> Translation
 			</button>
-			<button class="mine-all" onclick={mineAll}><Plus size={15} /> Study all lines</button>
+			{#if minable}<button class="mine-all" onclick={mineAll}><Plus size={15} /> Study all lines</button>{/if}
+			{#if own}
+				<button class="delete" class:armed={confirmDelete} onclick={remove}>
+					<Trash2 size={15} /> {confirmDelete ? 'Tap again to delete' : 'Delete'}
+				</button>
+			{/if}
 		</div>
+		<p class="hint">Tap a word to look it up.</p>
 	</header>
 
 	<div class="lines" class:conversation={passage.kind === 'conversation'}>
@@ -101,18 +124,21 @@
 				{#if line.speaker}<span class="speaker">{line.speaker}</span>{/if}
 				<div class="bubble">
 					<div class="line-main">
-						<button class="script-btn" onclick={() => toggleReveal(i)} title="Tap to reveal">
-							<ScriptText text={line.target} language={passage.language} size="md" />
-						</button>
+						<div class="script-line"><TapText text={line.target} language={passage.language} size="md" /></div>
 						<div class="line-actions">
-							<AudioButton text={line.target} language={passage.language} label="Play line" />
-							<button class="study" class:done={mined.has(i)} onclick={() => mine(i)} title="Send to reviews">
-								{#if mined.has(i)}<Check size={15} />{:else}<Plus size={15} />{/if}
+							<button class="study" class:on={revealed.has(i)} onclick={() => toggleReveal(i)} title="Reading & translation" aria-label="Show reading and translation">
+								<Eye size={15} />
 							</button>
+							<AudioButton text={line.target} language={passage.language} label="Play line" />
+							{#if line.meaning}
+								<button class="study" class:done={mined.has(i)} onclick={() => mine(i)} title="Send to reviews">
+									{#if mined.has(i)}<Check size={15} />{:else}<Plus size={15} />{/if}
+								</button>
+							{/if}
 						</div>
 					</div>
-					{#if showReadingFor(i)}<div class="reading">{displayReading(line.reading, line.target, passage.language, $settings.zhReading)}</div>{/if}
-					{#if showMeaningFor(i)}<div class="meaning">{line.meaning}</div>{/if}
+					{#if showReadingFor(i) && line.reading}<div class="reading">{displayReading(line.reading, line.target, passage.language, $settings.zhReading)}</div>{/if}
+					{#if showMeaningFor(i) && line.meaning}<div class="meaning">{line.meaning}</div>{/if}
 				</div>
 			</div>
 		{/each}
@@ -177,6 +203,15 @@
 	.controls .mine-all {
 		margin-left: auto;
 	}
+	.controls .delete.armed {
+		border-color: var(--color-danger);
+		color: var(--color-danger);
+	}
+	.hint {
+		margin: 0.6rem 0 0;
+		font-size: 0.82rem;
+		color: var(--color-text-muted);
+	}
 	.lines {
 		display: flex;
 		flex-direction: column;
@@ -218,12 +253,7 @@
 		justify-content: space-between;
 		gap: 0.75rem;
 	}
-	.script-btn {
-		border: none;
-		background: transparent;
-		padding: 0;
-		text-align: inherit;
-		color: inherit;
+	.script-line {
 		flex: 1;
 		min-width: 0;
 	}
@@ -242,6 +272,10 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+	}
+	.study.on {
+		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+		border-color: var(--color-accent);
 	}
 	.study.done {
 		color: var(--color-success);

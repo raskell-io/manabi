@@ -21,7 +21,9 @@ import type {
 	TranscribeInput,
 	TranscribeResult,
 	TtsInput,
-	TtsResult
+	TtsResult,
+	AnnotateInput,
+	AnnotateResult
 } from './types';
 
 // Order matters: TTS prefers the first provider that succeeds.
@@ -88,6 +90,18 @@ export async function transcribe(
 		return p.transcribe(input, settings);
 	}
 	return { ok: false, error: 'No transcription provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
+}
+
+/** Reading + translation for lines of the learner's own text (OpenAI only). */
+export async function annotate(
+	input: AnnotateInput,
+	settings: ManabiSettings
+): Promise<InferenceResult<AnnotateResult>> {
+	for (const p of PROVIDERS) {
+		if (!p.annotate || !p.capabilities(settings).generate) continue;
+		return p.annotate(input, settings);
+	}
+	return { ok: false, error: 'No annotation provider (set an OpenAI key in Settings)', providerId: 'router', target: 'remote' };
 }
 
 export function canDiacritize(settings: ManabiSettings): boolean {

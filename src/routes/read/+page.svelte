@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MessageSquare, FileText, Check } from 'lucide-svelte';
+	import { MessageSquare, FileText, Check, ClipboardPaste } from 'lucide-svelte';
 	import { passageReads, passages, settings } from '$lib/db/store';
 	import { LANGUAGES, type Passage } from '$lib/db/types';
 
@@ -10,7 +10,8 @@
 
 <header class="head">
 	<h1>Read</h1>
-	<p class="muted">Natural {langName} conversations and short texts. Tap any line for the reading and translation, or send a line to your reviews.</p>
+	<p class="muted">Natural {langName} conversations and short texts. Tap any word to look it up, reveal a line's reading and translation, or send it to your reviews.</p>
+	<a class="btn3d ghost paste" href="/read/new"><ClipboardPaste size={18} /> Read your own text</a>
 </header>
 
 {#snippet card(p: Passage)}
@@ -50,6 +51,9 @@
 </section>
 
 <style>
+	.paste {
+		margin-top: 0.75rem;
+	}
 	.read-mark {
 		display: inline-flex;
 		align-items: center;

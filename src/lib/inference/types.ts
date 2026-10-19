@@ -68,6 +68,16 @@ export interface DiacritizeResult {
 	texts: string[];
 }
 
+/** Lines of the learner's own text to annotate with a reading and translation. */
+export interface AnnotateInput {
+	language: Language;
+	lines: string[];
+}
+/** One per input line, same order. */
+export interface AnnotateResult {
+	lines: { reading: string; transliteration?: string; meaning: string }[];
+}
+
 /** A learner's recording to transcribe (for pronunciation scoring). */
 export interface TranscribeInput {
 	audio: Blob;
@@ -105,4 +115,5 @@ export interface InferenceProvider {
 		input: TranscribeInput,
 		settings: ManabiSettings
 	): Promise<InferenceResult<TranscribeResult>>;
+	annotate?(input: AnnotateInput, settings: ManabiSettings): Promise<InferenceResult<AnnotateResult>>;
 }

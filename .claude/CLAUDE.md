@@ -45,9 +45,11 @@ src/lib/
   radicals.ts 214 Kangxi radicals + radicalOf / radicalMembers / searchRadicals over generated radicals-data.ts
   roots.ts    Hebrew roots: rootOfWord / searchRoots / splitByRoot (highlight) over hand-curated roots-data.ts
   path.ts     learning paths: per language a Beginner and a Refresher path (pathsFor), each ordered stages (script · words · reading · skills · explore) over existing content; progress derived (pathState / stageProgress), never stored; the pick lives in settings.pathChoice (else suggestedPath)
+  dictionary.ts tap-a-word lookup: lookup.ts (longest match zh/ja + deinflect-ja.ts; ko particles/endings + form map; he prefixes + form map) over static/dict shards (dict-shard.ts layout, built by tools/gen-dict.mjs from CC-CEDICT / JMdict / Wiktionary; CC BY-SA, see static/dict/LICENSE.md), fetched lazily + SW-cached
+  own-text.ts "Read your own text": splitSentences, offline readings (pinyin / kana / romanizeHangul), AI readings + translations via router `annotate`
   names.ts    place & people names per language (countries · home · world · family · given) over hand-curated names-data.ts
-  components/ PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep; `still` for the nav logo — one animated Nabi per screen) · Confetti
-src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
+  components/ TapText (tappable words → LookupSheet) · PathStrip (Home's path glimpse) · HowItWorks · ScriptText · AudioButton · Recorder · ExerciseRunner · StrokePad (Hanzi Writer: Watch/Trace) · GlyphSheet · Mascot (Nabi 나비, the animated SVG butterfly; moods happy/cheer/sad/think/sleep; `still` for the nav logo — one animated Nabi per screen) · Confetti
+src/routes/   / · path · review[?lesson=id | ?items=ids&title=…][&mode=…] · read[/new | /[id]] · library (hub) · scripts · radicals[?r=n] · roots[?r=id] · names[?tab=people] · vocab · items[/[id]] · lessons · dashboard · workbench · settings
   nav.ts      PRIMARY (5 tabs: Home Review Read Library Progress) + LIBRARY; drives the phone tab bar, sidebar and hub
   ui.ts       `immersive` store — a running review session hides the phone bars (focus mode)
   today.ts    pickNextSession (Home's Continue card: reading → listening → speaking → library) · formatDuration
