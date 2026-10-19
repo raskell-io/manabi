@@ -23,6 +23,7 @@
 				{ name: 'CC-Canto', href: 'https://cantonese.org', what: 'Cantonese dictionary and Jyutping readings for CC-CEDICT, by Pleco', licence: 'CC BY-SA 3.0' },
 				{ name: 'JMdict & KANJIDIC2', href: 'https://www.edrdg.org/edrdg/licence.html', what: 'Japanese dictionary and kanji data, by the EDRDG (via jmdict-simplified and kanji-data)', licence: 'CC BY-SA 4.0' },
 				{ name: 'English Wiktionary', href: 'https://kaikki.org', what: 'Korean and Hebrew dictionaries, extracted by Wiktextract / kaikki.org', licence: 'CC BY-SA 4.0 / GFDL' },
+				{ name: 'words.hk', href: 'https://words.hk/faiman/analysis/', what: 'Cantonese word frequencies and Jyutping for the word lists', licence: 'Public domain' },
 				{ name: 'complete-hsk-vocabulary', href: 'https://github.com/drkameleon/complete-hsk-vocabulary', what: 'HSK 3.0 word lists' },
 				{ name: 'open-anki-jlpt-decks', href: 'https://github.com/jamsinclair/open-anki-jlpt-decks', what: 'JLPT word lists' }
 			]

@@ -23,6 +23,14 @@
 	const levels = $derived<LevelMeta[]>(manifest[lang] ?? []);
 	const meta = $derived(levels.find((l) => l.level === activeLevel));
 
+	/** A level as shown: HSK 3, N4, Top 1,500 (Cantonese frequency bands). */
+	function levelName(level: string): string {
+		return lang === 'zh' ? `HSK ${level}` : lang === 'yue' ? `Top ${Number(level).toLocaleString('en')}` : level;
+	}
+
+	/** The level tag an added word carries: "ZH 3", "JA N4", "YUE Top 500". */
+	const itemLevel = () => `${lang.toUpperCase()} ${lang === 'yue' ? levelName(activeLevel) : activeLevel}`;
+
 	const DISPLAY_CAP = 600;
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
@@ -70,15 +78,14 @@
 	}
 
 	function add(w: VocabWord) {
-		studyVocabWord(lang, w, `${lang.toUpperCase()} ${activeLevel}`);
+		studyVocabWord(lang, w, itemLevel());
 		added = new Set(added).add(w.t);
 	}
 
 	function addLevel() {
 		if (!meta) return;
-		const label = lang === 'zh' ? `HSK ${activeLevel}` : activeLevel;
-		if (!confirm(`Add all ${meta.count} ${label} words to your reviews?`)) return;
-		const n = addVocabWords(lang, words, `${lang.toUpperCase()} ${activeLevel}`);
+		if (!confirm(`Add all ${meta.count} ${levelName(activeLevel)} words to your reviews?`)) return;
+		const n = addVocabWords(lang, words, itemLevel());
 		added = new Set([...added, ...words.map((w) => w.t)]);
 		alert(`Added ${n} new word${n === 1 ? '' : 's'} to your reviews.`);
 	}
@@ -87,7 +94,7 @@
 <header class="head">
 	<h1>Vocabulary</h1>
 	<p class="muted">
-		{lang === 'zh' ? 'Full HSK 3.0' : lang === 'ja' ? 'JLPT N5–N1' : lang === 'ko' ? 'TOPIK' : ''} {langName} word lists. Use
+		{lang === 'zh' ? 'Full HSK 3.0' : lang === 'ja' ? 'JLPT N5–N1' : lang === 'yue' ? 'The 5,000 most frequent' : lang === 'ko' ? 'TOPIK' : ''} {langName} {lang === 'yue' ? 'words, in bands' : 'word lists'}. Use
 		<strong>＋ Add</strong> to drop a word into your spaced-repetition reviews — or add a whole level at once.
 	</p>
 </header>
@@ -98,7 +105,7 @@
 	<div class="tabs" role="tablist">
 		{#each levels as l (l.level)}
 			<button class="tab" class:active={l.level === activeLevel} role="tab" aria-selected={l.level === activeLevel} onclick={() => selectLevel(l.level)}>
-				{lang === 'zh' ? 'HSK ' : ''}{l.level} <span class="count">{l.count}</span>
+				{levelName(l.level)} <span class="count">{l.count}</span>
 			</button>
 		{/each}
 	</div>
@@ -134,7 +141,8 @@
 	{/if}
 
 	<p class="credits">
-		Chinese: HSK 3.0 word lists (complete-hsk-vocabulary). Japanese: JLPT N5–N1 vocab
+		Chinese: HSK 3.0 word lists (complete-hsk-vocabulary). Cantonese: word frequencies and Jyutping from the
+		words.hk corpus (public domain), glosses from CC-Canto / CC-CEDICT. Japanese: JLPT N5–N1 vocab
 		(open-anki-jlpt-decks, derived from JMdict / Tanos JLPT lists).
 	</p>
 {/if}

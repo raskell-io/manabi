@@ -33,7 +33,7 @@ test('About: reachable from Settings and the Library, with the build and credits
 	await expect(page).toHaveURL(/\/about$/);
 	await expect(page.locator('h1')).toContainText('Manabi');
 	await expect(page.locator('.build')).toHaveText(/^v\d+\.\d+\.\d+ · \S+ · \d{4}-\d{2}-\d{2}$/);
-	await expect(page.locator('.credit-list li')).toHaveCount(21);
+	await expect(page.locator('.credit-list li')).toHaveCount(22);
 	await expect(page.locator('.credits')).toContainText('CC-CEDICT');
 	await expect(page.locator('.credits')).toContainText('CC-Canto');
 	await page.goto('/library');

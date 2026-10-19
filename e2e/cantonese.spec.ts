@@ -33,6 +33,12 @@ test('Cantonese: Hong Kong characters, Jyutping, lookup and ruby', async ({ page
 	await page.goto('/names');
 	await expect(page.locator('body')).toContainText('澳洲');
 
+	// Frequency word lists, Jyutping readings.
+	await page.goto('/vocab');
+	await expect(page.getByRole('tab', { name: /Top 500/ })).toHaveAttribute('aria-selected', 'true');
+	await expect(page.locator('.list li').first()).toContainText('係');
+	await expect(page.locator('.list li .reading').first()).toHaveText('hai6');
+
 	// A review session runs on the Cantonese words.
 	await page.goto('/review');
 	await page.locator('.mode-card[data-mode=reading]').click();
