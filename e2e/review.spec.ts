@@ -3,9 +3,9 @@ import { test, expect, boot, squish, toSummary } from './fixtures';
 test('a full reading session runs to its summary', async ({ page }) => {
 	await page.goto('/review');
 	await page.locator('.mode-card[data-mode=reading]').click();
-	for (let n = 0; n < 40 && !(await page.locator('.summary, .streak-screen').count()); n++) {
+	for (let n = 0; n < 40 && !(await page.locator('.summary, .streak-screen, .goal-screen').count()); n++) {
 		await page.locator('.choice:not([disabled])').first().waitFor({ timeout: 5000 }).catch(() => {});
-		if (await page.locator('.summary, .streak-screen').count()) break;
+		if (await page.locator('.summary, .streak-screen, .goal-screen').count()) break;
 		await page.locator('.choice').nth(n % 2).click();
 		await page.locator('.grade').waitFor();
 		await page.keyboard.press('Enter');
@@ -47,17 +47,28 @@ test('a lesson starts with an intro card, then XP and combos as you go', async (
 
 	// Finish the session right: its XP is banked and adds up on Progress.
 	let total = 35;
-	for (let i = 4; !(await page.locator('.summary, .streak-screen').count()); i++) {
+	for (let i = 4; !(await page.locator('.summary, .streak-screen, .goal-screen').count()); i++) {
 		const word = (await page.locator('.prompt .script').first().innerText()).trim();
 		await page.locator('.choice', { hasText: meaningOf.get(word)! }).first().click();
 		await page.keyboard.press('Enter');
 		total += 15;
 		if (i > 40) throw new Error('session did not end');
 	}
+	// First session of the day: the streak, then the daily goal (50 XP by default).
+	await page.locator('.streak-screen button').click();
+	await expect(page.locator('.goal-screen h1')).toHaveText('Daily goal reached!');
 	await toSummary(page);
 	await expect(page.locator('.xp-bank')).toHaveText(`${total} XP in total · ${total} today`);
 	await page.goto('/dashboard');
 	await expect(page.locator('.xp-tile.total .xp-num')).toHaveText(String(total));
+	await page.goto('/');
+	await expect(page.locator('.ring-card')).toHaveClass(/met/);
+	await expect(page.locator('.ring-num')).toHaveText(`${total}/50`);
+	await page.locator('.ring-card').click();
+	await page.locator('button.lang', { hasText: 'Intense' }).click();
+	await page.goto('/');
+	await expect(page.locator('.ring-num')).toHaveText(`${total}/200`);
+	await expect(page.locator('.ring-card')).not.toHaveClass(/met/);
 });
 
 test('a session in dark mode', async ({ page }) => {

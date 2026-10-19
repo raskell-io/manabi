@@ -12,7 +12,7 @@
 		skillMemories,
 		updateSettings
 	} from '$lib/db/store';
-	import { LANGUAGES, stripNiqqud, todayIso, type Language } from '$lib/db/types';
+	import { LANGUAGES, stripNiqqud, todayIso, XP_GOALS, type Language } from '$lib/db/types';
 	import type { MergeSummary } from '$lib/db/merge';
 	import { isSyncConfigured, syncNow, syncState, type SyncState } from '$lib/sync';
 	import { localModelStatus } from '$lib/inference/local-models';
@@ -156,6 +156,15 @@
 
 <section class="group">
 	<h2>Daily limits</h2>
+	<p class="muted" id="goal">Daily goal — the XP ring on Home. A right answer earns 10 XP, a run of three or more 15.</p>
+	<div class="lang-row goal-row">
+		{#each XP_GOALS as g (g.xp)}
+			<button class="lang" class:active={s.xpGoal === g.xp} onclick={() => updateSettings({ xpGoal: g.xp })}>
+				<span class="native">{g.xp} XP</span>
+				<span class="name">{g.label}</span>
+			</button>
+		{/each}
+	</div>
 	<label>
 		<span>New items per day</span>
 		<input type="number" min="0" max="50" value={s.newPerDay} onchange={(e) => updateSettings({ newPerDay: +e.currentTarget.value })} />
@@ -403,6 +412,9 @@
 	}
 	.reading-aid {
 		margin-top: 1.1rem;
+	}
+	.goal-row {
+		margin-bottom: 1rem;
 	}
 	.zh-preview-block {
 		display: flex;

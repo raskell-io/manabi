@@ -9,6 +9,7 @@
 	import CountUp from '$lib/components/CountUp.svelte';
 	import LessonIntro from '$lib/components/LessonIntro.svelte';
 	import StreakCelebration from '$lib/components/StreakCelebration.svelte';
+	import GoalCelebration from '$lib/components/GoalCelebration.svelte';
 	import { playCombo, playComplete } from '$lib/sounds';
 	import ExerciseRunner, { type CompleteResult } from '$lib/components/ExerciseRunner.svelte';
 	import {
@@ -70,6 +71,8 @@
 	let toast = $state<{ id: number; n: number } | null>(null);
 	let streakBefore: { days: number; today: boolean } = { days: 0, today: false };
 	let streak = $state<{ days: number; week: WeekDay[] } | null>(null);
+	// Today's XP crossed the daily goal with this session: its screen comes next.
+	let goalHit = $state<{ before: number; today: number; goal: number } | null>(null);
 	let fx = 0;
 	const XP_RIGHT = 10;
 	const XP_COMBO_BONUS = 5; // per answer while on a run of 3+
@@ -193,6 +196,7 @@
 		floaters = [];
 		toast = null;
 		streak = null;
+		goalHit = null;
 		streakBefore = computeStreak(get(practiceTimes));
 		intro = tasks.length > 0 && !reducedMotion;
 	}
@@ -202,6 +206,7 @@
 		done = false;
 		intro = false;
 		streak = null;
+		goalHit = null;
 		allTasks = snapshotQueue(scope ?? undefined).tasks;
 		epoch += 1;
 	}
@@ -251,13 +256,16 @@
 			// Fresh counts for "Next up" (what this session cleared is gone now).
 			allTasks = snapshotQueue(scope ?? undefined).tasks;
 			epoch += 1;
+			const goal = get(settings).xpGoal;
+			const before = xpSummary(get(xpSessions), todayIso()).today;
+			if (goal > 0 && before < goal && before + xp >= goal) goalHit = { before, today: before + xp, goal };
 			recordXp(xp, scope?.language ?? get(activeLanguage));
 			void maybeAutoSync(); // push this session's progress (no-op unless configured)
 			// First session of the day that counts: the streak screen comes first.
 			const after = computeStreak(get(practiceTimes));
 			if (results.length > 0 && !streakBefore.today && after.today) {
 				streak = { days: after.days, week: lastSevenDays(get(practiceTimes)) };
-			} else if (results.length > 0) {
+			} else if (results.length > 0 && !goalHit) {
 				playComplete();
 			}
 		} else {
@@ -361,6 +369,16 @@
 		week={streak.week}
 		onContinue={() => {
 			streak = null;
+			if (!goalHit) playComplete();
+		}}
+	/>
+{:else if done && goalHit}
+	<GoalCelebration
+		before={goalHit.before}
+		today={goalHit.today}
+		goal={goalHit.goal}
+		onContinue={() => {
+			goalHit = null;
 			playComplete();
 		}}
 	/>

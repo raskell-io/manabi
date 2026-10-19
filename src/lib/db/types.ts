@@ -323,6 +323,9 @@ export interface ManabiSettings {
 	asrScoring: boolean; // score recordings with speech recognition (OpenAI, or on-device below)
 	localAsr: boolean; // recognize speech on-device with Whisper (transformers.js); opt-in download
 	localAsrModel: 'base' | 'small'; // Whisper size: base ≈ 130 MB, small ≈ 300 MB
+	localAsrCantonese: boolean; // Cantonese: a Whisper fine-tuned on Hong Kong Cantonese (≈ 300 MB) instead of the size above
+	localAsrGpu: boolean; // run on-device Whisper on the GPU (WebGPU) when the browser has one; else WASM
+	localNiqqud: boolean; // add Hebrew vowels on-device (DictaBERT menaked, ≈ 320 MB) instead of OpenAI
 	hideHebrewVowels: boolean; // render Hebrew without niqqud (advanced reading)
 	zhScript: ZhScript; // Chinese display script; content is stored Simplified (lib/chinese.ts)
 	zhReading: ZhReading; // Chinese reading aid shown; readings are stored as pinyin (lib/zhuyin.ts)
@@ -331,6 +334,7 @@ export interface ManabiSettings {
 	typedRecall: boolean; // recall cards ask you to type the word (vs. pick it)
 	theme: 'system' | 'light' | 'dark';
 	reminderTime: string; // HH:MM for the daily calendar reminder (reminder.ts)
+	xpGoal: number; // daily XP goal (all languages), shown as Home's ring
 	/** The learning path picked per language ('beginner' | 'refresher'); unset = suggested. */
 	pathChoice: Partial<Record<Language, string>>;
 	[key: string]: unknown;
@@ -351,6 +355,9 @@ export function defaultSettings(): ManabiSettings {
 		asrScoring: true,
 		localAsr: false,
 		localAsrModel: 'base',
+		localAsrCantonese: false,
+		localAsrGpu: true,
+		localNiqqud: false,
 		hideHebrewVowels: false,
 		zhScript: 'simplified',
 		zhReading: 'pinyin',
@@ -359,11 +366,20 @@ export function defaultSettings(): ManabiSettings {
 		typedRecall: true,
 		theme: 'light',
 		reminderTime: '19:00',
+		xpGoal: 50,
 		pathChoice: {}
 	};
 }
 
 // --- XP ---------------------------------------------------------------------
+
+/** Daily XP goals to pick from (a right answer is 10 XP). */
+export const XP_GOALS: { xp: number; label: string }[] = [
+	{ xp: 20, label: 'Casual' },
+	{ xp: 50, label: 'Regular' },
+	{ xp: 100, label: 'Serious' },
+	{ xp: 200, label: 'Intense' }
+];
 
 /** One finished review session's points (10 per right answer, +5 on a run of 3+). */
 export interface XpSession {
@@ -375,7 +391,7 @@ export interface XpSession {
 
 // --- Document ---------------------------------------------------------------
 
-export const SCHEMA_VERSION = 13;
+export const SCHEMA_VERSION = 14;
 
 export interface ManabiDocument {
 	schemaVersion: number;

@@ -44,7 +44,7 @@ test('Traditional script (Taiwan, Hong Kong) and back', async ({ page }) => {
 		expect(await page.locator('.exercise').innerText()).not.toMatch(SIMPLIFIED_ONLY);
 		await page.locator('.choice').first().click();
 		await page.keyboard.press('Enter');
-		if (await page.locator('.summary, .streak-screen').count()) break;
+		if (await page.locator('.summary, .streak-screen, .goal-screen').count()) break;
 	}
 
 	await page.goto('/settings');
@@ -92,7 +92,7 @@ test('Zhuyin reading aid', async ({ page }) => {
 		expect(await page.locator('.exercise').innerText()).not.toMatch(PINYIN);
 		await page.locator('.choice').first().click();
 		await page.keyboard.press('Enter');
-		if (await page.locator('.summary, .streak-screen').count()) break;
+		if (await page.locator('.summary, .streak-screen, .goal-screen').count()) break;
 	}
 });
 

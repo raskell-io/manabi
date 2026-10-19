@@ -11,13 +11,15 @@
 		practiceTimes,
 		reviewSummary,
 		setActiveLanguage,
-		settings
+		settings,
+		xpSessions
 	} from '$lib/db/store';
 	import { LANGUAGES, type Language } from '$lib/db/types';
 	import { hasPrerecorded, loadAudioManifest, type LangManifest } from '$lib/audio';
 	import { rankAudioPractice, type AudioDimension } from '$lib/srs/practice';
 	import { computeStreak, greeting, lastSevenDays, pickNextSession, READING_DIMS } from '$lib/today';
-	import { isoDate } from '$lib/db/types';
+	import { isoDate, todayIso } from '$lib/db/types';
+	import { xpSummary } from '$lib/srs/stats';
 
 	const langName = $derived(LANGUAGES.find((l) => l.code === $settings.activeLanguage)?.name ?? '');
 
@@ -71,8 +73,11 @@
 		const today = isoDate(new Date());
 		return $practiceTimes.filter((t) => isoDate(new Date(t)) === today).length;
 	});
-	const goal = $derived(doneToday + reading);
-	const ringPct = $derived(goal === 0 ? 0 : doneToday / goal);
+	// The ring: today's XP (all languages) against the daily goal.
+	const xpToday = $derived(xpSummary($xpSessions, todayIso()).today);
+	const goal = $derived($settings.xpGoal);
+	const goalMet = $derived(goal > 0 && xpToday >= goal);
+	const ringPct = $derived(goal === 0 ? 0 : Math.min(1, xpToday / goal));
 	const RING_C = 2 * Math.PI * 34;
 
 	// What Nabi says.
@@ -146,7 +151,7 @@
 <PathStrip />
 
 <div class="progress-row">
-	<div class="card ring-card">
+	<a class="card ring-card" class:met={goalMet} href="/settings#goal" aria-label="{xpToday} of {goal} XP today — change the daily goal">
 		<svg class="goal-ring" viewBox="0 0 80 80" aria-hidden="true">
 			<circle cx="40" cy="40" r="34" class="goal-track" />
 			<circle
@@ -159,10 +164,10 @@
 			/>
 		</svg>
 		<div class="ring-text">
-			<span class="ring-num">{doneToday}<small>/{goal}</small></span>
-			<span class="lbl">cards today</span>
+			<span class="ring-num">{xpToday}<small>/{goal}</small></span>
+			<span class="lbl">{goalMet ? 'Goal reached!' : 'XP today'}</span>
 		</div>
-	</div>
+	</a>
 	<div class="card week-card">
 		<div class="week-head">
 			<span class="flame" class:lit={streak.today}><Flame size={22} /></span>
@@ -421,6 +426,8 @@
 		margin: 1.5rem 0 0;
 	}
 	.ring-card {
+		color: inherit;
+		text-decoration: none;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
@@ -437,6 +444,13 @@
 	}
 	.goal-track {
 		stroke: var(--color-bg-elevated);
+	}
+	.met .goal-fill {
+		stroke: var(--color-sun);
+	}
+	.met .lbl {
+		color: var(--color-warning);
+		font-weight: 800;
 	}
 	.goal-fill {
 		stroke: var(--color-success);

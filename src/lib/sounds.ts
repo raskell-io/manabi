@@ -80,3 +80,11 @@ export function playStreak(): void {
 	note(ac, 587.3, 0.12, 0.2, 0.13, 'sine');
 	note(ac, 784.0, 0.24, 0.55, 0.15);
 }
+
+/** Daily XP goal reached: a bouncy run up the scale, landing on a bright chord. */
+export function playGoal(): void {
+	const ac = audioCtx();
+	if (!ac) return;
+	[523.3, 587.3, 659.3, 784.0, 880.0].forEach((f, i) => note(ac, f, i * 0.06, 0.12, 0.12));
+	[1046.5, 1318.5, 1568.0, 2093.0].forEach((f) => note(ac, f, 0.34, 0.7, 0.08));
+}

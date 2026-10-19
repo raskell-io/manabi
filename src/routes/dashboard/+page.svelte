@@ -77,7 +77,7 @@
 <section class="xp" aria-label="XP">
 	<div class="xp-tile total"><span class="xp-lbl"><Sparkles size={13} strokeWidth={3} /> Total XP</span><span class="xp-num">{xp.total.toLocaleString()}</span></div>
 	<div class="xp-tile"><span class="xp-lbl">This week</span><span class="xp-num">{xp.week.toLocaleString()}</span></div>
-	<div class="xp-tile"><span class="xp-lbl">Today</span><span class="xp-num">{xp.today.toLocaleString()}</span></div>
+	<div class="xp-tile"><span class="xp-lbl">Today</span><span class="xp-num">{xp.today.toLocaleString()}{#if $settings.xpGoal}<small> / {$settings.xpGoal}</small>{/if}</span></div>
 </section>
 
 <section class="charts">
@@ -188,6 +188,11 @@
 	.xp-num {
 		font-size: 1.5rem;
 		font-weight: 900;
+	}
+	.xp-num small {
+		font-size: 0.9rem;
+		font-weight: 800;
+		color: var(--color-text-muted);
 	}
 	.total .xp-num {
 		color: var(--color-warning);

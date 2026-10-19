@@ -38,9 +38,13 @@ export async function useLanguage(page: Page, native: '中文' | '廣東話' | '
 /** Collapse whitespace (innerText keeps line breaks). */
 export const squish = (s: string) => s.replace(/\s+/g, ' ').trim();
 
-/** After a session's last card: past the streak screen (first session of the day) to the summary. */
+/** After a session's last card: past the streak and daily-goal screens (when they show) to the summary. */
 export async function toSummary(page: Page): Promise<void> {
-	await page.locator('.summary, .streak-screen').first().waitFor();
-	if (await page.locator('.streak-screen').count()) await page.locator('.streak-screen button', { hasText: 'Continue' }).click();
+	for (;;) {
+		await page.locator('.summary, .streak-screen, .goal-screen').first().waitFor();
+		const screen = page.locator('.streak-screen, .goal-screen');
+		if (!(await screen.count())) break;
+		await screen.locator('button', { hasText: 'Continue' }).click();
+	}
 	await page.locator('.summary').waitFor();
 }

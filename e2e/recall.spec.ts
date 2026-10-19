@@ -36,8 +36,8 @@ test('dictation, then typed recall, as the word matures', async ({ page, context
 	await page.clock.setSystemTime(new Date('2026-10-21T08:00:00'));
 	await session(page, 'reading');
 	for (;;) {
-		await page.locator('.choice, .summary, .streak-screen').first().waitFor();
-		if (await page.locator('.summary, .streak-screen').count()) break;
+		await page.locator('.choice, .summary, .streak-screen, .goal-screen').first().waitFor();
+		if (await page.locator('.summary, .streak-screen, .goal-screen').count()) break;
 		const instruction = await page.locator('.instruction').innerText();
 		await page.locator('.choice', { hasText: instruction.startsWith('What does') ? 'today' : '今天' }).first().click();
 		await gradeGood(page);
@@ -65,8 +65,8 @@ test('typed recall: "I don\'t know" shows the answer', async ({ page, context })
 		await page.clock.setSystemTime(new Date(`${day}T08:00:00`));
 		await session(page, 'reading');
 		for (;;) {
-			await page.locator('.choice, .summary, .streak-screen').first().waitFor();
-			if (await page.locator('.summary, .streak-screen').count()) break;
+			await page.locator('.choice, .summary, .streak-screen, .goal-screen').first().waitFor();
+			if (await page.locator('.summary, .streak-screen, .goal-screen').count()) break;
 			const instruction = await page.locator('.instruction').innerText();
 			await page.locator('.choice', { hasText: instruction.startsWith('What does') ? 'today' : '今天' }).first().click();
 			await gradeGood(page);
